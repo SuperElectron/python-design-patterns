@@ -10,7 +10,7 @@ __Behavioral Patterns__:
 
 | Pattern | Description |
 |:-------:| ----------- |
-| [iterator](behavioral/iterator.py) | emplements pythonic style design 3 rules |
+| [iterator](behavioral/iterator.py) | emplements pythonic style design with 3 rules |
 
 __Creational Patterns__:
 
