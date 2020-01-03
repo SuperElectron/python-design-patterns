@@ -11,6 +11,8 @@ __Behavioral Patterns__:
 | Pattern | Description |
 |:-------:| ----------- |
 | [iterator](behavioral/iterator.py) | emplements pythonic style design with 3 rules |
+| [command](behavioral/command.py) | Copy Paste implementation of command design pattern |
+| [command_1](behavioral/command_1.py) | ![Command Design Pattern](behavioral/command-design-pattern.PNG) |
 
 __Creational Patterns__:
 
