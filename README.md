@@ -33,6 +33,9 @@ __Structural Patterns__:
 |:-------:| ----------- |
 | [composite](structural/composite.py) | lets clients treat individual objects and compositions uniformly |
 | [decorator](structural/decorator.py) | wrap functionality with other functionality in order to affect outputs |
+| [decorator_1](structural/decorator_1.py) | showing import time versus run time |
+| [decorator_2](structural/decorator_2.py) | @functools.wraps & parameterized decorators |
+| [decorator_3](structural/decorator_3.py) | making use of @singledispatch decorator to handle different input types |
 | [flyweight](structural/flyweight.py) | transparently reuse existing instances of objects with similar/identical state |
 
 ---

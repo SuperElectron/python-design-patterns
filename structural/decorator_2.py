@@ -1,6 +1,5 @@
-# simple example of a decorator in action
-# uses the functools.wraps decorator to copy the relevant attributes from func to clocked in goodClock()
-
+# #1 goodClock() uses the functools.wraps decorator to copy the relevant attributes from func to clocked
+# #2 @clock() has a parametized registration decorator
 import time
 import functools
 
@@ -61,14 +60,55 @@ def goodFake():
     return 10
 
 
+# @clock() is a parametized registration decorator
+DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({args}) -> {result}'
+
+
+def clock(fmt=DEFAULT_FMT):
+    def decorate(func):
+        def clocked(*_args):
+            t0 = time.time()
+            _result = func(*_args)
+            elapsed = time.time() - t0
+            name = func.__name__
+            args = ', '.join(repr(arg) for arg in _args)
+            result = repr(_result)
+            print(fmt.format(**locals()))
+            return _result
+        return clocked
+    return decorate
+
+
+@clock()
+def snooze1(seconds):
+    """ IS NOT making use of parameterization """
+    time.sleep(seconds)
+
+
+@clock('{name}: {elapsed}s')
+def snooze2(seconds):
+    """ IS making use of parameterization """
+    time.sleep(seconds)
+
+
 if __name__ == '__main__':
-    print('okClock usage')
+    print('*' * 10)
+    print('okClock usage: basic setup')
     fake()
     print('*' * 10)
     factorial(6)
     print('*' * 10)
-    print('goodClock usage')
+    print('goodClock usage: @functools.wraps(func) used around inner function')
     print('*' * 10)
     goodFake()
     print('*' * 10)
     goodFactorial(6)
+    print('*' * 10)
+    print('clock usage: no parameterization')
+    print('*' * 10)
+    for i in range(3):
+        snooze1(.123)
+    print('*' * 10)
+    print('clock usage: with parameterization')
+    for i in range(3):
+        snooze2(.123)
