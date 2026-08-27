@@ -1,1 +1,23 @@
-__pycache__
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+uv.lock
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# oh-my-claudecode runtime state
+.omc/
