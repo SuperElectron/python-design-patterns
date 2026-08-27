@@ -73,7 +73,7 @@ stdlib_sightings: [functools.wraps, contextlib.contextmanager]
 Verdicts: `pythonic` = use it as shown; `use-with-care` = valid but has sharp edges
 (caveats say which); `prefer-alternative` = the classic form exists for study in
 docs/fundamentals.md, `pattern/` exports the alternative to write instead
-(e.g. Singleton → module global, Visitor → singledispatch). See `docs/verdicts.md`.
+(e.g. Singleton → module global, Visitor → singledispatch).
 
 ## Workflow
 
