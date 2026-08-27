@@ -1,1 +1,1 @@
-"""Flyweight: share immutable instances rather than duplicating them."""
+from .pattern.pool import InternPool as InternPool

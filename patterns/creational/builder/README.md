@@ -14,37 +14,18 @@ stdlib_sightings: [email.message.EmailMessage, configparser.ConfigParser]
 
 # Builder
 
-## Problem
+Assemble a complex object step by step, with validation at each step and an
+immutable result. **Verdict: use with care** — keyword arguments already
+solve one-shot construction; a builder earns its keep only when assembly is
+genuinely staged.
 
-Some objects are miserable to construct in one shot: many parts, ordering
-constraints, optional pieces. In 1994 Java/C++ the answer was a separate
-Builder class walked by a Director, so the same step sequence could produce
-different representations.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `SelectBuilder` (mutable, fluent) → `Query` (frozen) |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/sql_select_builder/`](examples/sql_select_builder/) | Mini-project: order analytics on sqlite, every query builder-staged |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the full ceremony: an abstract builder interface, two concrete
-builders, and a director that walks the steps. Faithful to the book — and
-visibly over-engineered for Python.
-
-## Pythonic solution
-
-Python removes the two problems the pattern solved. Keyword arguments with
-defaults kill the telescoping constructor, and first-class classes mean "the
-same process, different representation" is just passing a different callable.
-What *survives* is the Builder-as-convenience: a friendly object that
-accumulates settings and then emits the real, immutable product —
-`pythonic.py` builds a frozen dataclass through one.
-
-## In the wild
-
-`email.message.EmailMessage` is a builder you mutate call by call
-(`msg["To"] = ...`, `set_content(...)`) before serializing;
-`configparser.ConfigParser` accumulates sections the same way. Matplotlib's
-`pyplot` interface is the guide's own headline example.
-
-## Verdict
-
-**Use with care.** Reach for keyword arguments first. Write a builder when
-construction is genuinely staged or when you want a mutable assembly surface
-in front of an immutable product.
+```bash
+uv run python -m patterns.creational.builder.examples.sql_select_builder.main
+```

@@ -1,1 +1,1 @@
-"""Singleton: one instance, program-wide access. Verdict: prefer the Global Object pattern."""
+from .pattern import Shared as Shared

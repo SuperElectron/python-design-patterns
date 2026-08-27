@@ -1,1 +1,2 @@
-"""Registry: implementations announce themselves; dispatch is a lookup."""
+from .pattern import Registry as Registry
+from .pattern import UnknownKeyError as UnknownKeyError

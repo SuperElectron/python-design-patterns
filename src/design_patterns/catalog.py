@@ -15,10 +15,14 @@ from pathlib import Path
 from typing import Literal, get_args
 
 Verdict = Literal["pythonic", "use-with-care", "prefer-alternative"]
-VariantName = Literal["naive", "pythonic", "real_world"]
+DocName = Literal["fundamentals", "implementation", "examples"]
 
 VERDICTS: tuple[str, ...] = get_args(Verdict)
-VARIANTS: tuple[str, ...] = get_args(VariantName)
+DOC_NAMES: tuple[str, ...] = get_args(DocName)
+
+# Pre-v2 units shipped flat naive/pythonic/real_world files; their presence in
+# a unit today is stale debris and fails validation.
+_RETIRED_VARIANT_FILES = ("naive.py", "pythonic.py", "real_world.py")
 
 _REQUIRED_KEYS = frozenset({"id", "name", "guide_url", "problem", "symptoms", "verdict", "caveats"})
 
@@ -51,9 +55,31 @@ class Pattern:
     def slug(self) -> str:
         return self.id.split("/", 1)[1]
 
-    def variants(self) -> dict[str, Path]:
-        """The example files this unit actually ships."""
-        return {v: self.path / f"{v}.py" for v in VARIANTS if (self.path / f"{v}.py").is_file()}
+    def docs(self) -> dict[str, Path]:
+        """The unit's teaching docs (fundamentals/implementation/examples)."""
+        return {
+            d: self.path / "docs" / f"{d}.md"
+            for d in DOC_NAMES
+            if (self.path / "docs" / f"{d}.md").is_file()
+        }
+
+    def examples(self) -> dict[str, Path]:
+        """Runnable mini-project packages: ``examples/<project>/`` with a ``main.py``."""
+        examples_dir = self.path / "examples"
+        if not examples_dir.is_dir():
+            return {}
+        return {
+            child.name: child
+            for child in sorted(examples_dir.iterdir())
+            if child.is_dir() and (child / "main.py").is_file()
+        }
+
+    def sources(self) -> dict[str, Path]:
+        """The pattern's own code: ``pattern/*.py``, keyed by filename."""
+        pattern_dir = self.path / "pattern"
+        if not pattern_dir.is_dir():
+            return {}
+        return {p.name: p for p in sorted(pattern_dir.glob("*.py"))}
 
 
 def _split_frontmatter(text: str, readme: Path) -> tuple[str, str]:
@@ -119,9 +145,44 @@ def _parse_pattern(readme: Path, root: Path) -> Pattern:
         prose=prose,
         path=unit_dir,
     )
-    if not pattern.variants():
-        raise CatalogError(f"{readme}: unit ships no naive/pythonic/real_world example")
+    _validate_shape(pattern, readme)
     return pattern
+
+
+def _validate_shape(pattern: Pattern, readme: Path) -> None:
+    """Every unit must ship the complete module shape: pattern/ docs/ examples/ tests/."""
+    unit = pattern.path
+    if stale := sorted(f for f in _RETIRED_VARIANT_FILES if (unit / f).is_file()):
+        raise CatalogError(f"{readme}: module unit still ships legacy variant files: {stale}")
+    missing_docs = [d for d in DOC_NAMES if not (unit / "docs" / f"{d}.md").is_file()]
+    if missing_docs:
+        raise CatalogError(f"{readme}: module unit missing docs/: {missing_docs}")
+    if not (unit / "pattern" / "__init__.py").is_file():
+        raise CatalogError(f"{readme}: module unit's pattern/ package has no __init__.py")
+    examples = pattern.examples()
+    if not examples:
+        raise CatalogError(f"{readme}: module unit ships no runnable examples/<project>/main.py")
+    if dunder_mains := sorted(unit.rglob("__main__.py")):
+        raise CatalogError(
+            f"{readme}: __main__.py is banned "
+            f"({[str(f.relative_to(unit)) for f in dunder_mains]}) — "
+            "entry points are main.py, run via python -m <package>.main"
+        )
+    for stray in _empty_inits(unit):
+        raise CatalogError(
+            f"{readme}: delete empty __init__.py ({stray.relative_to(unit)}) — "
+            "namespace packages (PEP 420) carry the structure"
+        )
+    tests_dir = unit / "tests"
+    if not any(tests_dir.glob("test_*.py")):
+        raise CatalogError(f"{readme}: module unit has no tests/test_*.py")
+
+
+def _empty_inits(unit: Path) -> list[Path]:
+    """Empty ``__init__.py`` anywhere in the unit — banned; only load-bearing ones exist."""
+    return sorted(
+        f for f in unit.rglob("__init__.py") if f.stat().st_size == 0 or not f.read_text().strip()
+    )
 
 
 @dataclass(frozen=True)
@@ -140,12 +201,13 @@ class Catalog:
         return tuple(p.id for p in self.patterns)
 
     def to_json(self) -> str:
-        """The ``catalog://index`` payload: everything except prose and paths."""
+        """The ``catalog://index`` payload: metadata plus docs/examples listings."""
         entries = []
         for p in self.patterns:
             entry = asdict(p)
             del entry["prose"], entry["path"]
-            entry["variants"] = sorted(p.variants())
+            entry["docs"] = sorted(p.docs())
+            entry["examples"] = sorted(p.examples())
             entries.append(entry)
         return json.dumps(entries, indent=2)
 

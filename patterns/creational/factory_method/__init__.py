@@ -1,1 +1,2 @@
-"""Factory Method: defer which helper gets built. Verdict: inject, or class attribute."""
+from .pattern import Factory as Factory
+from .pattern import factory_slot as factory_slot

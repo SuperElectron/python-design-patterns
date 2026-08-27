@@ -14,33 +14,17 @@ stdlib_sightings: [queue.Queue, asyncio.Queue]
 
 # Mediator
 
-## Problem
-
-A signup form: the submit button enables only when username and password
-fields validate, the password strength meter watches the password field…
-Let the widgets reference each other and you get N² couplings that no one
-can safely change.
-
-## Naive solution
-
-`naive.py` is the GoF dialog: colleagues report every change to the mediator
-and *only* the mediator decides who reacts.
-
-## Pythonic solution
-
-The mediator doesn't need a Colleague base class — widgets accept a
-`notify` callable and hold zero rules. `pythonic.py` scales the idea to a
-checkout form whose rules genuinely tangle (country restricts shipping,
-shipping gates payment and changes the total): one `_recheck` method holds
-every rule, and a country change cascades through the dependent fields.
-
-## In the wild
-
-`queue.Queue` mediates producers and consumers: neither side knows the
-other exists, and the coupling that used to be pairwise lives in one
-thread-safe object.
-
-## Verdict
-
-**Use with care.** Excellent for genuinely tangled interaction rules; watch
+Route component interactions through one coordinator that owns every rule.
+**Verdict: use with care** — excellent for genuinely tangled rules; watch
 for god-object drift.
+
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Field` (dumb value holder) + `Form` (the mediator base owning `recheck`) |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/checkout_form/`](examples/checkout_form/) | Mini-project: cascading checkout rules built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
+
+```bash
+uv run python -m patterns.behavioral.mediator.examples.checkout_form.main
+```

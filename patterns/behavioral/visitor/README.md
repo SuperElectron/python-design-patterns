@@ -14,29 +14,17 @@ stdlib_sightings: [functools.singledispatch, ast.NodeVisitor]
 
 # Visitor
 
-## Problem
+New operations over a node structure, without editing the nodes. **Verdict:
+prefer an alternative** — `singledispatch` deletes the `accept()` plumbing;
+the subclass form survives at stdlib boundaries (`ast.NodeVisitor`).
 
-An expression tree (or document tree, or AST) needs new operations — render,
-optimize, measure — and you'd rather not add a method to every node class for
-every new operation.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Operation`, `UnhandledNodeError` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/doc_exporters/`](examples/doc_exporters/) | Mini-project: document exporters built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the full GoF double dispatch: every node implements
-`accept(visitor)`, every visitor implements one `visit_X` per node type.
-
-## Pythonic solution
-
-`functools.singledispatch` dispatches on the node's type directly — the
-`accept()` plumbing evaporates, node classes stay untouched, and a new
-operation is one decorated function per node type.
-
-## In the wild
-
-`ast.NodeVisitor` walks Python source with a `visit_ClassName` method per
-node — the Visitor pattern as a supported stdlib API.
-
-## Verdict
-
-**Prefer an alternative:** `singledispatch`. Use `ast.NodeVisitor` when the
-tree is Python itself.
+```bash
+uv run python -m patterns.behavioral.visitor.examples.doc_exporters.main
+```

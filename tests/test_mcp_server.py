@@ -2,10 +2,13 @@
 
 import json
 
+import pytest
 from mcp import Client
 from mcp.types import TextResourceContents
 
-from design_patterns_mcp.server import mcp
+import design_patterns.mcp.server as server_module
+from design_patterns.catalog import Catalog
+from design_patterns.mcp.server import mcp
 
 
 class TestTools:
@@ -24,15 +27,15 @@ class TestTools:
             ids = [p["id"] for p in result.structured_content["result"]]
             assert len(ids) == 5 and all(i.startswith("creational/") for i in ids)
 
-    async def test_get_pattern_with_source(self) -> None:
+    async def test_get_pattern_lists_docs_and_examples(self) -> None:
         async with Client(mcp) as client:
-            result = await client.call_tool(
-                "get_pattern", {"pattern_id": "structural/decorator", "variant": "pythonic"}
-            )
+            result = await client.call_tool("get_pattern", {"pattern_id": "structural/decorator"})
             assert result.structured_content is not None
             detail = result.structured_content
             assert detail["verdict"] == "pythonic"
-            assert "functools" in detail["source"]["pythonic"]
+            assert detail["docs"] == ["examples", "fundamentals", "implementation"]
+            assert "resilient_client" in detail["examples"]
+            assert detail["prose"]
 
     async def test_get_pattern_unknown_id_names_the_catalog(self) -> None:
         async with Client(mcp) as client:
@@ -49,16 +52,22 @@ class TestTools:
             assert "creational/singleton" in ids
 
     async def test_run_example_returns_real_output(self) -> None:
+        # The pilot unit is module-shape for good — a stable target while the
+        # remaining units migrate group by group.
         async with Client(mcp) as client:
             result = await client.call_tool(
-                "run_example", {"pattern_id": "creational/singleton", "variant": "pythonic"}
+                "run_example",
+                {
+                    "pattern_id": "behavioral/chain_of_responsibility",
+                    "example": "ticket_escalation",
+                },
             )
             assert result.structured_content is not None
             run = result.structured_content
             assert run["exit_code"] == 0 and not run["timed_out"]
-            assert "module global is shared" in run["stdout"]
+            assert "helpdesk" in run["stdout"]
 
-    async def test_recommend_attaches_caveats_and_alternative_note(self) -> None:
+    async def test_recommend_attaches_caveats(self) -> None:
         async with Client(mcp) as client:
             result = await client.call_tool(
                 "recommend_pattern",
@@ -68,8 +77,88 @@ class TestTools:
             recs = result.structured_content["result"]
             singleton = next(r for r in recs if r["id"] == "creational/singleton")
             assert singleton["verdict"] == "prefer-alternative"
-            assert "pythonic.py" in singleton["note"]
             assert singleton["caveats"]
+
+
+class TestRecommendNote:
+    """The prefer-alternative note is pinned via the synthetic unit."""
+
+    async def test_note_names_the_docs_and_source_tools(
+        self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from design_patterns.mcp.search import SearchIndex
+
+        monkeypatch.setattr(server_module, "get_catalog", lambda: module_catalog)
+        monkeypatch.setattr(server_module, "get_index", lambda: SearchIndex(module_catalog))
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "recommend_pattern", {"problem_statement": "thing needed"}
+            )
+            assert result.structured_content is not None
+            rec = result.structured_content["result"][0]
+            assert rec["id"] == "creational/thing"
+            assert "get_pattern_docs" in rec["note"] and "read_source" in rec["note"]
+
+
+class TestModuleShapeTools:
+    """The three access levels, against the synthetic unit."""
+
+    @pytest.fixture(autouse=True)
+    def _use_module_catalog(self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(server_module, "get_catalog", lambda: module_catalog)
+
+    async def test_get_pattern_docs(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "get_pattern_docs", {"pattern_id": "creational/thing", "doc": "fundamentals"}
+            )
+            assert not result.is_error
+            assert "fundamentals of Thing" in str(result.content[0])
+
+    async def test_get_pattern_docs_rejects_unknown_doc(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "get_pattern_docs", {"pattern_id": "creational/thing", "doc": "naive"}
+            )
+            assert result.is_error
+
+    async def test_list_examples_names_the_run_call(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("list_examples", {"pattern_id": "creational/thing"})
+            assert result.structured_content is not None
+            examples = result.structured_content["result"]
+            assert [e["name"] for e in examples] == ["demo"]
+            assert "run_example" in examples[0]["run"]
+
+    async def test_run_example_by_package(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "run_example", {"pattern_id": "creational/thing", "example": "demo"}
+            )
+            assert result.structured_content is not None
+            run = result.structured_content
+            assert run["exit_code"] == 0 and "built a thing" in run["stdout"]
+
+    async def test_read_source_returns_pattern_package(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("read_source", {"pattern_id": "creational/thing"})
+            assert result.structured_content is not None
+            sources = result.structured_content
+            assert "built a thing" in sources["thing.py"]
+
+    async def test_docs_resource(self) -> None:
+        async with Client(mcp) as client:
+            doc = await client.read_resource("pattern://creational/thing/docs/implementation")
+            first = doc.contents[0]
+            assert isinstance(first, TextResourceContents)
+            assert "implementation of Thing" in first.text
+
+    async def test_unknown_doc_resource_error_text_reaches_client(self) -> None:
+        # ResourceError (not ValueError) is required for the hint to survive
+        # the SDK's template wrapper — this pins that the text gets through.
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="has no doc"):
+                await client.read_resource("pattern://creational/thing/docs/naive")
 
 
 class TestResources:
@@ -80,17 +169,17 @@ class TestResources:
             assert isinstance(contents, TextResourceContents)
             assert len(json.loads(contents.text)) == 32
 
-    async def test_pattern_doc_and_source_templates(self) -> None:
+    async def test_pattern_doc_and_docs_templates(self) -> None:
         async with Client(mcp) as client:
             doc = await client.read_resource("pattern://behavioral/iterator")
             first = doc.contents[0]
             assert isinstance(first, TextResourceContents)
             assert "# Iterator" in first.text
 
-            src = await client.read_resource("pattern://behavioral/iterator/naive")
-            first_src = src.contents[0]
-            assert isinstance(first_src, TextResourceContents)
-            assert "__next__" in first_src.text
+            fund = await client.read_resource("pattern://behavioral/iterator/docs/fundamentals")
+            first_fund = fund.contents[0]
+            assert isinstance(first_fund, TextResourceContents)
+            assert "# Iterator — fundamentals" in first_fund.text
 
 
 class TestPrompts:

@@ -1,1 +1,2 @@
-"""Memento: capture state for later restore."""
+from .pattern.history import History as History
+from .pattern.history import NoSnapshotError as NoSnapshotError

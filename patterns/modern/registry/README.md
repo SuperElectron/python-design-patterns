@@ -14,28 +14,17 @@ stdlib_sightings: [codecs.register, functools.singledispatch, atexit.register]
 
 # Registry
 
-## Problem
+Implementations announce themselves by name; dispatch is a lookup, and adding
+a case is writing one new function. **Verdict: pythonic** — the standard cure
+for `if/elif` dispatch.
 
-An exporter supports "csv", "json", "xml"… and every new format edits the
-same `if/elif` ladder. The dispatcher has become a bottleneck every plugin
-must patch.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Registry`, `UnknownKeyError` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/export_plugins/`](examples/export_plugins/) | Mini-project: self-registering exporters, one in a separate plugin module |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is that ladder: closed for extension, growing forever.
-
-## Pythonic solution
-
-A dict from name to callable, filled by a `@register("csv")` decorator —
-defining a handler *is* registering it. Dispatch is a lookup; the unknown-key
-policy lives in exactly one place.
-
-## In the wild
-
-`codecs.register` is a full plugin registry (every `.encode("rot13")` is a
-lookup); `functools.singledispatch` is a registry keyed by type;
-`atexit.register` collects callables to run at shutdown.
-
-## Verdict
-
-**Pythonic.** The standard cure for if/elif dispatch.
+```bash
+uv run python -m patterns.modern.registry.examples.export_plugins.main
+```

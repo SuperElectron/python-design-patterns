@@ -1,1 +1,3 @@
-"""Chain of Responsibility: first handler that can, does. Verdict: a list and a loop."""
+from .pattern.chain import Chain as Chain
+from .pattern.chain import Handler as Handler
+from .pattern.chain import UnhandledRequestError as UnhandledRequestError

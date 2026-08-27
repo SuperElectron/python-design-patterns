@@ -14,34 +14,16 @@ stdlib_sightings: [iter, next, generators, itertools]
 
 # Iterator
 
-## Problem
+Traverse elements without exposing storage — lazily when it matters.
+**Verdict: pythonic** — the pattern is the language; write generators.
 
-Callers want to walk a collection's elements — possibly lazily, possibly in a
-custom order — without coupling to its storage. The GoF answer is a separate
-cursor object with a "give me the next one" method.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `iterate_pages` — chunked traversal behind one generator |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/paginated_client/`](examples/paginated_client/) | Mini-project: observably lazy article API client built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` implements the protocol by hand, the way the guide teaches it:
-an iterable whose `__iter__` returns a fresh iterator object, and an iterator
-with `__next__` (raising `StopIteration`) plus `__iter__` returning itself so
-it can be used directly in a `for` loop.
-
-## Pythonic solution
-
-Python absorbed this pattern deeper than any other — `for`, unpacking, and
-comprehensions all speak the protocol natively, and **generators** write the
-iterator for you: a function with `yield` returns an object implementing
-`__iter__` and `__next__` correctly, with all cursor state kept in the frame.
-`pythonic.py` re-does `naive.py` in a fraction of the code.
-
-## In the wild
-
-`itertools` is an entire stdlib module of composable iterators; files iterate
-by line; `dict` yields keys. `real_world.py` composes `itertools.islice` and
-`itertools.count` into a lazy, infinite-but-bounded pipeline.
-
-## Verdict
-
-**Pythonic.** Know the manual protocol (it's the machinery underneath), write
-generators in practice.
+```bash
+uv run python -m patterns.behavioral.iterator.examples.paginated_client.main
+```

@@ -14,30 +14,18 @@ stdlib_sightings: [enum.Enum, generators]
 
 # State
 
-## Problem
+Behavior that depends on "where we are" — gathered into one readable
+transition table instead of mode-flag branches in every method.
+**Verdict: use with care** — tables and generators cover most machines;
+class-per-state only pays at real size.
 
-A turnstile behaves differently locked vs unlocked; an order moves through a
-lifecycle. Branching on a mode flag in every method scatters the machine
-across the class.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `StateMachine`, `Step`, `IllegalTransitionError` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/order_lifecycle/`](examples/order_lifecycle/) | Mini-project: an order FSM with guards and an audit log built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF form: a class per state, the context delegating to the
-current state object, transitions swapping the object.
-
-## Pythonic solution
-
-Two idioms in `pythonic.py`: an `Enum` + transition-table machine (data, not
-classes — the whole machine visible in one dict), and a **generator** machine
-where the paused frame *is* the state.
-
-## In the wild
-
-Generators are the language's own state machines — every coroutine and every
-`itertools`-style pipeline stage relies on frame suspension keeping state.
-`real_world.py` shows a protocol scanner built on exactly that.
-
-## Verdict
-
-**Use with care.** Class-per-state pays off only for large machines with
-state-specific data; tables and generators cover the rest.
+```bash
+uv run python -m patterns.behavioral.state.examples.order_lifecycle.main
+```

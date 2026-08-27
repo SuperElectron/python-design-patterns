@@ -14,34 +14,17 @@ stdlib_sightings: [logging.Logger with logging.Handler]
 
 # Bridge
 
-## Problem
+Two independent axes (what to do × how to carry it out) joined by one injected
+reference, instead of a subclass per combination. **Verdict: prefer an
+alternative** — composition with dependency injection *is* the bridge.
 
-Shapes (circle, square) need rendering backends (vector, raster). Inheriting
-`VectorCircle`, `RasterCircle`, `VectorSquare`… multiplies the two axes into
-one hierarchy — the same explosion Composition-Over-Inheritance warns about,
-seen from the structural side.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Transport` protocol, transports, `AlertNotifier`, `DigestNotifier` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/notification_center/`](examples/notification_center/) | Mini-project: team alert/digest routing over per-team transports |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the book's shape: an abstraction hierarchy (`Shape`) holding a
-reference to an implementor hierarchy (`Renderer`), each extensible without
-touching the other.
-
-## Pythonic solution
-
-Strip the ceremony and the Bridge is *composition with an injected
-dependency* — which is why the verdict points there. `pythonic.py` bridges
-notifiers (alerts, digests) over delivery transports (email, Slack, SMS):
-the transport is a `Protocol`, notifiers are dataclasses holding one, and
-"outage alert to Slack" is a constructor call, not a class.
-
-## In the wild
-
-`logging` is a Bridge you already use: `Logger` (the abstraction callers see)
-delegates to interchangeable `Handler` implementations, and both sides grow
-independently.
-
-## Verdict
-
-**Prefer an alternative** — plain composition/DI *is* the bridge. Keep the
-lesson (name your axes), skip the taxonomy.
+```bash
+uv run python -m patterns.structural.bridge.examples.notification_center.main
+```

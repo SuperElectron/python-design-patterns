@@ -1,1 +1,4 @@
-"""Prebound Method: module functions that are bound methods of one hidden instance."""
+from .pattern import Counter as Counter
+from .pattern import increment as increment
+from .pattern import peek as peek
+from .pattern import shares_instance as shares_instance

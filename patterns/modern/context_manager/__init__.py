@@ -1,1 +1,2 @@
-"""Context Manager: structural acquire/release pairing."""
+from .pattern import AtomicWrite as AtomicWrite
+from .pattern import temporarily as temporarily

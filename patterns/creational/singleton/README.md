@@ -15,36 +15,18 @@ stdlib_sightings: [None, Ellipsis, NotImplemented]
 
 # Singleton
 
-## Problem
+One instance for the whole process, reachable from anywhere. **Verdict: prefer
+an alternative** — a module already is a singleton; write a module-level
+instance, or a `Shared` accessor when construction must wait. Keep a reset
+seam for tests.
 
-Some resources must exist exactly once: a configuration object, a connection
-pool, a process-wide registry. The Gang of Four answer is a class that
-intercepts construction and always hands back the same instance.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Shared` — lazy build, one instance, `reset()` seam |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/app_config/`](examples/app_config/) | Mini-project: process-wide settings behind `get_settings()` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the classic implementation: override `__new__`, cache the
-instance on the class. It works, but note what Python forces on you — callers
-still *look* like they're constructing (`Logger()`), `__init__` re-runs on
-every call unless you guard it, and subclassing gets weird fast.
-
-## Pythonic solution
-
-Python already has singletons: **modules**. A module is created once, cached in
-`sys.modules`, and every `import` returns the same object. `pythonic.py` shows
-the Global Object pattern — instantiate a plain class once at module level (or
-lazily behind a function) and import that. No metaclass, no `__new__`, nothing
-to explain in review.
-
-## In the wild
-
-`None`, `Ellipsis`, and `NotImplemented` are the interpreter's own singletons —
-that's why `is` comparison against them is correct. Every imported module is
-one too: `real_world.py` proves it.
-
-## Verdict
-
-**Prefer an alternative.** The naive form exists here for study; if you're
-reaching for it, write a module-level instance instead. The exceptions are rare
-enough that you'll know them when you hit them (lazy construction that must be
-thread-safe, C-extension interop).
+```bash
+uv run python -m patterns.creational.singleton.examples.app_config.main
+```

@@ -1,1 +1,1 @@
-"""Global Object: module-level constants and shared instances."""
+from .pattern import Lazy as Lazy

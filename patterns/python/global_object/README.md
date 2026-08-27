@@ -14,32 +14,17 @@ stdlib_sightings: [os.environ, calendar.day_name, math.pi]
 
 # Global Object
 
-## Problem
+Share a constant or a pre-built object program-wide by assigning it at module
+level — Python's native singleton. **Verdict: use with care** — constants
+freely, expensive things lazily, mutation only where it is the documented job.
 
-Many parts of a program need the same value — a constant table, a compiled
-regex, a configured client. Passing it through every call chain is noise;
-building it repeatedly is waste.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Lazy` (deferred construction + test-reset seam) |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/settings_module/`](examples/settings_module/) | Mini-project: an app settings module with all three kinds of global |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` shows the two classic misuses: hidden *mutable* module state that
-couples callers together, and import-time I/O that makes `import` slow,
-fragile, and untestable.
-
-## Pythonic solution
-
-`pythonic.py` shows the pattern done well: immutable constants computed at
-import time (cheap, deterministic), a pre-built global object whose
-construction is pure, and lazy initialization for anything expensive —
-so importing the module never costs more than defining functions.
-
-## In the wild
-
-`math.pi` is the Constant Pattern; `calendar.day_name` is an import-time
-computed global object; `os.environ` is the rare *documented* mutable global,
-mutation being its entire purpose.
-
-## Verdict
-
-**Use with care.** Constants and immutable pre-built objects: freely. Mutable
-globals: only when shared mutation is the feature, not an accident.
+```bash
+uv run python -m patterns.python.global_object.examples.settings_module.main
+```

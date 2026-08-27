@@ -1,1 +1,2 @@
-"""Composite: one interface for an object and a tree of objects."""
+from .pattern.tree import Composite as Composite
+from .pattern.tree import HasTotal as HasTotal

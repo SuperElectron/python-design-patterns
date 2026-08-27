@@ -14,31 +14,17 @@ stdlib_sightings: [asyncio.Queue, asyncio.TaskGroup, queue.Queue]
 
 # Async Producer/Consumer
 
-## Problem
+Fan I/O-bound work out to N workers over a bounded queue — backpressure by
+`maxsize`, shutdown as an explicit, tested choice. **Verdict: use with care**
+— the right tool for async fan-out; the two caveats are where it bites.
 
-Producers generate work faster (or slower) than consumers process it. You
-want N workers pulling from a shared source, bounded memory in between, and
-a shutdown that neither drops items nor hangs.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `WorkerPool`, `Shutdown`, `process_all` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/feed_fetcher/`](examples/feed_fetcher/) | Mini-project: feed pipeline with per-item failure capture, both shutdown disciplines |
+| [`tests/`](tests/) | Behavioral tests for the pool and the mini-project |
 
-## Naive solution
-
-`naive.py` is the thread version: `threading.Thread` workers around a
-`queue.Queue` with sentinels — fine, but each worker burns an OS thread and
-coordination is manual.
-
-## Pythonic solution
-
-`asyncio.Queue` with `TaskGroup`-managed workers: `maxsize` gives
-backpressure, `queue.join()` waits for completion, cancellation ends the
-idle workers. All the coordination is in the queue.
-
-## In the wild
-
-This *is* the stdlib idiom — the asyncio docs' own queue example is this
-pattern; `real_world.py` shapes it as a rate-limited fetch pipeline with
-per-item results collected in completion order.
-
-## Verdict
-
-**Use with care.** The right tool for I/O-bound fan-out; get the shutdown
-discipline right (and tested) or debug it forever.
+```bash
+uv run python -m patterns.modern.async_producer_consumer.examples.feed_fetcher.main
+```

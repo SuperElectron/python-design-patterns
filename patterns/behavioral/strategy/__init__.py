@@ -1,1 +1,2 @@
-"""Strategy: interchangeable algorithms. Verdict: pass a function."""
+from .pattern.registry import StrategyRegistry as StrategyRegistry
+from .pattern.registry import UnknownStrategyError as UnknownStrategyError

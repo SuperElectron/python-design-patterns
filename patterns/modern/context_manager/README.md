@@ -14,31 +14,16 @@ stdlib_sightings: [open, contextlib.contextmanager, contextlib.ExitStack, tempfi
 
 # Context Manager
 
-## Problem
+Pair acquire with release on every exit path, structurally — Python's RAII.
+**Verdict: pythonic** — any acquire/release pair you write twice deserves one.
 
-Every acquired resource — file, lock, connection, temporary state — must be
-released on *every* exit path. Hand-written `try/finally` scattered through a
-codebase is where cleanup bugs live.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `AtomicWrite` (protocol form), `temporarily` (generator form) |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/atomic_deploy/`](examples/atomic_deploy/) | Mini-project: all-or-nothing config deployment via `ExitStack` |
+| [`tests/`](tests/) | Behavioral tests for both managers and the mini-project |
 
-## Naive solution
-
-`naive.py` is the try/finally discipline done by hand, including the nested
-two-resource version that shows why it doesn't scale.
-
-## Pythonic solution
-
-The `with` statement makes the pairing structural: `pythonic.py` implements
-the protocol both ways — a class with `__enter__`/`__exit__`, and the
-generator form via `@contextmanager` where the `yield` splits acquire from
-release.
-
-## In the wild
-
-`open`, locks, and sqlite transactions are all context managers;
-`contextlib.ExitStack` manages a *dynamic* number of them, unwinding in
-reverse on the way out — shown in `real_world.py`.
-
-## Verdict
-
-**Pythonic.** Python's own RAII; any acquire/release pair you write twice
-deserves one.
+```bash
+uv run python -m patterns.modern.context_manager.examples.atomic_deploy.main
+```

@@ -15,33 +15,17 @@ stdlib_sightings: [functools.wraps, functools.lru_cache, contextlib.contextmanag
 
 # Decorator
 
-## Problem
+Add one cross-cutting concern at a time — logging, timing, retries, limits —
+by wrapping, then stack the wrappers. **Verdict: pythonic** — for callables the
+language absorbed the pattern into `@decorator` syntax.
 
-You want cross-cutting behavior — logging, caching, retries, access control —
-around existing behavior, without editing the original and without a subclass
-per combination.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `logged`, `timed`, `retry`, `rate_limited` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/resilient_client/`](examples/resilient_client/) | Mini-project: a flaky API client hardened by stacking `pattern/` decorators |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF object wrapper: a class that holds the wrapped object,
-adds its twist, and forwards everything else. Faithful, and it carries the
-book's real cost — you must forward *every* method, and the wrapper still
-fails `isinstance` checks against the original.
-
-## Pythonic solution
-
-For callables, the language absorbed the pattern into `@decorator` syntax.
-`pythonic.py` builds a proper function decorator (with `functools.wraps`) and
-a parameterized one — the three-layer form that trips everyone up once.
-
-## In the wild
-
-`functools.lru_cache` is a decorator adding caching; `functools.wraps` is a
-decorator that fixes decorators; `contextlib.contextmanager` turns a generator
-into a context manager. You use this pattern daily whether you notice or not.
-
-## Verdict
-
-**Pythonic** — for callables, idiomatically so. GoF-style object wrapping is
-rarer; when you need it, `__getattr__` forwarding (shown in `naive.py`) keeps
-it tolerable.
+```bash
+uv run python -m patterns.structural.decorator.examples.resilient_client.main
+```

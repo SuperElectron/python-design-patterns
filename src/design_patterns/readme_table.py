@@ -33,17 +33,14 @@ _VERDICT_BADGES = {
 
 def render_table() -> str:
     catalog = load_catalog()
-    lines: list[str] = []
+    lines = ["\n| Pattern | Group | Verdict | Problem it solves |", "|---|---|---|---|"]
     for group in _GROUP_ORDER:
         members = [p for p in catalog.patterns if p.group == group]
-        if not members:
-            continue
-        lines.append(f"\n### {_GROUP_TITLES[group]}\n")
-        lines.append("| Pattern | Verdict | Problem it solves |")
-        lines.append("|---|---|---|")
         for p in sorted(members, key=lambda p: p.slug):
             link = f"[{p.name}](patterns/{p.id}/)"
-            lines.append(f"| {link} | {_VERDICT_BADGES[p.verdict]} | {p.problem} |")
+            lines.append(
+                f"| {link} | {_GROUP_TITLES[group]} | {_VERDICT_BADGES[p.verdict]} | {p.problem} |"
+            )
     return "\n".join(lines) + "\n"
 
 

@@ -1,1 +1,2 @@
-"""Sentinel Object: an unforgeable marker for missing, when None is a real value."""
+from .pattern import MISSING as MISSING
+from .pattern import Sentinel as Sentinel
