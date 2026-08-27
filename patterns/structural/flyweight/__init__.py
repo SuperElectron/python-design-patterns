@@ -1,1 +1,1 @@
-from patterns.structural.flyweight.pattern import InternPool as InternPool
+from .pattern.pool import InternPool as InternPool

@@ -1,2 +1,2 @@
-from patterns.behavioral.mediator.pattern.form import Field as Field
-from patterns.behavioral.mediator.pattern.form import Form as Form
+from .form import Field as Field
+from .form import Form as Form

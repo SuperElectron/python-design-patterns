@@ -1,6 +1,6 @@
-from patterns.structural.bridge.pattern import AlertNotifier as AlertNotifier
-from patterns.structural.bridge.pattern import DigestNotifier as DigestNotifier
-from patterns.structural.bridge.pattern import EmailTransport as EmailTransport
-from patterns.structural.bridge.pattern import SlackTransport as SlackTransport
-from patterns.structural.bridge.pattern import SmsTransport as SmsTransport
-from patterns.structural.bridge.pattern import Transport as Transport
+from .pattern.bridge import AlertNotifier as AlertNotifier
+from .pattern.bridge import DigestNotifier as DigestNotifier
+from .pattern.bridge import EmailTransport as EmailTransport
+from .pattern.bridge import SlackTransport as SlackTransport
+from .pattern.bridge import SmsTransport as SmsTransport
+from .pattern.bridge import Transport as Transport

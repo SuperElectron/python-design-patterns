@@ -1,2 +1,2 @@
-from patterns.behavioral.strategy.pattern import StrategyRegistry as StrategyRegistry
-from patterns.behavioral.strategy.pattern import UnknownStrategyError as UnknownStrategyError
+from .pattern.registry import StrategyRegistry as StrategyRegistry
+from .pattern.registry import UnknownStrategyError as UnknownStrategyError

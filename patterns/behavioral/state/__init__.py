@@ -1,4 +1,4 @@
-from patterns.behavioral.state.pattern import Guard as Guard
-from patterns.behavioral.state.pattern import IllegalTransitionError as IllegalTransitionError
-from patterns.behavioral.state.pattern import StateMachine as StateMachine
-from patterns.behavioral.state.pattern import Step as Step
+from .pattern.machine import Guard as Guard
+from .pattern.machine import IllegalTransitionError as IllegalTransitionError
+from .pattern.machine import StateMachine as StateMachine
+from .pattern.machine import Step as Step

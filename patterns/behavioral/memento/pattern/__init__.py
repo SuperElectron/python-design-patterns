@@ -1,2 +1,2 @@
-from patterns.behavioral.memento.pattern.history import History as History
-from patterns.behavioral.memento.pattern.history import NoSnapshotError as NoSnapshotError
+from .history import History as History
+from .history import NoSnapshotError as NoSnapshotError

@@ -1,2 +1,2 @@
-from patterns.structural.composite.pattern import Composite as Composite
-from patterns.structural.composite.pattern import HasTotal as HasTotal
+from .pattern.tree import Composite as Composite
+from .pattern.tree import HasTotal as HasTotal

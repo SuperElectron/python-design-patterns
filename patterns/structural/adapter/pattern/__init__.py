@@ -1,1 +1,1 @@
-from patterns.structural.adapter.pattern.adapter import DelegatingAdapter as DelegatingAdapter
+from .adapter import DelegatingAdapter as DelegatingAdapter

@@ -1,5 +1,5 @@
-from patterns.structural.decorator.pattern import RateLimitExceededError as RateLimitExceededError
-from patterns.structural.decorator.pattern import logged as logged
-from patterns.structural.decorator.pattern import rate_limited as rate_limited
-from patterns.structural.decorator.pattern import retry as retry
-from patterns.structural.decorator.pattern import timed as timed
+from .pattern.decorators import RateLimitExceededError as RateLimitExceededError
+from .pattern.decorators import logged as logged
+from .pattern.decorators import rate_limited as rate_limited
+from .pattern.decorators import retry as retry
+from .pattern.decorators import timed as timed

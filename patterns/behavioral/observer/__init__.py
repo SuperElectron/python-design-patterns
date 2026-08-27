@@ -1,3 +1,3 @@
-from patterns.behavioral.observer.pattern import ErrorPolicy as ErrorPolicy
-from patterns.behavioral.observer.pattern import Signal as Signal
-from patterns.behavioral.observer.pattern import Subscriber as Subscriber
+from .pattern.signal import ErrorPolicy as ErrorPolicy
+from .pattern.signal import Signal as Signal
+from .pattern.signal import Subscriber as Subscriber

@@ -1,3 +1,3 @@
-from patterns.structural.proxy.pattern import LazyProxy as LazyProxy
-from patterns.structural.proxy.pattern import MeteringProxy as MeteringProxy
-from patterns.structural.proxy.pattern import ProtectionProxy as ProtectionProxy
+from .pattern.proxies import LazyProxy as LazyProxy
+from .pattern.proxies import MeteringProxy as MeteringProxy
+from .pattern.proxies import ProtectionProxy as ProtectionProxy

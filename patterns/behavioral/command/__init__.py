@@ -1,3 +1,3 @@
-from patterns.behavioral.command.pattern import Action as Action
-from patterns.behavioral.command.pattern import Undoable as Undoable
-from patterns.behavioral.command.pattern import UndoStack as UndoStack
+from .pattern.commands import Action as Action
+from .pattern.commands import Undoable as Undoable
+from .pattern.commands import UndoStack as UndoStack

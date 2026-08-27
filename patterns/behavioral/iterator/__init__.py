@@ -1,2 +1,2 @@
-from patterns.behavioral.iterator.pattern import PageFetcher as PageFetcher
-from patterns.behavioral.iterator.pattern import iterate_pages as iterate_pages
+from .pattern.paging import PageFetcher as PageFetcher
+from .pattern.paging import iterate_pages as iterate_pages
