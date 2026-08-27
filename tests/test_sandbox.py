@@ -1,41 +1,14 @@
-"""Sandbox contract: only catalog files run; timeouts and bad ids refuse."""
+"""Sandbox contract: only catalog example packages run; bad ids and names refuse."""
+
+from pathlib import Path
 
 import pytest
+from tests.conftest import write_module_unit
 
 from design_patterns.catalog import Catalog, load_catalog
-from design_patterns.mcp.sandbox import run_example, run_example_package
+from design_patterns.mcp.sandbox import run_example_package
 
 CATALOG = load_catalog()
-
-
-class TestSandbox:
-    def test_runs_a_legacy_variant(self, legacy_catalog: Catalog) -> None:
-        # Legacy variants are a synthetic-fixture concern: every real unit
-        # migrates to the module shape.
-        result = run_example(legacy_catalog, "creational/oldthing", "pythonic")
-        assert result.exit_code == 0
-        assert "pythonic oldthing runs" in result.stdout
-        assert not result.timed_out
-
-    def test_unknown_pattern_id_is_refused(self, legacy_catalog: Catalog) -> None:
-        with pytest.raises(KeyError):
-            run_example(legacy_catalog, "../../etc/passwd", "naive")
-
-    def test_unknown_variant_is_refused(self, legacy_catalog: Catalog) -> None:
-        # Against a unit that HAS variants, so the refusal is a real selection
-        # miss, not the empty-variants degenerate case.
-        with pytest.raises(KeyError, match="no variant"):
-            run_example(legacy_catalog, "creational/oldthing", "__init__")
-
-    def test_traversal_shaped_variant_is_refused(self, legacy_catalog: Catalog) -> None:
-        with pytest.raises(KeyError):
-            run_example(legacy_catalog, "creational/oldthing", "../../../tmp/evil")
-
-    def test_failing_example_reports_not_raises(self, legacy_catalog: Catalog) -> None:
-        # every current example exits 0; simulate by checking the API shape
-        result = run_example(legacy_catalog, "creational/oldthing", "real_world")
-        assert isinstance(result.exit_code, int)
-        assert isinstance(result.stderr, str)
 
 
 class TestPackageSandbox:
@@ -57,9 +30,17 @@ class TestPackageSandbox:
         with pytest.raises(KeyError):
             run_example_package(module_catalog, "../../etc/passwd", "demo")
 
-    def test_legacy_unit_has_no_packages(self, legacy_catalog: Catalog) -> None:
-        with pytest.raises(KeyError, match="no example"):
-            run_example_package(legacy_catalog, "creational/oldthing", "pythonic")
+    def test_failing_example_reports_not_raises(self, tmp_path: Path) -> None:
+        # A crashing demo must come back as a RunResult, not an exception.
+        root = tmp_path / "patterns"
+        unit = write_module_unit(root)
+        (unit / "examples" / "demo" / "__main__.py").write_text(
+            "import sys\n\nprint('about to fail')\nsys.exit(3)\n"
+        )
+        result = run_example_package(load_catalog(root), "creational/thing", "demo")
+        assert result.exit_code == 3
+        assert "about to fail" in result.stdout
+        assert not result.timed_out
 
     def test_runs_the_real_pilot_unit(self) -> None:
         # The migrated unit itself, through the python -I -m path CI must cover.
@@ -71,19 +52,18 @@ class TestPackageSandbox:
         assert not result.timed_out
 
 
-def _every_module_example() -> list[tuple[str, str]]:
+def _every_example() -> list[tuple[str, str]]:
     return [
         (pattern.id, example)
         for pattern in CATALOG.patterns
-        if pattern.shape == "module"
         for example in sorted(pattern.examples())
     ]
 
 
 class TestEveryExampleRuns:
-    """Demo rot check: every module unit's every example runs in the sandbox."""
+    """Demo rot check: every unit's every example runs in the sandbox."""
 
-    @pytest.mark.parametrize(("pattern_id", "example"), _every_module_example())
+    @pytest.mark.parametrize(("pattern_id", "example"), _every_example())
     def test_example_exits_cleanly(self, pattern_id: str, example: str) -> None:
         result = run_example_package(CATALOG, pattern_id, example)
         assert result.exit_code == 0, f"{pattern_id}/{example}: {result.stderr}"

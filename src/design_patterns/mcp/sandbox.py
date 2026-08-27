@@ -1,8 +1,8 @@
-"""Sandboxed execution of catalog example files -- and nothing else.
+"""Sandboxed execution of catalog example packages -- and nothing else.
 
 The contract: only paths resolved from the catalog index are runnable.
-The (id, variant) / (id, example) pair is looked up, never joined into a
-path, so there is no traversal and no arbitrary-file execution surface.
+The (id, example) pair is looked up, never joined into a path, so there is
+no traversal and no arbitrary-file execution surface.
 """
 
 from __future__ import annotations
@@ -60,29 +60,14 @@ def _run_module(repo_root: str, module: str) -> RunResult:
     )
 
 
-def run_example(catalog: Catalog, pattern_id: str, variant: str) -> RunResult:
-    """Execute one vendored legacy example file in a subprocess and capture its output."""
-    pattern = catalog.get(pattern_id)  # KeyError for unknown ids -- by design
-    variants = pattern.variants()
-    if variant not in variants:
-        raise KeyError(f"{pattern_id} has no variant {variant!r} (has: {sorted(variants)})")
-    path = variants[variant]  # resolved by the catalog, never by the caller
-    if not path.is_file():  # a real check, not an assert: survives python -O
-        raise FileNotFoundError(f"catalog names {path} but it does not exist")
-
-    repo_root = pattern.path.parents[2]
-    module = f"patterns.{pattern.group}.{pattern.slug}.{variant}"
-    return _run_module(str(repo_root), module)
-
-
 def run_example_package(catalog: Catalog, pattern_id: str, example: str) -> RunResult:
-    """Execute a module-shape unit's ``examples/<example>`` mini-project package."""
+    """Execute a unit's ``examples/<example>`` mini-project package in a subprocess."""
     pattern = catalog.get(pattern_id)  # KeyError for unknown ids -- by design
     examples = pattern.examples()
     if example not in examples:
         raise KeyError(f"{pattern_id} has no example {example!r} (has: {sorted(examples)})")
     path = examples[example]  # resolved by the catalog, never by the caller
-    if not (path / "__main__.py").is_file():
+    if not (path / "__main__.py").is_file():  # a real check, not an assert: survives python -O
         raise FileNotFoundError(f"catalog names {path} but it has no __main__.py")
 
     repo_root = pattern.path.parents[2]

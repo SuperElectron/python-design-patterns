@@ -29,25 +29,23 @@ python-design-patterns-mcp --http --host 127.0.0.1 --port 8734
 | Tool | What it does |
 |---|---|
 | `list_patterns(group?, verdict?)` | Catalog listing, filterable |
-| `get_pattern(pattern_id, variant?)` | Full prose and metadata (`variant` served only pre-module-shape units; the current catalog has none) |
+| `get_pattern(pattern_id)` | One pattern's metadata and README prose |
 | `search_patterns(query, limit?)` | BM25 full-text search over names, aliases, problems, symptoms, prose |
 | `get_pattern_docs(pattern_id, doc)` | A pattern's teaching doc: `fundamentals`, `implementation`, or `examples` |
 | `list_examples(pattern_id)` | A pattern's runnable mini-projects |
-| `run_example(pattern_id, example=...)` | Executes a mini-project in a sandboxed subprocess; returns real stdout (`variant=` remains for pre-module-shape units only) |
+| `run_example(pattern_id, example)` | Executes a mini-project in a sandboxed subprocess; returns real stdout |
 | `read_source(pattern_id)` | A pattern's own implementation (`pattern/` package) |
 | `recommend_pattern(problem_statement, limit?)` | Ranked candidates with caveats; `prefer-alternative` verdicts tell you what to write instead |
 
 Every pattern follows three access levels: scan docs
 (`get_pattern_docs`) → run a use case (`list_examples` + `run_example`) →
-read the source (`read_source`). Units predating the module shape would
-expose flat variant files instead; the current catalog has none.
+read the source (`read_source`).
 
 ## Resources
 
 - `catalog://index` — the whole catalog as JSON
 - `pattern://<group>/<slug>` — one pattern's prose
 - `pattern://<group>/<slug>/docs/<doc>` — one pattern's teaching doc
-- `pattern://<group>/<slug>/<variant>` — a pre-module-shape unit's variant source (none in the current catalog)
 
 ## Prompts
 
@@ -55,8 +53,7 @@ expose flat variant files instead; the current catalog has none.
 
 ## Sandbox contract
 
-`run_example` executes only files resolved from the catalog index — the
-`(id, variant)` / `(id, example)` pair is a dictionary lookup, never joined
-into a path. The
+`run_example` executes only packages resolved from the catalog index — the
+`(id, example)` pair is a dictionary lookup, never joined into a path. The
 subprocess runs `python -I` in a temp cwd with a scrubbed environment, a 10s
 timeout, and 64KB output caps. There is no arbitrary-code-execution tool.

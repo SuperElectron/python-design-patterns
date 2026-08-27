@@ -7,7 +7,6 @@ import pytest
 
 from design_patterns.catalog import (
     VERDICTS,
-    Catalog,
     CatalogError,
     find_patterns_root,
     load_catalog,
@@ -20,21 +19,6 @@ class TestRealCatalog:
         assert len(catalog.patterns) == 32
         assert "structural/decorator" in catalog.ids()
 
-    def test_real_catalog_is_fully_module_shape(self) -> None:
-        # The migration is complete: every real unit is module-shape. A unit
-        # regressing to legacy shape must fail here, not silently downgrade.
-        shapes = {p.shape for p in load_catalog().patterns}
-        assert shapes == {"module"}
-
-    def test_legacy_loader_branch_stays_covered_by_the_synthetic_unit(
-        self, legacy_catalog: Catalog
-    ) -> None:
-        # No real unit is legacy any more; this pins that the loader's legacy
-        # branch (and the tests that rely on it) still have a living subject.
-        (pattern,) = legacy_catalog.patterns
-        assert pattern.shape == "legacy"
-        assert sorted(pattern.variants()) == ["naive", "pythonic", "real_world"]
-
     def test_every_module_example_builds_on_its_own_pattern_package(self) -> None:
         # The mini-projects exist to show the pattern in practice: each one
         # must import its unit's pattern/ package, not reimplement the idea.
@@ -43,8 +27,6 @@ class TestRealCatalog:
         import ast
 
         for pattern in load_catalog().patterns:
-            if pattern.shape != "module":
-                continue
             group, slug = pattern.id.split("/")
             absolute = f"patterns.{group}.{slug}.pattern"
             for name, path in pattern.examples().items():
@@ -69,16 +51,13 @@ class TestRealCatalog:
                     f"{pattern.id} example {name!r} never imports its own pattern package"
                 )
 
-    def test_every_unit_ships_its_shape_completely(self) -> None:
+    def test_every_unit_ships_the_full_module_shape(self) -> None:
         for pattern in load_catalog().patterns:
-            if pattern.shape == "module":
-                assert sorted(pattern.docs()) == ["examples", "fundamentals", "implementation"], (
-                    pattern.id
-                )
-                assert pattern.examples(), pattern.id
-                assert pattern.sources(), pattern.id
-            else:
-                assert sorted(pattern.variants()) == ["naive", "pythonic", "real_world"], pattern.id
+            assert sorted(pattern.docs()) == ["examples", "fundamentals", "implementation"], (
+                pattern.id
+            )
+            assert pattern.examples(), pattern.id
+            assert pattern.sources(), pattern.id
 
     def test_verdicts_are_from_the_vocabulary(self) -> None:
         for pattern in load_catalog().patterns:
@@ -96,15 +75,9 @@ class TestRealCatalog:
     def test_index_json_round_trips(self) -> None:
         entries = json.loads(load_catalog().to_json())
         assert len(entries) == 32
-        assert all({"id", "name", "problem", "verdict", "variants"} <= e.keys() for e in entries)
+        keys = {"id", "name", "problem", "verdict", "docs", "examples"}
+        assert all(keys <= e.keys() for e in entries)
         assert not any("prose" in e or "path" in e for e in entries)
-
-
-def _write_unit(root: Path, group: str, slug: str, frontmatter: str, body: str = "# x") -> None:
-    unit = root / group / slug
-    unit.mkdir(parents=True)
-    (unit / "README.md").write_text(f"---\n{frontmatter}\n---\n\n{body}\n")
-    (unit / "pythonic.py").write_text("def main() -> None: ...\n")
 
 
 GOOD = """\
@@ -119,22 +92,24 @@ caveats: []"""
 
 class TestValidation:
     def test_minimal_valid_unit_loads(self, tmp_path: Path) -> None:
-        _write_unit(tmp_path, "creational", "thing", GOOD)
+        _write_module_unit(tmp_path, "creational", "thing", GOOD)
         catalog = load_catalog(tmp_path)
         assert catalog.get("creational/thing").verdict == "pythonic"
 
     def test_missing_key_fails(self, tmp_path: Path) -> None:
-        _write_unit(tmp_path, "creational", "thing", GOOD.replace('problem: "Build a thing."', ""))
+        _write_module_unit(
+            tmp_path, "creational", "thing", GOOD.replace('problem: "Build a thing."', "")
+        )
         with pytest.raises(CatalogError, match="missing frontmatter keys"):
             load_catalog(tmp_path)
 
     def test_id_directory_mismatch_fails(self, tmp_path: Path) -> None:
-        _write_unit(tmp_path, "creational", "other", GOOD)
+        _write_module_unit(tmp_path, "creational", "other", GOOD)
         with pytest.raises(CatalogError, match="!= directory"):
             load_catalog(tmp_path)
 
     def test_unknown_verdict_fails(self, tmp_path: Path) -> None:
-        _write_unit(tmp_path, "creational", "thing", GOOD.replace("pythonic", "amazing"))
+        _write_module_unit(tmp_path, "creational", "thing", GOOD.replace("pythonic", "amazing"))
         with pytest.raises(CatalogError, match="verdict"):
             load_catalog(tmp_path)
 
@@ -143,12 +118,6 @@ class TestValidation:
         unit.mkdir(parents=True)
         (unit / "README.md").write_text("# just prose\n")
         with pytest.raises(CatalogError, match="frontmatter"):
-            load_catalog(tmp_path)
-
-    def test_unit_without_examples_fails(self, tmp_path: Path) -> None:
-        _write_unit(tmp_path, "creational", "thing", GOOD)
-        (tmp_path / "creational" / "thing" / "pythonic.py").unlink()
-        with pytest.raises(CatalogError, match="ships no"):
             load_catalog(tmp_path)
 
     def test_empty_tree_fails(self, tmp_path: Path) -> None:
@@ -183,11 +152,9 @@ class TestModuleShapeValidation:
     def test_valid_module_unit_loads_with_shape_fields(self, tmp_path: Path) -> None:
         _write_module_unit(tmp_path, "creational", "thing", GOOD)
         pattern = load_catalog(tmp_path).get("creational/thing")
-        assert pattern.shape == "module"
         assert sorted(pattern.docs()) == ["examples", "fundamentals", "implementation"]
         assert sorted(pattern.examples()) == ["demo"]
         assert sorted(pattern.sources()) == ["__init__.py", "thing.py"]
-        assert pattern.variants() == {}
 
     def test_missing_doc_fails(self, tmp_path: Path) -> None:
         unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
@@ -225,9 +192,8 @@ class TestModuleShapeValidation:
         with pytest.raises(CatalogError, match="legacy variant files"):
             load_catalog(tmp_path)
 
-    def test_half_migration_is_claimed_and_fails_loudly(self, tmp_path: Path) -> None:
-        # docs/ alone marks the unit module-shape; strict validation then
-        # demands the rest instead of silently classifying it legacy.
+    def test_partial_unit_fails_loudly(self, tmp_path: Path) -> None:
+        # A unit with only some of the template present must fail validation.
         unit = tmp_path / "creational" / "thing"
         (unit / "docs").mkdir(parents=True)
         (unit / "README.md").write_text(f"---\n{GOOD}\n---\n\n# x\n")
@@ -240,10 +206,9 @@ class TestModuleShapeValidation:
         with pytest.raises(CatalogError, match=r"examples/ is not a package"):
             load_catalog(tmp_path)
 
-    def test_index_json_carries_shape(self, tmp_path: Path) -> None:
+    def test_index_json_carries_docs_and_examples(self, tmp_path: Path) -> None:
         _write_module_unit(tmp_path, "creational", "thing", GOOD)
         entries = json.loads(load_catalog(tmp_path).to_json())
-        assert entries[0]["shape"] == "module"
         assert entries[0]["examples"] == ["demo"]
         assert entries[0]["docs"] == ["examples", "fundamentals", "implementation"]
 
