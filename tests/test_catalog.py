@@ -30,17 +30,34 @@ class TestRealCatalog:
     def test_every_module_example_builds_on_its_own_pattern_package(self) -> None:
         # The mini-projects exist to show the pattern in practice: each one
         # must import its unit's pattern/ package, not reimplement the idea.
-        import re
+        # AST walk, not text search — a docstring mentioning the path is not
+        # an import.
+        import ast
 
         for pattern in load_catalog().patterns:
             if pattern.shape != "module":
                 continue
             group, slug = pattern.id.split("/")
             absolute = f"patterns.{group}.{slug}.pattern"
-            relative = re.compile(r"from\s+\.+pattern\b|import\s+\.+pattern\b")
             for name, path in pattern.examples().items():
-                sources = "\n".join(f.read_text() for f in sorted(path.rglob("*.py")))
-                assert absolute in sources or relative.search(sources), (
+                imports_pattern = False
+                for source_file in sorted(path.rglob("*.py")):
+                    tree = ast.parse(source_file.read_text(), filename=str(source_file))
+                    for node in ast.walk(tree):
+                        if isinstance(node, ast.ImportFrom):
+                            module = node.module or ""
+                            if module == absolute or module.startswith(f"{absolute}."):
+                                imports_pattern = True
+                            # Relative: from ..pattern import X / from ...pattern.chain import X
+                            if node.level > 0 and (
+                                module == "pattern" or module.startswith("pattern.")
+                            ):
+                                imports_pattern = True
+                        elif isinstance(node, ast.Import):
+                            for alias in node.names:
+                                if alias.name == absolute or alias.name.startswith(f"{absolute}."):
+                                    imports_pattern = True
+                assert imports_pattern, (
                     f"{pattern.id} example {name!r} never imports its own pattern package"
                 )
 

@@ -9,10 +9,12 @@ CATALOG = load_catalog()
 
 
 class TestSandbox:
-    def test_runs_a_real_example(self) -> None:
-        result = run_example(CATALOG, "structural/flyweight", "pythonic")
+    def test_runs_a_legacy_variant(self, legacy_catalog: Catalog) -> None:
+        # Legacy variants are a synthetic-fixture concern: every real unit
+        # migrates to the module shape.
+        result = run_example(legacy_catalog, "creational/oldthing", "pythonic")
         assert result.exit_code == 0
-        assert "shares" in result.stdout
+        assert "pythonic oldthing runs" in result.stdout
         assert not result.timed_out
 
     def test_unknown_pattern_id_is_refused(self) -> None:
