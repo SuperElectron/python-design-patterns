@@ -14,30 +14,17 @@ stdlib_sightings: [sqlite3, shelve]
 
 # Repository
 
-## Problem
+Domain logic speaks to storage through a small `Protocol` port; a fake and a
+real adapter both satisfy it, held together by shared contract tests.
+**Verdict: use with care** — earn it with a genuine second implementation.
 
-Pricing rules shouldn't know SQL. When persistence details soak into domain
-logic, every business test drags a database behind it and every storage
-change touches everything.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Invoice`, `Invoices` (port), `InMemoryInvoices` (fake), `total_owed`, `overdue` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/invoice_ledger/`](examples/invoice_ledger/) | Mini-project: sqlite adapter + identical answers from both backends |
+| [`tests/`](tests/) | Domain tests on the fake; one contract suite parametrized over both adapters |
 
-## Naive solution
-
-`naive.py` inlines sqlite calls in the domain function — compact, and
-welded shut.
-
-## Pythonic solution
-
-A `Protocol` names the collection-like operations the domain needs (`add`,
-`get`, `list`); an in-memory dict repo serves tests, a sqlite repo serves
-production, and the domain function accepts either.
-
-## In the wild
-
-`shelve` is a ready-made key-object repository over `dbm`; `sqlite3` with a
-thin class over it is the standard hand-rolled form (shown in
-`real_world.py`).
-
-## Verdict
-
-**Use with care.** Earn it with a real second implementation (the in-memory
-fake counts); skip it for scripts that just need a query.
+```bash
+uv run python -m patterns.modern.repository.examples.invoice_ledger
+```
