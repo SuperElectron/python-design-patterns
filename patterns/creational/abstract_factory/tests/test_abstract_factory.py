@@ -1,6 +1,7 @@
 """Behavioral tests for all three abstract-factory variants."""
 
 from decimal import Decimal
+from typing import ClassVar
 
 from patterns.creational.abstract_factory import naive, pythonic, real_world
 
@@ -14,16 +15,29 @@ class TestNaive:
 
 
 class TestPythonic:
-    def test_callable_is_the_factory(self) -> None:
-        assert pythonic.parse_numbers(["2.5"], Decimal) == [Decimal("2.5")]
+    ROWS: ClassVar[list[list[str]]] = [["west", "$12k"], ["east", "$9k"]]
 
-    def test_default_factory(self) -> None:
-        assert pythonic.parse_numbers(["2.5"]) == [2.5]
+    def test_markdown_family_renders_consistently(self) -> None:
+        doc = pythonic.render_sales_report(pythonic.MARKDOWN, self.ROWS)
+        assert doc.startswith("## Sales by region")
+        assert "| west | $12k |" in doc
+        assert doc.endswith("> Figures exclude refunds.")
 
-    def test_family_bundle_swaps_every_member(self) -> None:
-        result = pythonic.parse(["1.1"], pythonic.EXACT_FAMILY)
-        assert result == (Decimal("1.1"),)
-        assert pythonic.parse(["1.1"]) == [1.1]
+    def test_html_family_renders_consistently(self) -> None:
+        doc = pythonic.render_sales_report(pythonic.HTML, self.ROWS)
+        assert "<h2>Sales by region</h2>" in doc
+        assert "<td>west</td>" in doc
+        assert '<div class="callout">' in doc
+
+    def test_client_is_format_blind(self) -> None:
+        # A brand-new family works without touching the renderer.
+        plain = pythonic.DocumentFamily(
+            heading=str.upper,
+            table=lambda headers, rows: "; ".join(",".join(r) for r in rows),
+            callout=lambda text: f"NB: {text}",
+        )
+        doc = pythonic.render_sales_report(plain, self.ROWS)
+        assert doc.splitlines()[0] == "SALES BY REGION"
 
 
 class TestRealWorld:

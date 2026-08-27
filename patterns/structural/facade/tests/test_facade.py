@@ -4,6 +4,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+import pytest
+
 from patterns.structural.facade import naive, pythonic, real_world
 
 
@@ -14,13 +16,72 @@ class TestNaive:
 
 
 class TestPythonic:
-    def test_facade_covers_the_common_case(self) -> None:
-        text = "the cat and the hat and the cat in the hat"
-        assert pythonic.top_words(text, 2) == [("cat", 2), ("hat", 2)]
+    def _subsystem(
+        self,
+    ) -> tuple[pythonic.Warehouse, pythonic.PaymentGateway, pythonic.Shipping, pythonic.Notifier]:
+        return (
+            pythonic.Warehouse(stock={"mug": 10}),
+            pythonic.PaymentGateway(),
+            pythonic.Shipping(),
+            pythonic.Notifier(),
+        )
 
-    def test_subsystem_stays_available_for_full_control(self) -> None:
-        counts = pythonic.count(["the", "cat"], drop_stopwords=False)
-        assert counts["the"] == 1
+    def test_facade_runs_every_step_in_order(self) -> None:
+        warehouse, gateway, shipping, notifier = self._subsystem()
+        result = pythonic.place_order(
+            warehouse,
+            gateway,
+            shipping,
+            notifier,
+            sku="mug",
+            quantity=2,
+            price_cents=1200,
+            card="4242",
+            address="12 Grace Ave",
+        )
+        assert warehouse.stock["mug"] == 8
+        assert gateway.charges == [("4242", 2400)]
+        assert result.shipping_label in shipping.labels
+        assert notifier.sent and result.transaction_id in notifier.sent[0]
+
+    def test_declined_payment_rolls_back_the_reservation(self) -> None:
+        warehouse, gateway, shipping, notifier = self._subsystem()
+        gateway.declined_cards.add("0000")
+        with pytest.raises(PermissionError):
+            pythonic.place_order(
+                warehouse,
+                gateway,
+                shipping,
+                notifier,
+                sku="mug",
+                quantity=3,
+                price_cents=1200,
+                card="0000",
+                address="x",
+            )
+        assert warehouse.stock["mug"] == 10  # released, not leaked
+        assert shipping.labels == [] and notifier.sent == []
+
+    def test_insufficient_stock_charges_nothing(self) -> None:
+        warehouse, gateway, shipping, notifier = self._subsystem()
+        with pytest.raises(LookupError):
+            pythonic.place_order(
+                warehouse,
+                gateway,
+                shipping,
+                notifier,
+                sku="mug",
+                quantity=99,
+                price_cents=1200,
+                card="4242",
+                address="x",
+            )
+        assert gateway.charges == []
+
+    def test_subsystem_stays_public_for_full_control(self) -> None:
+        # Invoice-only flow: callers can still drive the parts directly.
+        gateway = pythonic.PaymentGateway()
+        assert gateway.charge("4242", 500) == "txn-1"
 
 
 class TestRealWorld:

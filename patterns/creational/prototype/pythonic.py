@@ -1,39 +1,67 @@
 """What to write instead: a registry of callables.
 
-Classes are first-class values in Python, and ``functools.partial`` turns
-"this class plus these arguments" into a zero-argument factory. The registry
-stores factories; asking for a fresh instance is just calling one.
+The real shape: a scheduler stamping out report jobs from preconfigured
+templates. ``functools.partial`` freezes each template's settings into a
+zero-argument factory; per-run tweaks come from ``dataclasses.replace`` on
+the frozen product -- no clone() protocol anywhere.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from functools import partial
 
 
-@dataclass
-class Circle:
-    radius: int
-    color: str
+@dataclass(frozen=True)
+class ReportJob:
+    name: str
+    query: str
+    recipients: tuple[str, ...]
+    fmt: str = "pdf"
+    filters: tuple[str, ...] = ()
 
 
-#: The whole pattern: names mapped to zero-argument factories.
-MENU: dict[str, Callable[[], Circle]] = {
-    "small-red": partial(Circle, radius=1, color="red"),
-    "big-blue": partial(Circle, radius=10, color="blue"),
+TEMPLATES: dict[str, Callable[[], ReportJob]] = {
+    "nightly-sales": partial(
+        ReportJob,
+        name="nightly-sales",
+        query="SELECT * FROM sales WHERE day = today()",
+        recipients=("sales-leads@example.com",),
+        filters=("exclude-test-accounts",),
+    ),
+    "weekly-audit": partial(
+        ReportJob,
+        name="weekly-audit",
+        query="SELECT * FROM ledger WHERE week = this_week()",
+        recipients=("finance@example.com", "cfo@example.com"),
+        fmt="xlsx",
+    ),
 }
 
 
-def create(name: str) -> Circle:
-    return MENU[name]()
+def schedule(template: str, **overrides: object) -> ReportJob:
+    """A fresh, independently-owned job; overrides customize this run only."""
+    job = TEMPLATES[template]()
+    return replace(job, **overrides) if overrides else job  # type: ignore[arg-type]
+
+
+@dataclass
+class Scheduler:
+    queue: list[ReportJob] = field(default_factory=list)
+
+    def enqueue(self, template: str, **overrides: object) -> ReportJob:
+        job = schedule(template, **overrides)
+        self.queue.append(job)
+        return job
 
 
 def main() -> None:
-    a = create("small-red")
-    b = create("small-red")
-    print(f"fresh instances: {a is not b}, equal config: {a == b}")
-    print(create("big-blue"))
+    scheduler = Scheduler()
+    scheduler.enqueue("nightly-sales")
+    rush = scheduler.enqueue("weekly-audit", fmt="csv")
+    print(f"queued: {[j.name for j in scheduler.queue]}")
+    print(f"per-run override, template untouched: {rush.fmt} vs {schedule('weekly-audit').fmt}")
 
 
 if __name__ == "__main__":

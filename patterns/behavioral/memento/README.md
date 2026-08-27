@@ -8,6 +8,7 @@ symptoms: ["undo", "checkpoint and rollback", "save game", "restore previous sta
 verdict: use-with-care
 caveats:
   - "Immutable state makes the pattern nearly free: a snapshot is just keeping the old object. Design the state to be frozen and mementos fall out."
+  - "pickle.loads executes code while deserializing — only unpickle snapshots your own process produced; use JSON for anything crossing a trust boundary."
   - "Deep-copying big mutable graphs per keystroke is the naive cost; snapshot the smallest state that matters."
 stdlib_sightings: [copy.deepcopy, pickle.dumps, dataclasses.replace]
 ---

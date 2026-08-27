@@ -34,3 +34,13 @@ class TestRealWorld:
     def test_names_are_rejected(self) -> None:
         with pytest.raises(ValueError):
             real_world.safe_eval("x + 1")
+
+    def test_bool_constants_are_rejected(self) -> None:
+        # bool subclasses int; a safe evaluator must not compute True + 1.
+        with pytest.raises(ValueError, match="disallowed"):
+            real_world.safe_eval("True + 1")
+
+    def test_hostile_nesting_gets_a_clean_error_not_a_crash(self) -> None:
+        bomb = "1" + " + 1" * 200  # deeper than MAX_DEPTH
+        with pytest.raises(ValueError, match="deeply nested"):
+            real_world.safe_eval(bomb)

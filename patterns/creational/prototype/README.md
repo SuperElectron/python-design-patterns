@@ -27,11 +27,11 @@ and a registry mapping names to exemplars that get cloned on demand.
 
 ## Pythonic solution
 
-Python doesn't need the interface, because *callables* are the interface. A
-registry can hold classes, `functools.partial` objects pre-loading the
-arguments, or bound methods — anything you can call to get a fresh instance.
-`pythonic.py` shows the guide's recommendation: a registry of zero-argument
-factories.
+Python doesn't need the interface, because *callables* are the interface.
+`pythonic.py` shows the guide's recommendation on a real shape — a scheduler
+stamping out report jobs from `functools.partial` templates, with per-run
+tweaks via `dataclasses.replace` on the frozen product. No `clone()`
+anywhere.
 
 ## In the wild
 

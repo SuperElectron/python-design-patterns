@@ -18,18 +18,31 @@ _BINOPS: dict[type[ast.operator], Callable[[float, float], float]] = {
 }
 
 
+#: Deeper than any human formula; shallower than the recursion limit, so a
+#: hostile input gets a clean ValueError instead of a RecursionError crash.
+MAX_DEPTH = 50
+
+
 def safe_eval(formula: str) -> float:
     """Evaluate arithmetic like '2 * (3 + 4)'; reject everything else."""
-    return _walk(ast.parse(formula, mode="eval").body)
+    return _walk(ast.parse(formula, mode="eval").body, depth=0)
 
 
-def _walk(node: ast.expr) -> float:
-    if isinstance(node, ast.Constant) and isinstance(node.value, int | float):
+def _walk(node: ast.expr, depth: int) -> float:
+    if depth > MAX_DEPTH:
+        raise ValueError("expression too deeply nested")
+    if (
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, int | float)
+        and not isinstance(node.value, bool)
+        # bool subclasses int, and a *safe* evaluator should not quietly
+        # compute True + 1 -- so it is excluded explicitly.
+    ):
         return float(node.value)
     if isinstance(node, ast.BinOp) and type(node.op) in _BINOPS:
-        return _BINOPS[type(node.op)](_walk(node.left), _walk(node.right))
+        return _BINOPS[type(node.op)](_walk(node.left, depth + 1), _walk(node.right, depth + 1))
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
-        return -_walk(node.operand)
+        return -_walk(node.operand, depth + 1)
     raise ValueError(f"disallowed syntax: {ast.dump(node)[:40]}")
 
 
