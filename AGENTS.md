@@ -30,10 +30,12 @@ patterns/<group>/<slug>/
 │   ├── implementation.md# introducing it into a real system: smell, steps, idioms, pitfalls
 │   └── examples.md      # cited EXTERNAL usages: stdlib, OSS, articles
 ├── examples/            # runnable mini-projects that import pattern/
-│   ├── __init__.py
 │   └── <project>/       # realistic domain, no Foo/Bar; __main__.py + modules
 └── tests/               # isolated: test_<named>.py + test_<project>.py
 ```
+
+No other `__init__.py` exist — namespace packages (PEP 420) carry the rest;
+the loader rejects empty ones.
 
 - Everything import-safe (no side effects at import); mini-projects run via
   `uv run python -m patterns.<group>.<slug>.examples.<project>`.
@@ -49,8 +51,10 @@ patterns/<group>/<slug>/
   `replace=True`); ordered collections append freely.
 - `ParamSpec` only where a wrapper callable is returned; identity typing otherwise.
 - Never `None` as a cache sentinel; immutability guards recurse into containers.
-- `__init__.py` is empty unless it is the unit's public-API re-export file
-  (`from .pattern.x import Y as Y` — the as-alias form); never `__all__`.
+- No empty `__init__.py` — delete them (PEP 420 namespace packages). One exists
+  only when load-bearing: the unit's public-API re-exports
+  (`from .pattern.x import Y as Y` — the as-alias form) or an import-time
+  effect the unit teaches. Never `__all__`.
 
 ## Frontmatter schema (the MCP server indexes this — keep it valid)
 

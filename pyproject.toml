@@ -55,16 +55,24 @@ src = ["src", "patterns", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 
+[tool.ruff.lint.isort]
+# Namespace packages (PEP 420): no __init__.py to detect these by, so declare them.
+known-first-party = ["patterns", "design_patterns"]
+
 [tool.mypy]
 strict = true
 python_version = "3.11"
 files = ["src", "patterns"]
+# Namespace packages (PEP 420): no empty __init__.py — resolve modules by
+# their full dotted path from the package bases below.
+explicit_package_bases = true
+mypy_path = ["src", "."]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "patterns"]
 pythonpath = ["."]
 asyncio_mode = "auto"
-addopts = "-q --cov=src --cov=patterns --cov-report=term-missing"
+addopts = "-q --import-mode=importlib --cov=src --cov=patterns --cov-report=term-missing"
 timeout = 30  # a shutdown regression must fail CI, not hang it
 
 [tool.coverage.report]

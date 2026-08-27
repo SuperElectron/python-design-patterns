@@ -164,14 +164,21 @@ def _validate_shape(pattern: Pattern, readme: Path) -> None:
         raise CatalogError(
             f"{readme}: module unit ships no runnable examples/<project>/__main__.py"
         )
-    if not (unit / "examples" / "__init__.py").is_file():
-        raise CatalogError(f"{readme}: examples/ is not a package (no __init__.py)")
-    for name, path in examples.items():
-        if not (path / "__init__.py").is_file():
-            raise CatalogError(f"{readme}: example {name!r} is not a package (no __init__.py)")
+    for stray in _empty_inits(unit):
+        raise CatalogError(
+            f"{readme}: delete empty __init__.py ({stray.relative_to(unit)}) — "
+            "namespace packages (PEP 420) carry the structure"
+        )
     tests_dir = unit / "tests"
     if not any(tests_dir.glob("test_*.py")):
         raise CatalogError(f"{readme}: module unit has no tests/test_*.py")
+
+
+def _empty_inits(unit: Path) -> list[Path]:
+    """Empty ``__init__.py`` anywhere in the unit — banned; only load-bearing ones exist."""
+    return sorted(
+        f for f in unit.rglob("__init__.py") if f.stat().st_size == 0 or not f.read_text().strip()
+    )
 
 
 @dataclass(frozen=True)
