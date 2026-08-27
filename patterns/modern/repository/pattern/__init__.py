@@ -1,9 +1,6 @@
-"""Repository — public API.
+"""The Repository pattern, importable as library code."""
 
->>> from patterns.modern.repository import Invoices, InMemoryInvoices
-"""
-
-from patterns.modern.repository.pattern import (
+from patterns.modern.repository.pattern.ledger import (
     InMemoryInvoices,
     Invoice,
     Invoices,

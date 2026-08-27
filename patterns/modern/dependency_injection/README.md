@@ -14,32 +14,17 @@ stdlib_sightings: [json.dumps cls=, sorted key=, unittest.mock]
 
 # Dependency Injection
 
-## Problem
+Hand an object its collaborators — clock, storage, transport — instead of
+letting it construct them, so tests can swap in fakes. **Verdict: pythonic** —
+a keyword argument with a production default is the whole mechanism.
 
-A class that builds its own collaborators — its clock, its store, its HTTP
-client — can only ever be tested with the real things. The hidden `new` is
-the coupling.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `ReminderService`, `InvoiceSource`, `MailTransport`, `Clock` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/invoice_reminders/`](examples/invoice_reminders/) | Mini-project: adapters + a real composition root over `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` hard-wires `datetime.now` and a concrete store inside the class.
-Watch the test problem appear: the greeting depends on the actual wall
-clock.
-
-## Pythonic solution
-
-Pass the collaborators in. `pythonic.py` is an overdue-invoice reminder
-service with three seams — the clock, the invoice source, the mail transport —
-each a `Protocol` or callable with a production default. Tests hand in a
-frozen date and a capturing mailbox and become fully deterministic. No
-container, no framework, no decorators.
-
-## In the wild
-
-Every `key=` argument is DI (`sorted`, `min`, `max`); `json.dumps(cls=...)`
-injects the encoder; `unittest.mock` exists to be injected. The stdlib does
-DI by keyword argument, and so should you.
-
-## Verdict
-
-**Pythonic.** The default-argument seam is the pattern, entire.
+```bash
+uv run python -m patterns.modern.dependency_injection.examples.invoice_reminders
+```
