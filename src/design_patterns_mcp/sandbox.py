@@ -33,6 +33,8 @@ def run_example(catalog: Catalog, pattern_id: str, variant: str) -> RunResult:
     if variant not in variants:
         raise KeyError(f"{pattern_id} has no variant {variant!r} (has: {sorted(variants)})")
     path = variants[variant]  # resolved by the catalog, never by the caller
+    if not path.is_file():  # a real check, not an assert: survives python -O
+        raise FileNotFoundError(f"catalog names {path} but it does not exist")
 
     repo_root = pattern.path.parents[2]
     module = f"patterns.{pattern.group}.{pattern.slug}.{variant}"
@@ -54,8 +56,13 @@ def run_example(catalog: Catalog, pattern_id: str, variant: str) -> RunResult:
             )
         except subprocess.TimeoutExpired as exc:
             out = exc.stdout.decode() if isinstance(exc.stdout, bytes) else (exc.stdout or "")
-            return RunResult(exit_code=-1, stdout=out[:MAX_OUTPUT_BYTES], stderr="", timed_out=True)
-    assert path.is_file()
+            err = exc.stderr.decode() if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+            return RunResult(
+                exit_code=-1,
+                stdout=out[:MAX_OUTPUT_BYTES],
+                stderr=err[:MAX_OUTPUT_BYTES],
+                timed_out=True,
+            )
     return RunResult(
         exit_code=completed.returncode,
         stdout=completed.stdout[:MAX_OUTPUT_BYTES],

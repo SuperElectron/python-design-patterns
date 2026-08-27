@@ -18,7 +18,11 @@ def get_card(rank: str, suit: str) -> tuple[str, str]:
 
 
 class Card:
-    """The __new__ form: ``Card('9', '♥') is Card('9', '♥')``."""
+    """The __new__ form: ``Card('9', '♥') is Card('9', '♥')``.
+
+    The pool is unbounded and unsynchronized: fine for a fixed domain like
+    52 cards, wrong for unbounded user-supplied keys or racing threads.
+    """
 
     _pool: ClassVar[dict[tuple[str, str], Card]] = {}
 

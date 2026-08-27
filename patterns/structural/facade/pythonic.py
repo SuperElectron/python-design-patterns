@@ -81,6 +81,9 @@ def place_order(
     except PermissionError:
         warehouse.release(sku, quantity)  # the step copy-paste always forgets
         raise
+    # Honest boundary: a crash below this line leaves the charge captured.
+    # Real systems make charge/label/notify a saga (compensate on failure)
+    # or an idempotent retry -- the facade pattern doesn't solve that part.
     label = shipping.create_label(sku, address)
     notifier.confirm(address, txn, label)
     return OrderResult(transaction_id=txn, shipping_label=label)
