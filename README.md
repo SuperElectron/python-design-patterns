@@ -17,15 +17,6 @@ claude mcp add design-patterns -- uv run --directory <this-repo> python-design-p
 
 ## Use it
 
-```
-patterns/structural/decorator/
-├── README.md       # the problem, the verdict, the map
-├── pattern/        # the pattern as importable, typed code
-├── docs/           # fundamentals · implementation · cited external examples
-├── examples/       # runnable mini-projects that use pattern/
-└── tests/          # behavioral tests for both
-```
-
 ```python
 from patterns.structural.decorator import retry, logged
 ```
