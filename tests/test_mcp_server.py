@@ -246,17 +246,27 @@ class TestResources:
             assert isinstance(contents, TextResourceContents)
             assert len(json.loads(contents.text)) == 32
 
-    async def test_pattern_doc_and_source_templates(self) -> None:
+    async def test_pattern_doc_and_docs_templates(self) -> None:
         async with Client(mcp) as client:
             doc = await client.read_resource("pattern://behavioral/iterator")
             first = doc.contents[0]
             assert isinstance(first, TextResourceContents)
             assert "# Iterator" in first.text
 
-            src = await client.read_resource("pattern://behavioral/iterator/naive")
+            fund = await client.read_resource("pattern://behavioral/iterator/docs/fundamentals")
+            first_fund = fund.contents[0]
+            assert isinstance(first_fund, TextResourceContents)
+            assert "Iterator" in first_fund.text
+
+    async def test_legacy_variant_source_template(
+        self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(server_module, "get_catalog", lambda: legacy_catalog)
+        async with Client(mcp) as client:
+            src = await client.read_resource("pattern://creational/oldthing/pythonic")
             first_src = src.contents[0]
             assert isinstance(first_src, TextResourceContents)
-            assert "__next__" in first_src.text
+            assert "pythonic oldthing runs" in first_src.text
 
 
 class TestPrompts:
