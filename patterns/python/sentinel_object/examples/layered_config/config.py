@@ -8,6 +8,7 @@ the sentinel, checked by identity.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import cast
 
 from patterns.python.sentinel_object.pattern import MISSING, Sentinel
 
@@ -31,14 +32,20 @@ class LayeredConfig:
         )
 
     def get(self, key: str, default: Value | Sentinel = MISSING) -> Value:
-        """The first layer that *has* the key wins — even when its value is None."""
+        """The first layer that *has* the key wins — even when its value is None.
+
+        Checks are by identity (``is MISSING``), the unit's own rule: equality
+        is overloadable and a type check would swallow any *other* sentinel a
+        caller legitimately stored as a value. The ``cast``s are for the type
+        checker only — identity is the semantic guard.
+        """
         for _, layer in self._layers:
             value = layer.get(key, MISSING)
-            if not isinstance(value, Sentinel):
-                return value
-        if isinstance(default, Sentinel):
+            if value is not MISSING:
+                return cast("Value", value)
+        if default is MISSING:
             raise KeyError(f"{key!r} not set in any layer and no default given")
-        return default
+        return cast("Value", default)
 
     def source_of(self, key: str) -> str:
         """Which layer answers for a key — 'unset' if none does."""

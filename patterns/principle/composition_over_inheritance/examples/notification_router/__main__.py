@@ -23,8 +23,8 @@ def main() -> None:
     webhook = FakeWebhook("https://pager.example/hook")
     router = Router(
         notifiers=(
-            Notifier(filters=(min_severity(2),), format=plain_text, deliver=console),
-            Notifier(filters=(min_severity(4), Dedup()), format=as_json, deliver=webhook),
+            Notifier(filters=(min_severity(2),), transform=plain_text, sink=console),
+            Notifier(filters=(min_severity(4), Dedup()), transform=as_json, sink=webhook),
         )
     )
     alerts = [

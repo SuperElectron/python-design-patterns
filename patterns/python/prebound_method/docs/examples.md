@@ -10,8 +10,11 @@ reviewing module-API code.
   stays public for isolated streams.
   [docs.python.org/3/library/random.html](https://docs.python.org/3/library/random.html) ·
   [source](https://github.com/python/cpython/blob/main/Lib/random.py)
-- **`secrets`.** `token_hex`, `token_bytes`, `choice` come from a module-level
-  `SystemRandom` instance — the same wiring with a different engine.
+- **`secrets`.** `choice` and `randbits` are prebound from a module-level
+  `SystemRandom` instance — the same wiring with a different engine. (The
+  useful contrast: `token_hex`/`token_bytes` are plain module functions that
+  merely *call* it — they have no `__self__` and would fail this unit's own
+  `shares_instance()` check.)
   [docs.python.org/3/library/secrets.html](https://docs.python.org/3/library/secrets.html)
 - **`calendar`.** Module functions like `calendar.month` delegate to a
   module-level `TextCalendar` instance.

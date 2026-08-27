@@ -20,7 +20,7 @@ load-bearing idea behind the rest of this catalog.
 
 | Where | What |
 |---|---|
-| [`pattern/`](pattern/) | The importable code: `Filter`/`Transform`/`Sink` axis aliases + the composed `Logger` |
+| [`pattern/`](pattern/) | The importable code: `Pipeline` (the composition point), `Filter`/`Transform`/`Sink` axis aliases, and `Logger` built on it |
 | [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
 | [`examples/notification_router/`](examples/notification_router/) | Mini-project: alerts through filter × format × deliver pieces, zero combination subclasses |
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |

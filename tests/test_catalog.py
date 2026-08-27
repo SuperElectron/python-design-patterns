@@ -7,6 +7,7 @@ import pytest
 
 from design_patterns.catalog import (
     VERDICTS,
+    Catalog,
     CatalogError,
     find_patterns_root,
     load_catalog,
@@ -19,13 +20,20 @@ class TestRealCatalog:
         assert len(catalog.patterns) == 32
         assert "structural/decorator" in catalog.ids()
 
-    def test_catalog_contains_both_shapes_during_migration(self) -> None:
-        # The pilot migrated at least one unit; a silent regression of a
-        # module unit back to legacy shape must fail here, not skip a branch.
+    def test_real_catalog_is_fully_module_shape(self) -> None:
+        # The migration is complete: every real unit is module-shape. A unit
+        # regressing to legacy shape must fail here, not silently downgrade.
         shapes = {p.shape for p in load_catalog().patterns}
-        assert "module" in shapes
-        module_ids = {p.id for p in load_catalog().patterns if p.shape == "module"}
-        assert "behavioral/chain_of_responsibility" in module_ids
+        assert shapes == {"module"}
+
+    def test_legacy_loader_branch_stays_covered_by_the_synthetic_unit(
+        self, legacy_catalog: Catalog
+    ) -> None:
+        # No real unit is legacy any more; this pins that the loader's legacy
+        # branch (and the tests that rely on it) still have a living subject.
+        (pattern,) = legacy_catalog.patterns
+        assert pattern.shape == "legacy"
+        assert sorted(pattern.variants()) == ["naive", "pythonic", "real_world"]
 
     def test_every_module_example_builds_on_its_own_pattern_package(self) -> None:
         # The mini-projects exist to show the pattern in practice: each one

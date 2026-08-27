@@ -1,8 +1,9 @@
 """The Sentinel Object pattern as importable, typed building blocks.
 
-``Sentinel`` is a named, unforgeable marker (PEP 661's shape); ``MISSING`` is
-the one most APIs need. A sentinel's identity is its meaning: compare with
-``is``, never ``==``.
+``Sentinel`` is a named, unforgeable marker (a PEP 661-inspired shape;
+unlike the PEP's proposal, two same-named sentinels here are deliberately
+distinct objects — tested). ``MISSING`` is the one most APIs need. A
+sentinel's identity is its meaning: compare with ``is``, never ``==``.
 """
 
 from __future__ import annotations

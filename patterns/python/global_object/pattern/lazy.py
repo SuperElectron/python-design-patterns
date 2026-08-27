@@ -19,6 +19,16 @@ _UNSET = object()  # a sentinel (see python/sentinel_object): None may be a valu
 class Lazy(Generic[T]):
     """A module-global built on first ``get()``, not at import time.
 
+    Why not ``functools.cache`` on the factory? Two reasons this class earns
+    its ~15 lines: the ``_UNSET`` sentinel means a factory that legitimately
+    returns ``None`` is still cached exactly once (an ``is None`` check would
+    rebuild it forever), and ``reset()``/``initialized`` give tests the seam
+    and the proof that the import stayed cheap.
+
+    Not thread-safe: two threads racing the first ``get()`` may both run the
+    factory. Fine for the import-time-globals use this pattern serves; wrap
+    ``get()`` in a lock if a threaded first touch is real for you.
+
     >>> table = Lazy(load_expensive_table)   # import: nothing happens
     >>> table.get()                          # first use: built once
     >>> table.reset()                        # tests: order-independence back

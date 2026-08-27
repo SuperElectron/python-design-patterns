@@ -9,7 +9,7 @@ verdict: pythonic
 caveats:
   - "Build the hidden instance cheaply and without I/O — it is constructed at import time."
   - "Keep the class public too, so users needing isolated state can instantiate their own (exactly as random.Random allows)."
-stdlib_sightings: [random.random, random.seed, secrets.token_hex]
+stdlib_sightings: [random.random, random.seed, secrets.choice]
 ---
 
 # Prebound Method

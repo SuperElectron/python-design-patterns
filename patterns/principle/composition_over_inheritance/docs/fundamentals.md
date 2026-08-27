@@ -15,7 +15,7 @@ injected where needed; M + N pieces cover M × N behaviors. Source chapter:
 |---|---|
 | Axes of variation | The independent behaviors (what to accept, how to shape, where to send) |
 | One small piece per axis | A callable or tiny class per behavior — `Filter`/`Transform`/`Sink` in [`pattern/compose.py`](../pattern/compose.py) |
-| The composition point | The one class that holds a piece per axis and wires them (`Logger`, the example's `Notifier`) |
+| The composition point | The one class that holds a piece per axis and wires them — `Pipeline` in [`pattern/compose.py`](../pattern/compose.py); `Logger` and the example's `Notifier` are `Pipeline` put to work |
 | Clients | Pick pieces and construct; a new combination is a constructor call |
 
 ## Mechanism

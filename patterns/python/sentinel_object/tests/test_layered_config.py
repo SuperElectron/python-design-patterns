@@ -11,6 +11,7 @@ from patterns.python.sentinel_object.examples.layered_config import (
     notifier_for,
 )
 from patterns.python.sentinel_object.examples.layered_config.__main__ import main
+from patterns.python.sentinel_object.pattern import Sentinel
 
 
 def build_config() -> LayeredConfig:
@@ -73,3 +74,35 @@ class TestDemo:
         assert "(from cli)" in out
         assert "(from file)" in out
         assert "NullNotifier" in out
+
+
+class _EqualsEverything:
+    """A value whose __eq__ lies — only identity checks survive it."""
+
+    def __eq__(self, other: object) -> bool:
+        return True
+
+    def __hash__(self) -> int:
+        return 0
+
+
+class TestIdentityIsTheGuard:
+    def test_get_checks_identity_not_equality(self) -> None:
+        liar = _EqualsEverything()
+        config = LayeredConfig(defaults={"trap": liar})  # type: ignore[dict-item]
+        got: object = config.get("trap")
+        assert got is liar  # `==` would treat the liar as MISSING
+
+    def test_a_different_sentinel_stored_as_a_value_is_not_swallowed(self) -> None:
+        other = Sentinel("OTHER")
+        config = LayeredConfig(defaults={"marker": other})  # type: ignore[dict-item]
+        stored: object = config.get("marker")
+        assert stored is other  # an isinstance check would eat it
+        assert config.source_of("marker") == "defaults"
+
+
+class TestNullNotifierPaths:
+    def test_absent_key_also_means_the_silent_notifier(self) -> None:
+        # The default=None argument exists exactly for the fully-unset case.
+        config = LayeredConfig(defaults={})
+        assert isinstance(notifier_for(config), NullNotifier)

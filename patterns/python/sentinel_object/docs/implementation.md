@@ -21,9 +21,11 @@ if cached is None:  # a cached None recomputes forever
    a clean `Value` type outside. The sentinel should not leak into public
    return types — resolve it (raise, or apply the caller's default) before
    returning.
-4. **Check by identity**, and let the type-checker help: `isinstance(value,
-   Sentinel)` narrows types under `mypy --strict` where a raw `object()`
-   cannot.
+4. **Check by identity** — `value is MISSING`, the rule the pattern lives
+   by: equality is overloadable, and a type check (`isinstance(value,
+   Sentinel)`) would swallow any *other* sentinel stored as a legitimate
+   value. Under `mypy --strict` a `cast` at the return keeps the public
+   type clean; identity remains the semantic guard.
 5. **Upgrade chronic branching to a Null Object.** If many callers test the
    sentinel just to skip work, return a do-nothing implementation of the real
    interface instead (`NullNotifier` in the worked example).
@@ -35,11 +37,11 @@ from patterns.python.sentinel_object import MISSING, Sentinel
 def get(self, key: str, default: Value | Sentinel = MISSING) -> Value:
     for layer in self._layers:
         value = layer.get(key, MISSING)
-        if not isinstance(value, Sentinel):
-            return value  # a stored None wins here
-    if isinstance(default, Sentinel):
+        if value is not MISSING:
+            return cast("Value", value)  # a stored None wins here
+    if default is MISSING:
         raise KeyError(key)
-    return default
+    return cast("Value", default)
 ```
 
 ## Python idioms that keep it small

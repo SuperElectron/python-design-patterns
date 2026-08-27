@@ -32,9 +32,10 @@ class DedupJsonWebhookNotifier(...): ...  # and severity thresholds arrive Monda
    its tests become tests of a *combination*, which now read as configuration.
 
 ```python
-from patterns.principle.composition_over_inheritance import Filter, Sink, Transform
+from patterns.principle.composition_over_inheritance import Pipeline
 
-pager = Notifier(filters=(min_severity(4), Dedup()), format=as_json, deliver=webhook)
+# Notifier = Pipeline[Alert, str] — the domain names the composition point.
+pager = Notifier(filters=(min_severity(4), Dedup()), transform=as_json, sink=webhook)
 ```
 
 ## Python idioms that keep it small
@@ -58,7 +59,8 @@ pager = Notifier(filters=(min_severity(4), Dedup()), format=as_json, deliver=web
   reconverges on the diamond tomorrow — the guide's taxonomy of dodges is
   worth rereading when tempted.
 - **Order left implicit.** The composition point owns the delegation order;
-  document and test it (filters before format, format before deliver).
+  document and test it (filters run in order and short-circuit — a stateful
+  filter placed after a veto never records vetoed items).
 
 ## Worked example
 

@@ -6,7 +6,7 @@ reviewing class hierarchies.
 ## Python standard library
 
 - **`logging`.** The guide's own worked example, shipped at scale: `Logger`
-  composes `Handler`s, `Filter`s, and `Formatter`s — four orthogonal axes,
+  composes `Handler`s, `Filter`s, and `Formatter`s — three orthogonal axes,
   no class per combination.
   [docs.python.org/3/library/logging.html](https://docs.python.org/3/library/logging.html)
 - **`socketserver`.** The honest contrast: the stdlib's mixin dodge

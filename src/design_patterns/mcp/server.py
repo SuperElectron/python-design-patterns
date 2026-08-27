@@ -37,14 +37,13 @@ mcp = MCPServer(
         "Design patterns in Python: 32 units covering all 23 GoF patterns, "
         "Python-native patterns, and modern additions, each with an honest "
         "verdict. Start with search_patterns or recommend_pattern; verdicts of "
-        "'prefer-alternative' tell you what to write instead. Migrated "
-        "(module-shape) units offer three access levels: get_pattern_docs "
+        "'prefer-alternative' tell you what to write instead. Every unit "
+        "offers three access levels: get_pattern_docs "
         "(fundamentals/implementation/examples), then list_examples + "
         "run_example(example=...) for runnable mini-projects, then read_source "
-        "(the pattern/ package). Legacy (not yet migrated) units instead ship "
-        "flat variant files, served via get_pattern(variant=...) and "
-        "run_example(variant=...) with variant one of 'naive', 'pythonic', "
-        "'real_world' (their literal filenames)."
+        "(the pattern/ package). Units predating the module shape would ship "
+        "flat variant files via get_pattern(variant=...) and "
+        "run_example(variant=...); the current catalog has none."
     ),
 )
 
@@ -140,6 +139,10 @@ def run_example(
     and return its real output. For migrated (module-shape) patterns pass
     example=<mini-project name from list_examples>; for legacy patterns pass
     variant='naive'|'pythonic'|'real_world'. Exactly one of the two."""
+    # Legacy-shape support (the variant= arm below and its relatives) is kept
+    # deliberately: every real unit is module-shape now, but the loader
+    # contract still admits legacy units and the synthetic test fixtures
+    # exercise these paths. Removal is a wrap-phase decision, tracked there.
     if (variant is None) == (example is None):
         raise ValueError("pass exactly one of 'variant' (legacy) or 'example' (module-shape)")
     if example is not None:
