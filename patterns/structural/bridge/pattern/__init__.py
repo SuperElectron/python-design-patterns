@@ -1,9 +1,6 @@
-"""Bridge — public API.
+"""The Bridge pattern, importable as library code."""
 
->>> from patterns.structural.bridge import AlertNotifier, SlackTransport
-"""
-
-from patterns.structural.bridge.pattern import (
+from patterns.structural.bridge.pattern.bridge import (
     AlertNotifier,
     DigestNotifier,
     EmailTransport,

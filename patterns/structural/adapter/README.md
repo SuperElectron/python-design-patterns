@@ -14,31 +14,17 @@ stdlib_sightings: [io.TextIOWrapper, socket.makefile, functools.cmp_to_key]
 
 # Adapter
 
-## Problem
+Make a class you can't edit speak the interface your code expects — translate
+what differs, forward the rest. **Verdict: pythonic** — the honest way to
+reconcile interfaces you don't control.
 
-Your code speaks one interface; a class you cannot edit speaks another. A
-sensor library reports Fahrenheit; your thermostat logic is written against
-`celsius()`.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `DelegatingAdapter` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/payment_gateways/`](examples/payment_gateways/) | Mini-project: one checkout over two mismatched vendor SDKs |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF object adapter: a class implementing the target
-interface, holding the adaptee, translating every call.
-
-## Pythonic solution
-
-Duck typing shrinks the job: adapt *only* what your code calls, and when
-that's one method, a plain function is the whole adapter. `pythonic.py` shows
-both the one-function adapter and a `__getattr__`-forwarding class for wider
-surfaces.
-
-## In the wild
-
-`io.TextIOWrapper` adapts a binary stream to the text-file interface —
-the stdlib's flagship adapter. `socket.makefile()` adapts a socket to a
-file-like object; `functools.cmp_to_key` adapts old comparator functions to
-the `key=` interface.
-
-## Verdict
-
-**Pythonic.** The honest way to reconcile interfaces you don't control.
+```bash
+uv run python -m patterns.structural.adapter.examples.payment_gateways
+```

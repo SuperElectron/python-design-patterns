@@ -1,8 +1,9 @@
-"""The Bridge without ceremony: composition plus an injected dependency.
+"""The Bridge without ceremony: composition plus an injected implementor.
 
-The two real axes: what to say (alert severities, digest summaries) and how
-to deliver it (email, Slack, SMS). M notifiers + N transports cover M x N
-combinations, and "send the outage alert to Slack" is a constructor call.
+Two independent axes — what to say (alert, digest) and how to deliver it
+(email, Slack, SMS). The transport is a ``Protocol`` injected into dataclass
+notifiers: M notifiers + N transports cover M x N combinations, and "outage
+alert to Slack" is a constructor call, not a class.
 """
 
 from __future__ import annotations
@@ -55,7 +56,7 @@ class AlertNotifier:
 
 @dataclass(frozen=True)
 class DigestNotifier:
-    """A second abstraction on the same bridge -- no transport changes needed."""
+    """A second abstraction on the same bridge — no transport changes needed."""
 
     transport: Transport
     recipient: str
@@ -63,16 +64,3 @@ class DigestNotifier:
     def digest(self, items: list[str]) -> None:
         summary = f"{len(items)} updates: " + "; ".join(items)
         self.transport.deliver(self.recipient, summary)
-
-
-def main() -> None:
-    slack = SlackTransport()
-    email = EmailTransport()
-    AlertNotifier(slack, "#ops").alert("critical", "db connection pool exhausted")
-    DigestNotifier(email, "team@example.com").digest(["3 deploys", "1 rollback"])
-    print(slack.posts)
-    print(email.outbox)
-
-
-if __name__ == "__main__":
-    main()
