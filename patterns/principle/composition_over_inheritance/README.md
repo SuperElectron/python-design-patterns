@@ -14,31 +14,17 @@ stdlib_sightings: [logging.Logger, logging.Handler, logging.Filter]
 
 # Composition Over Inheritance
 
-## Problem
+One small piece per axis of variation, composed at a single point: M + N
+pieces instead of M × N subclasses. **Verdict: pythonic** — the most
+load-bearing idea behind the rest of this catalog.
 
-A logger can filter messages and can write to a file or a socket. With
-inheritance, every combination costs a class: `FilteredLogger`,
-`SocketLogger`, `FilteredSocketLogger`… M filters × N destinations = M×N
-classes. This is the guide's opening case study.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Filter`/`Transform`/`Sink` axis aliases + the composed `Logger` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/notification_router/`](examples/notification_router/) | Mini-project: alerts through filter × format × deliver pieces, zero combination subclasses |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` builds exactly that explosion, three classes deep, so you can
-watch the combinatorics happen.
-
-## Pythonic solution
-
-Split each axis into its own object — filters decide, handlers write — and
-*compose* them in one logger. M + N small classes cover all M × N behaviors,
-and new combinations are constructor arguments, not new classes.
-
-## In the wild
-
-The stdlib `logging` module is this principle shipped at scale: `Logger`
-composes `Handler`s, `Filter`s, and `Formatter`s, and no class named
-`FilteredRotatingSyslogLogger` needs to exist.
-
-## Verdict
-
-**Pythonic** — and the single most load-bearing idea behind the other
-patterns in this catalog.
+```bash
+uv run python -m patterns.principle.composition_over_inheritance.examples.notification_router
+```
