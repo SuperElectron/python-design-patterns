@@ -16,7 +16,7 @@ from design_patterns.catalog import (
 class TestRealCatalog:
     def test_loads_all_units(self) -> None:
         catalog = load_catalog()
-        assert len(catalog.patterns) == 27
+        assert len(catalog.patterns) == 32
         assert "structural/decorator" in catalog.ids()
 
     def test_every_unit_ships_all_three_variants(self) -> None:
@@ -38,7 +38,7 @@ class TestRealCatalog:
 
     def test_index_json_round_trips(self) -> None:
         entries = json.loads(load_catalog().to_json())
-        assert len(entries) == 27
+        assert len(entries) == 32
         assert all({"id", "name", "problem", "verdict", "variants"} <= e.keys() for e in entries)
         assert not any("prose" in e or "path" in e for e in entries)
 
