@@ -21,3 +21,6 @@ uv.lock
 
 # oh-my-claudecode runtime state
 .omc/
+
+# local working files (plans, research briefs)
+.cache/
