@@ -42,8 +42,6 @@ packages = ["src/design_patterns"]
 line-length = 100
 target-version = "py311"
 src = ["src", "patterns", "tests"]
-# Legacy flat dirs are rewritten in the catalog-migration phase; lint the new tree only.
-extend-exclude = ["behavioral", "combos", "creational", "structural"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
@@ -51,11 +49,12 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 [tool.mypy]
 strict = true
 python_version = "3.11"
-files = ["src"]
+files = ["src", "patterns"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-q --cov=src --cov-report=term-missing"
+testpaths = ["tests", "patterns"]
+pythonpath = ["."]
+addopts = "-q --cov=src --cov=patterns --cov-report=term-missing"
 
 [tool.coverage.report]
 skip_empty = true
