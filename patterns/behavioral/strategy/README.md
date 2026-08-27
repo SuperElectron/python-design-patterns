@@ -14,32 +14,17 @@ stdlib_sightings: [sorted, list.sort, functools.cmp_to_key]
 
 # Strategy
 
-## Problem
+Swap the algorithm without touching the caller. **Verdict: prefer an
+alternative** — in Python a strategy is a function passed as an argument;
+the registry below is for families that grow.
 
-A checkout applies one of several promotion rules; a sorter orders by one of
-several keys. The algorithm must vary independently of the code that uses it.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `StrategyRegistry`, `UnknownStrategyError` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/promotions/`](examples/promotions/) | Mini-project: checkout pricing rules built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the book's shape: a `Promotion` interface, one class per
-algorithm, and a context object holding the chosen strategy. (Fluent Python
-fans will recognize the running example.)
-
-## Pythonic solution
-
-Functions *are* strategies. `pythonic.py` passes plain functions, and adds the
-decorator-registry twist: `@promotion` collects every rule into a list so
-`best_promo` can try them all — new rules register themselves by existing.
-This also fixes the legacy repo's bug, where a misplaced `return` inside the
-loop made `bulk_item` score only the first cart line.
-
-## In the wild
-
-`sorted(data, key=...)` is the Strategy pattern as an argument: the key
-function is an interchangeable ordering algorithm, and `functools.cmp_to_key`
-adapts old-style comparator strategies into key strategies.
-
-## Verdict
-
-**Prefer an alternative** — the alternative being a plain function. The
-pattern's *intent* is everywhere in Python; the class ceremony almost never is.
+```bash
+uv run python -m patterns.behavioral.strategy.examples.promotions
+```

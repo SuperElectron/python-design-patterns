@@ -1,1 +1,24 @@
-"""Interpreter: grammar as data. Verdict: use Python own parsers first."""
+"""Interpreter — public API.
+
+>>> from patterns.behavioral.interpreter import Interpreter, safe_eval
+"""
+
+from patterns.behavioral.interpreter.pattern import (
+    MAX_DEPTH,
+    Expr,
+    Interpreter,
+    Operation,
+    Resolver,
+    Value,
+    safe_eval,
+)
+
+__all__ = [
+    "MAX_DEPTH",
+    "Expr",
+    "Interpreter",
+    "Operation",
+    "Resolver",
+    "Value",
+    "safe_eval",
+]
