@@ -23,13 +23,22 @@ class TestNaive:
 
 
 class TestPythonic:
-    def test_factory_menu_produces_fresh_equal_instances(self) -> None:
-        a, b = pythonic.create("small-red"), pythonic.create("small-red")
-        assert a is not b
-        assert a == b == pythonic.Circle(radius=1, color="red")
+    def test_templates_stamp_out_fresh_equal_jobs(self) -> None:
+        a, b = pythonic.schedule("nightly-sales"), pythonic.schedule("nightly-sales")
+        assert a is not b and a == b
+        assert a.filters == ("exclude-test-accounts",)
 
-    def test_distinct_entries_differ(self) -> None:
-        assert pythonic.create("big-blue") == pythonic.Circle(radius=10, color="blue")
+    def test_per_run_overrides_leave_the_template_untouched(self) -> None:
+        rush = pythonic.schedule("weekly-audit", fmt="csv")
+        assert rush.fmt == "csv"
+        assert pythonic.schedule("weekly-audit").fmt == "xlsx"
+
+    def test_scheduler_queues_customized_jobs(self) -> None:
+        scheduler = pythonic.Scheduler()
+        scheduler.enqueue("nightly-sales")
+        scheduler.enqueue("weekly-audit", recipients=("audit@x.com",))
+        assert [j.name for j in scheduler.queue] == ["nightly-sales", "weekly-audit"]
+        assert scheduler.queue[1].recipients == ("audit@x.com",)
 
 
 class TestRealWorld:
