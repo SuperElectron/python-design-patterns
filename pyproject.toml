@@ -17,7 +17,9 @@ classifiers = [
   "Topic :: Software Development :: Libraries",
   "Topic :: Education",
 ]
-dependencies = []
+dependencies = [
+  "pyyaml>=6.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/SuperElectron/python-design-patterns"
@@ -29,6 +31,7 @@ dev = [
   "pytest-cov>=5.0",
   "ruff>=0.8",
   "mypy>=1.13",
+  "types-pyyaml>=6.0",
 ]
 
 [build-system]
