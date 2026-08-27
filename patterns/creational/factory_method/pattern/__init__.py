@@ -1,9 +1,6 @@
-"""Factory Method — public API.
+"""The Factory Method pattern's Python forms, importable as library code."""
 
->>> from patterns.creational.factory_method import Store
-"""
-
-from patterns.creational.factory_method.pattern import (
+from patterns.creational.factory_method.pattern.dodges import (
     ExpressStore,
     Factory,
     InjectedStore,
