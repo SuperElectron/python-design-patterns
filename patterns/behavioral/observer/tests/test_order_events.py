@@ -57,6 +57,17 @@ class TestFailureIsolation:
         pipeline.advance("A-5", "shipped", 3.0)
         assert pipeline.dead_letters == ["flaky_webhook: partner endpoint 503"]
 
+    def test_a_failing_class_based_subscriber_is_named_by_its_type(self) -> None:
+        # Instances have no __name__ — the quarantine falls back to the type.
+        class BrokenAuditSink:
+            def __call__(self, event: object) -> None:
+                raise RuntimeError("disk full")
+
+        pipeline, *_ = wired_pipeline()
+        pipeline.events.subscribe(BrokenAuditSink())
+        pipeline.advance("A-6", "shipped", 3.0)
+        assert pipeline.dead_letters == ["BrokenAuditSink: disk full"]
+
 
 class TestDemo:
     def test_main_reports_deliveries_and_the_dead_webhook(

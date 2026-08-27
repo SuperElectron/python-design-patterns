@@ -42,12 +42,20 @@ class Number(Expression):
         return self.value
 
 
-class Add(Expression):  # ...and Mul, and Sub, and every rule you add
+class Add(Expression):  # ...and Sub, and every rule you add
     def __init__(self, left: Expression, right: Expression) -> None:
         self.left, self.right = left, right
 
     def interpret(self) -> int:
         return self.left.interpret() + self.right.interpret()
+
+
+class Mul(Expression):  # one class per grammar rule, forever
+    def __init__(self, left: Expression, right: Expression) -> None:
+        self.left, self.right = left, right
+
+    def interpret(self) -> int:
+        return self.left.interpret() * self.right.interpret()
 
 
 tree = Mul(Add(Number(2), Number(3)), Number(4))

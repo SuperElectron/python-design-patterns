@@ -45,10 +45,17 @@ class TestCheckpoints:
         with pytest.raises(NoSnapshotError, match="alpha"):
             history.rollback_to("beta")
 
-    def test_renaming_a_checkpoint_overwrites_it(self) -> None:
+    def test_duplicate_checkpoint_name_is_refused(self) -> None:
         history: History[int] = History()
         history.checkpoint("mark", 1)
-        history.checkpoint("mark", 2)
+        with pytest.raises(ValueError, match="already exists"):
+            history.checkpoint("mark", 2)
+        assert history.rollback_to("mark") == 1  # the original survives
+
+    def test_replace_overwrites_intentionally(self) -> None:
+        history: History[int] = History()
+        history.checkpoint("mark", 1)
+        history.checkpoint("mark", 2, replace=True)
         assert history.rollback_to("mark") == 2
 
     def test_bool_reflects_any_stored_snapshot(self) -> None:
@@ -56,3 +63,14 @@ class TestCheckpoints:
         assert not history
         history.checkpoint("only-named", 1)
         assert history
+
+    def test_bool_is_true_for_a_stack_only_history(self) -> None:
+        history: History[int] = History()
+        history.save(1)
+        assert history  # the undo-stack half of __bool__ on its own
+
+    def test_rollback_to_is_non_destructive(self) -> None:
+        history: History[int] = History()
+        history.checkpoint("mark", 7)
+        assert history.rollback_to("mark") == 7
+        assert history.rollback_to("mark") == 7  # a checkpoint is reusable

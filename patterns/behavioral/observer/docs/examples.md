@@ -12,7 +12,8 @@ reviewing event/notification code.
 - **`asyncio` callbacks.** The event loop's core currency:
   `loop.call_soon`, future/task done-callbacks — completion observers
   driving the whole async machine.
-  [docs.python.org/3/library/asyncio-task.html](https://docs.python.org/3/library/asyncio-task.html)
+  [docs.python.org/3/library/asyncio-eventloop.html](https://docs.python.org/3/library/asyncio-eventloop.html) ·
+  [docs.python.org/3/library/asyncio-future.html](https://docs.python.org/3/library/asyncio-future.html)
 
 ## Major ecosystems
 

@@ -8,12 +8,13 @@ reviewing command-shaped code.
 - **`functools.partial`** — the execute-only half of the pattern as a
   builtin: a call and its arguments packaged into one object.
   [docs.python.org/3/library/functools.html#functools.partial](https://docs.python.org/3/library/functools.html#functools.partial)
-- **`sched.scheduler`** — queues (time, priority, action, argument) records —
-  commands with metadata — and its run loop is the invoker.
+- **`sched.scheduler`** — queues `Event` records (time, priority, sequence,
+  action, argument, kwargs) — commands with metadata — and its run loop is
+  the invoker.
   [docs.python.org/3/library/sched.html](https://docs.python.org/3/library/sched.html)
 - **`unittest.mock.call`** — recorded invocations as inspectable, comparable
   objects: the audit-log face of the pattern.
-  [docs.python.org/3/library/unittest.mock.html#call](https://docs.python.org/3/library/unittest.mock.html#call)
+  [docs.python.org/3/library/unittest.mock.html#unittest.mock.call](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.call)
 
 ## Major ecosystems
 

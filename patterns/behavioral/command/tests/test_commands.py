@@ -57,6 +57,14 @@ class TestUndoStack:
         assert not stack.can_undo
         assert not stack.can_redo
 
+    def test_can_undo_and_can_redo_report_true_when_true(self) -> None:
+        log: list[str] = []
+        stack = UndoStack()
+        stack.push(_append_command(log, "a"))
+        assert stack.can_undo and not stack.can_redo
+        stack.undo()
+        assert stack.can_redo and not stack.can_undo
+
     def test_log_reflects_only_applied_commands(self) -> None:
         log: list[str] = []
         stack = UndoStack()

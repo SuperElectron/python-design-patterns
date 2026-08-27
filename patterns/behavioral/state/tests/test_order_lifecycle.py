@@ -65,6 +65,21 @@ class TestDataGuards:
         with pytest.raises(IllegalTransitionError, match="guard"):
             lifecycle.trigger(OrderAction.PLACE)
 
+    def test_a_paid_order_can_still_cancel(self) -> None:
+        lifecycle = build_lifecycle(order_with_items())
+        lifecycle.trigger(OrderAction.PLACE)
+        lifecycle.trigger(OrderAction.PAY)
+        assert lifecycle.trigger(OrderAction.CANCEL) is OrderStatus.CANCELLED
+
+    def test_delivered_order_refund_exists_and_is_guarded(self) -> None:
+        order = order_with_items()
+        lifecycle = build_lifecycle(order)
+        for action in (OrderAction.PLACE, OrderAction.PAY, OrderAction.SHIP, OrderAction.DELIVER):
+            lifecycle.trigger(action)
+        assert not lifecycle.can(OrderAction.REFUND)  # nothing was charged
+        order.amount_paid = order.total
+        assert lifecycle.trigger(OrderAction.REFUND) is OrderStatus.REFUNDED
+
     def test_refund_requires_money_actually_taken(self) -> None:
         order = order_with_items()
         lifecycle = build_lifecycle(order)

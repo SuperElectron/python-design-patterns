@@ -2,41 +2,35 @@
 
 Country restricts shipping methods; shipping gates payment options and
 changes the total; submit enables only when the whole set is coherent.
-Fields know none of it — every rule lives in ``_recheck``, one readable
+Fields know none of it — every rule lives in ``recheck``, one readable
 place, and a country change cascades through the dependent fields.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 from patterns.behavioral.mediator.examples.checkout_form.rules import (
     PAYMENTS_BY_SHIPPING,
     SHIPPING_BY_COUNTRY,
 )
-from patterns.behavioral.mediator.pattern import Field
+from patterns.behavioral.mediator.pattern import Form
 
 
-@dataclass
-class CheckoutForm:
-    """Every cross-field rule, in one place."""
+class CheckoutForm(Form):
+    """Every cross-field rule, in one place — the ``recheck`` the base calls."""
 
-    cart_cents: int
-    country: Field = field(init=False)
-    shipping: Field = field(init=False)
-    payment: Field = field(init=False)
-    shipping_options: tuple[str, ...] = ()
-    payment_options: tuple[str, ...] = ()
-    total_cents: int = 0
-    submit_enabled: bool = False
+    def __init__(self, cart_cents: int) -> None:
+        super().__init__()
+        self.cart_cents = cart_cents
+        self.shipping_options: tuple[str, ...] = ()
+        self.payment_options: tuple[str, ...] = ()
+        self.total_cents = 0
+        self.submit_enabled = False
+        self.country = self.add_field("country")
+        self.shipping = self.add_field("shipping")
+        self.payment = self.add_field("payment")
+        self.recheck()
 
-    def __post_init__(self) -> None:
-        self.country = Field(self._recheck)
-        self.shipping = Field(self._recheck)
-        self.payment = Field(self._recheck)
-        self._recheck()
-
-    def _recheck(self) -> None:
+    def recheck(self) -> None:
         lanes = SHIPPING_BY_COUNTRY.get(self.country.value, {})
         self.shipping_options = tuple(lanes)
         if self.shipping.value not in lanes:

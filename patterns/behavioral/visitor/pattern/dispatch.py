@@ -35,7 +35,8 @@ class Operation(Generic[R]):
         def dispatch(node: object) -> R:
             handled = ", ".join(sorted(t.__name__ for t in self.registered_types())) or "none"
             raise UnhandledNodeError(
-                f"operation {name!r} has no case for {type(node).__name__} (handles: {handled})"
+                f"operation {self.name!r} has no case for {type(node).__name__} "
+                f"(handles: {handled})"
             )
 
         self._dispatch = dispatch

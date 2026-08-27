@@ -38,6 +38,11 @@ class TestValidateOrRollback:
         with pytest.raises(InvalidConfigError, match=r"workers.*timeout_s"):
             editor.apply({"workers": -1, "timeout_s": 0.0})
 
+    def test_an_unknown_log_level_is_rejected(self) -> None:
+        editor = ConfigEditor()
+        with pytest.raises(InvalidConfigError, match="log_level"):
+            editor.apply({"log_level": "LOUD"})
+
 
 class TestUndoAndCheckpoints:
     def test_undo_steps_back_one_committed_batch(self) -> None:

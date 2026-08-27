@@ -77,7 +77,7 @@ def build_lifecycle(order: Order) -> StateMachine[OrderStatus, OrderAction]:
 ## Worked example
 
 [`examples/order_lifecycle/`](../examples/order_lifecycle/) applies every
-step: an eight-row table, two data guards, refusal of a too-late cancel, and
+step: an eight-row table, three data guards, refusal of a too-late cancel, and
 the audit log printed at the end. Run it with:
 
 ```bash

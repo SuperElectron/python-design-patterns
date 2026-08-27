@@ -12,6 +12,10 @@ import ast
 import operator
 from collections.abc import Callable
 
+# The depth limit is the unit's ONE security knob: read from ``rules`` at
+# call time so hardening the exported constant tightens this evaluator too.
+from patterns.behavioral.interpreter.pattern import rules
+
 _BINOPS: dict[type[ast.operator], Callable[[float, float], float]] = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -20,18 +24,20 @@ _BINOPS: dict[type[ast.operator], Callable[[float, float], float]] = {
 }
 
 
-#: Deeper than any human formula; shallower than the recursion limit, so a
-#: hostile input gets a clean ValueError instead of a RecursionError crash.
-MAX_DEPTH = 50
-
-
 def safe_eval(formula: str) -> float:
-    """Evaluate arithmetic like '2 * (3 + 4)'; reject everything else."""
-    return _walk(ast.parse(formula, mode="eval").body, depth=0)
+    """Evaluate arithmetic like '2 * (3 + 4)'; anything else is ValueError.
+
+    That includes division by zero: every rejection this evaluator makes is
+    a ValueError, so callers wrap untrusted input in exactly one except.
+    """
+    try:
+        return _walk(ast.parse(formula, mode="eval").body, depth=0)
+    except ZeroDivisionError:
+        raise ValueError("division by zero") from None
 
 
 def _walk(node: ast.expr, depth: int) -> float:
-    if depth > MAX_DEPTH:
+    if depth > rules.MAX_DEPTH:
         raise ValueError("expression too deeply nested")
     if (
         isinstance(node, ast.Constant)

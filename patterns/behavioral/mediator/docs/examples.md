@@ -25,7 +25,7 @@ reviewing coordinator-shaped code.
 - **Message brokers (RabbitMQ, Kafka)** — the mediator at architecture
   scale: every producer and consumer couples to the broker's topology, none
   to each other. The god-object risk scales up too — topic sprawl is
-  `_recheck` sprawl. *(concept citation)*
+  `recheck` sprawl. *(concept citation)*
 
 ## What to notice across all of them
 

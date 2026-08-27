@@ -12,6 +12,7 @@ from patterns.behavioral.strategy.examples.promotions import (
     promotion,
 )
 from patterns.behavioral.strategy.examples.promotions.__main__ import main
+from patterns.behavioral.strategy.pattern import StrategyRegistry
 
 
 def bulk_cart() -> Order:
@@ -47,15 +48,32 @@ class TestSelectionPolicy:
         assert due(order) == 28.5
 
     def test_a_rule_added_at_runtime_joins_the_comparison(self) -> None:
-        @promotion.register
+        # A local registry: the module-global one stays untouched by tests.
+        local: StrategyRegistry[Order, float] = StrategyRegistry()
+        for rule in promotion:
+            local.register(rule)
+
+        @local.register
         def everything_free(order: Order) -> float:
             return order.total()
 
-        try:
-            name, _ = best_promo(bulk_cart())
-            assert name == "everything_free"
-        finally:
-            promotion.unregister("everything_free")
+        name, _ = best_promo(bulk_cart(), local)
+        assert name == "everything_free"
+        assert "everything_free" not in promotion.names()
+
+    def test_ties_go_to_the_earliest_registered_rule(self) -> None:
+        local: StrategyRegistry[Order, float] = StrategyRegistry()
+
+        def first(order: Order) -> float:
+            return 1.0
+
+        def second(order: Order) -> float:
+            return 1.0
+
+        local.register(first)
+        local.register(second)
+        name, discount = best_promo(bulk_cart(), local)
+        assert (name, discount) == ("first", 1.0)
 
 
 class TestDemo:

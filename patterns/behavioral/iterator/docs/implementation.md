@@ -50,8 +50,10 @@ million records.
   nested loops break mysteriously.
 - **Side effects in generators run late** (or never, if the caller stops
   early). Don't hide commits or releases inside a traversal.
-- **Catching `StopIteration` inside a generator** silently ends it
-  (PEP 479 makes this a `RuntimeError` — let it be one).
+- **`StopIteration` escaping a generator body** — say, from an unguarded
+  `next()` call inside it — would silently end the generator; PEP 479
+  converts that escape into a `RuntimeError` so the bug is loud. Guard
+  inner `next()` calls with a default or `except StopIteration`.
 
 ## Worked example
 

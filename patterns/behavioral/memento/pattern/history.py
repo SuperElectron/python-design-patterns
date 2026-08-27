@@ -35,8 +35,15 @@ class History(Generic[Snapshot]):
             raise NoSnapshotError("history is empty")
         return self._stack.pop()
 
-    def checkpoint(self, name: str, snapshot: Snapshot) -> Snapshot:
-        """Store a snapshot under a name (overwriting any previous holder)."""
+    def checkpoint(self, name: str, snapshot: Snapshot, *, replace: bool = False) -> Snapshot:
+        """Store a snapshot under a name; the name must be free.
+
+        A duplicate name is an error unless ``replace=True`` — a rollback API
+        that silently swaps what "before-migration" points at is untrustworthy
+        exactly where it must not be.
+        """
+        if name in self._checkpoints and not replace:
+            raise ValueError(f"checkpoint {name!r} already exists (pass replace=True)")
         self._checkpoints[name] = snapshot
         return snapshot
 

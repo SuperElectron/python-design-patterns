@@ -256,7 +256,7 @@ class TestResources:
             fund = await client.read_resource("pattern://behavioral/iterator/docs/fundamentals")
             first_fund = fund.contents[0]
             assert isinstance(first_fund, TextResourceContents)
-            assert "Iterator" in first_fund.text
+            assert "# Iterator — fundamentals" in first_fund.text
 
     async def test_legacy_variant_source_template(
         self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch

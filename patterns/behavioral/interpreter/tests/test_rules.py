@@ -71,6 +71,33 @@ class TestSafeEval:
     def test_evaluates_arithmetic(self) -> None:
         assert safe_eval("2 * (3 + 4)") == 14.0
 
+    def test_every_operator_is_pinned(self) -> None:
+        # The operator table is a security surface: each entry asserted
+        # individually so a mis-mapped operator cannot survive review.
+        assert safe_eval("7 + 2") == 9.0
+        assert safe_eval("7 - 2") == 5.0
+        assert safe_eval("7 * 2") == 14.0
+        assert safe_eval("7 / 2") == 3.5
+        assert safe_eval("-7") == -7.0
+        assert safe_eval("-(3 - 5)") == 2.0
+
+    def test_division_by_zero_is_a_value_error(self) -> None:
+        # The documented contract: every rejection is ValueError.
+        with pytest.raises(ValueError, match="division by zero"):
+            safe_eval("1/0")
+
+    def test_the_exported_depth_constant_is_the_one_enforced(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # One MAX_DEPTH knob for the whole unit — tightening the exported
+        # constant must actually tighten this evaluator.
+        from patterns.behavioral.interpreter.pattern import rules
+
+        monkeypatch.setattr(rules, "MAX_DEPTH", 3)
+        with pytest.raises(ValueError, match="too deeply nested"):
+            safe_eval("1 + 1 + 1 + 1 + 1 + 1")
+        assert safe_eval("1 + 1") == 2.0
+
     def test_rejects_imports_and_names(self) -> None:
         with pytest.raises(ValueError, match="disallowed"):
             safe_eval("__import__('os')")

@@ -10,8 +10,8 @@ couplings; a mediator makes it N spokes and one hub that owns every rule.
 
 | Role | Classic (GoF) form | Python form |
 |---|---|---|
-| Mediator | An interface, then a ConcreteMediator | One class holding every rule — often a single `_recheck` method |
-| Colleagues | A `Widget` base class holding a mediator reference | Plain value holders wired with a `notify` callable — [`Field`](../pattern/form.py) |
+| Mediator | An interface, then a ConcreteMediator | A [`Form`](../pattern/form.py) subclass whose single `recheck` method holds every rule |
+| Colleagues | A `Widget` base class holding a mediator reference | Plain value holders wired with a `notify` callable — [`Field`](../pattern/form.py), created via `Form.add_field` |
 | Interaction protocol | `mediator.widget_changed(widget)` | Any change calls `notify()`; the mediator re-derives the whole state |
 
 ## Mechanism
@@ -27,6 +27,9 @@ The textbook dialog threads a Colleague hierarchy through a mediator
 interface:
 
 ```python
+from __future__ import annotations  # SignupDialog is named before it exists
+
+
 class Widget:
     def __init__(self, mediator: SignupDialog, name: str) -> None:
         self.mediator = mediator  # every widget carries the wiring

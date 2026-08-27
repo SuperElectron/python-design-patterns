@@ -29,6 +29,9 @@ the cursor's bookkeeping is someone else's problem.
 The protocol implemented by hand, the way the guide teaches it:
 
 ```python
+from __future__ import annotations  # OddIterator is named before it exists
+
+
 class OddNumbers:  # the aggregate
     def __init__(self, maximum: int) -> None:
         self.maximum = maximum
@@ -56,6 +59,9 @@ Python absorbed this pattern deeper than any other. The same behavior as a
 generator is four lines — the cursor class vanishes into the paused frame:
 
 ```python
+from collections.abc import Iterator
+
+
 def odd_numbers(maximum: int) -> Iterator[int]:
     n = 1
     while n <= maximum:

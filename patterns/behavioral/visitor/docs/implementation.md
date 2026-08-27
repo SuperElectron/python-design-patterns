@@ -50,7 +50,8 @@ cross-cutting edit of the whole file.
 ## Python idioms that keep it small
 
 - **Dispatch on annotations** (`def _(node: Section) -> str`) keeps each
-  case self-documenting; the function names only need to be unique.
+  case self-documenting; `singledispatch` keys on the annotated type, so
+  the function names don't matter — every case can be named `_`.
 - **Same-module registration** keeps an operation reviewable as one unit —
   a dispatch family scattered across files is the ladder again, hidden.
 - **`ast.NodeVisitor` at the boundary:** when the tree is Python source,

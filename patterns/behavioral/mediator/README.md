@@ -20,7 +20,7 @@ for god-object drift.
 
 | Where | What |
 |---|---|
-| [`pattern/`](pattern/) | The importable code: `Field` — a dumb value holder with change notification |
+| [`pattern/`](pattern/) | The importable code: `Field` (dumb value holder) + `Form` (the mediator base owning `recheck`) |
 | [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
 | [`examples/checkout_form/`](examples/checkout_form/) | Mini-project: cascading checkout rules built on `pattern/` |
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |

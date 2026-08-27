@@ -37,6 +37,62 @@ class TestRegistration:
         assert len(registry) == 2
         assert [strategy(3) for strategy in registry] == [6, 9]
 
+    def test_duplicate_name_is_refused(self) -> None:
+        registry = make_registry()
+        with pytest.raises(ValueError, match="already registered"):
+
+            @registry.register
+            def double(n: int) -> int:  # same __name__ as an existing rule
+                return n + n
+
+        assert registry.get("double")(3) == 6  # the original survives
+
+    def test_accidental_same_name_collision_from_helpers_is_caught(self) -> None:
+        # Two factories both produce a function named "promo" — the classic
+        # accidental collision the name-keying invites.
+        registry: StrategyRegistry[int, int] = StrategyRegistry()
+
+        def make_promo_a() -> None:
+            @registry.register
+            def promo(n: int) -> int:
+                return n - 1
+
+        def make_promo_b() -> None:
+            @registry.register
+            def promo(n: int) -> int:
+                return n + 1
+
+        make_promo_a()
+        with pytest.raises(ValueError, match="'promo' already registered"):
+            make_promo_b()
+
+    def test_replace_swaps_a_strategy_intentionally(self) -> None:
+        registry = make_registry()
+
+        def double(n: int) -> int:
+            return n + n + n  # deliberately different behavior
+
+        registry.register(double, replace=True)
+        assert registry.get("double")(3) == 9
+
+    def test_unregister_unknown_name_raises(self) -> None:
+        registry = make_registry()
+        with pytest.raises(UnknownStrategyError, match="no strategy 'cube'"):
+            registry.unregister("cube")
+
+    def test_names_keep_registration_order(self) -> None:
+        registry: StrategyRegistry[int, int] = StrategyRegistry()
+
+        def zeta(n: int) -> int:
+            return n
+
+        def alpha(n: int) -> int:
+            return n
+
+        registry.register(zeta)
+        registry.register(alpha)
+        assert registry.names() == ["zeta", "alpha"]  # insertion, not sorted
+
 
 class TestLookup:
     def test_get_returns_the_named_strategy(self) -> None:

@@ -14,6 +14,42 @@ FLAGS: dict[str, Expr] = {
 }
 
 
+def _flag(rule: Expr, user: dict[str, Value]) -> bool:
+    return FlagEngine({"probe": rule}).is_enabled("probe", user)
+
+
+class TestComparisonOperators:
+    """Every operator, at its boundary — off-by-one is this engine's real risk."""
+
+    def test_ge_boundary(self) -> None:
+        assert _flag((">=", "age", 18), {"age": 18})
+        assert not _flag((">=", "age", 18), {"age": 17})
+
+    def test_gt_boundary(self) -> None:
+        assert not _flag((">", "age", 18), {"age": 18})
+        assert _flag((">", "age", 18), {"age": 19})
+
+    def test_le_boundary(self) -> None:
+        assert _flag(("<=", "age", 18), {"age": 18})
+        assert not _flag(("<=", "age", 18), {"age": 19})
+
+    def test_lt_boundary(self) -> None:
+        assert not _flag(("<", "age", 18), {"age": 18})
+        assert _flag(("<", "age", 18), {"age": 17})
+
+    def test_ne(self) -> None:
+        assert _flag(("!=", "plan", "pro"), {"plan": "free"})
+        assert not _flag(("!=", "plan", "pro"), {"plan": "pro"})
+
+    def test_ordered_comparison_refuses_booleans(self) -> None:
+        with pytest.raises(ValueError, match="ordered comparison on booleans"):
+            _flag((">=", "flagged", 1), {"flagged": True})
+
+    def test_ordered_comparison_refuses_non_numbers(self) -> None:
+        with pytest.raises(ValueError, match="needs numbers"):
+            _flag((">=", "plan", 18), {"plan": "pro"})
+
+
 class TestFlagEngine:
     def test_conjunction_requires_both_sides(self) -> None:
         engine = FlagEngine(FLAGS)

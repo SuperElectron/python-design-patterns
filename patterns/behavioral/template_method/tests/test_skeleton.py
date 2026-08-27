@@ -50,10 +50,29 @@ class TestVariation:
         base.with_steps(render=lambda data: "other")
         assert base.run() == "[raw+clean]"  # original unchanged
 
+    def test_every_step_is_individually_swappable(self) -> None:
+        trace: list[str] = []
+        base = recording_skeleton(trace)
+
+        assert base.with_steps(fetch=lambda: "other").run() == "[other+clean]"
+        assert base.with_steps(transform=lambda data: data).run() == "[raw]"
+        assert base.with_steps(render=lambda data: data.upper()).run() == "RAW+CLEAN"
+
+        delivered: list[str] = []
+        base.with_steps(deliver=delivered.append).run()
+        assert delivered == ["[raw+clean]"]
+
 
 class TestExplicitNoOps:
     def test_keep_all_is_the_identity_transform(self) -> None:
         assert keep_all((1, 2)) == (1, 2)
 
     def test_discard_delivers_nowhere(self) -> None:
-        discard("document")  # accepts any document, produces no side effect
+        # Prove nothing is delivered: a skeleton whose only sink is a
+        # recording list, with discard swapped in, records nothing.
+        delivered: list[str] = []
+        trace: list[str] = []
+        base = recording_skeleton(trace).with_steps(deliver=delivered.append)
+        base.with_steps(deliver=discard).run()
+        assert delivered == []
+        assert base.run() == "[raw+clean]" and delivered == ["[raw+clean]"]

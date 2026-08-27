@@ -31,12 +31,17 @@ event and reactions subscribe from their own modules.
    order; if a test doesn't assert an ordering requirement, you don't have one.
 
 ```python
-from patterns.behavioral.observer import Signal
+from patterns.behavioral.observer import Signal, Subscriber
 
 
 class OrderPipeline:
     def __init__(self) -> None:
+        self.dead_letters: list[str] = []
         self.events: Signal[OrderEvent] = Signal(on_error=self._quarantine)
+
+    def _quarantine(self, err: Exception, subscriber: Subscriber[OrderEvent]) -> None:
+        name = getattr(subscriber, "__name__", type(subscriber).__name__)
+        self.dead_letters.append(f"{name}: {err}")
 
     def advance(self, order_id: str, status: str, total: float) -> None:
         self.events.emit(OrderEvent(order_id, status, total))

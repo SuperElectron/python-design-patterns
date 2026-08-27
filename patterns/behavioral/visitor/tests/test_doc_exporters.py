@@ -21,9 +21,12 @@ from patterns.behavioral.visitor.examples.doc_exporters.__main__ import main, sa
 class TestMarkdown:
     def test_renders_the_whole_tree_with_heading_levels(self) -> None:
         out = markdown(sample_document())
-        assert out.startswith("# Release notes")
-        assert "## Highlights" in out
-        assert "- dark mode" in out
+        lines = out.splitlines()
+        # Exact-line assertions: "## Highlights" as a substring would also
+        # match "### Highlights", hiding a heading-level regression.
+        assert lines[0] == "# Release notes"
+        assert "## Highlights" in lines
+        assert "- dark mode" in lines
         assert "```bash\npip install app==2.0\n```" in out
 
 

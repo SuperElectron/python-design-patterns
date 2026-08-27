@@ -37,6 +37,19 @@ class TestBroadcast:
         signal.emit(2)
         assert seen == [1]
 
+    def test_iteration_and_len_expose_the_subscribers(self) -> None:
+        signal: Signal[str] = Signal()
+        assert len(signal) == 0 and list(signal) == []
+
+        def first(event: str) -> None: ...
+
+        def second(event: str) -> None: ...
+
+        signal.subscribe(first)
+        signal.subscribe(second)
+        assert len(signal) == 2
+        assert list(signal) == [first, second]
+
     def test_unsubscribing_a_stranger_raises(self) -> None:
         signal: Signal[int] = Signal()
         with pytest.raises(ValueError):

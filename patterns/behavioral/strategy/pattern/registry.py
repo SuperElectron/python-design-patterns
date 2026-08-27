@@ -28,9 +28,19 @@ class StrategyRegistry(Generic[In_, Out]):
     def __init__(self) -> None:
         self._strategies: dict[str, Callable[[In_], Out]] = {}
 
-    def register(self, strategy: Callable[[In_], Out]) -> Callable[[In_], Out]:
-        """Add a strategy under its function name; usable as a decorator."""
+    def register(
+        self, strategy: Callable[[In_], Out], *, replace: bool = False
+    ) -> Callable[[In_], Out]:
+        """Add a strategy under its function name; usable as a decorator.
+
+        A duplicate name is an error unless ``replace=True`` — the key is
+        ``__name__``, so two same-named functions from different modules
+        collide by accident, and silently dropping a rule is how a discount
+        stops applying with nothing logged.
+        """
         name = str(getattr(strategy, "__name__", repr(strategy)))
+        if name in self._strategies and not replace:
+            raise ValueError(f"strategy {name!r} already registered (pass replace=True)")
         self._strategies[name] = strategy
         return strategy
 

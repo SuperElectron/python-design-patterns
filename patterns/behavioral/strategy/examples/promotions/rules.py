@@ -35,14 +35,20 @@ def loyalty(order: Order) -> float:
     return 0.0
 
 
-def best_promo(order: Order) -> tuple[str, float]:
-    """Compare every registered rule; return the winner's name and discount."""
-    results = promotion.results(order)
+def best_promo(
+    order: Order, rules: StrategyRegistry[Order, float] | None = None
+) -> tuple[str, float]:
+    """Compare every registered rule; return the winner's name and discount.
+
+    Ties go to the earliest-registered rule — ``max`` keeps the first of
+    equals, and the registry iterates in registration order.
+    """
+    results = (rules if rules is not None else promotion).results(order)
     name = max(results, key=lambda n: results[n])
     return name, results[name]
 
 
-def due(order: Order) -> float:
+def due(order: Order, rules: StrategyRegistry[Order, float] | None = None) -> float:
     """What the customer pays after the best promotion."""
-    _, discount = best_promo(order)
+    _, discount = best_promo(order, rules)
     return order.total() - discount
