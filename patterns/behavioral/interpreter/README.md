@@ -14,31 +14,17 @@ stdlib_sightings: [ast.literal_eval, ast.NodeVisitor, re]
 
 # Interpreter
 
-## Problem
+Represent a tiny language's grammar as data and evaluate sentences safely.
+**Verdict: prefer an alternative** — Python's own parsers (`ast`, `re`) cover
+most little-language needs; grammar-as-data covers the rest.
 
-Users need to supply small formulas — spreadsheet expressions, feature-flag
-rules — that your program must evaluate, safely, without shipping them to
-`eval()`.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Interpreter` (tuple-tree evaluator), hardened `safe_eval` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/flag_rules/`](examples/flag_rules/) | Mini-project: feature-flag rules engine built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF class-per-grammar-rule form: `Number`, `Add`, `Mul`
-nodes each carrying `interpret()`, composed into an expression tree.
-
-## Pythonic solution
-
-The tree doesn't need a class per rule: nested tuples plus one recursive
-function interpret the same grammar in a screenful. Adding an operation to
-the language is one dict entry, not a class.
-
-## In the wild
-
-The `re` module is a full Interpreter-pattern implementation you use daily
-(pattern → compiled program → evaluated against strings). `ast.literal_eval`
-safely interprets Python's own literal grammar, and `real_world.py` builds
-the classic safe arithmetic evaluator from a restricted `ast` walk.
-
-## Verdict
-
-**Prefer an alternative.** Python's own parsers (`ast`, `re`) cover most
-"little language" needs; write a grammar only when you truly have a language.
+```bash
+uv run python -m patterns.behavioral.interpreter.examples.flag_rules
+```
