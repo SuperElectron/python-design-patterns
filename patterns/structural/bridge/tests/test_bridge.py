@@ -1,49 +1,57 @@
-"""Behavioral tests for all three bridge variants."""
+"""Behavioral tests for the bridge building block: axes compose freely."""
 
-from patterns.structural.bridge import naive, pythonic, real_world
+from __future__ import annotations
+
+from patterns.structural.bridge import (
+    AlertNotifier,
+    DigestNotifier,
+    EmailTransport,
+    SlackTransport,
+    SmsTransport,
+    Transport,
+)
 
 
-class TestNaive:
-    def test_same_abstraction_different_implementations(self) -> None:
-        assert naive.Circle(naive.VectorRenderer(), 2.0).draw() == "<circle r=2.0/>"
-        assert "pixels" in naive.Circle(naive.RasterRenderer(), 2.0).draw()
+class TestAxesCompose:
+    def test_any_notifier_works_over_any_transport(self) -> None:
+        # 2 notifiers x 3 transports: every combination must actually deliver.
+        email, slack, sms = EmailTransport(), SlackTransport(), SmsTransport()
+        channels: list[tuple[Transport, list[str]]] = [
+            (email, email.outbox),
+            (slack, slack.posts),
+            (sms, sms.messages),
+        ]
+        for transport, delivered in channels:
+            AlertNotifier(transport, "ops").alert("critical", "disk full")
+            DigestNotifier(transport, "ops").digest(["a", "b"])
+            assert len(delivered) == 2
+            assert "[CRITICAL] disk full" in delivered[0]
+            assert "2 updates" in delivered[1]
+
+    def test_alert_formats_severity_upfront(self) -> None:
+        slack = SlackTransport()
+        AlertNotifier(slack, "#ops").alert("critical", "db pool exhausted")
+        assert slack.posts == ["slack #ops: [CRITICAL] db pool exhausted"]
+
+    def test_digest_summarizes_item_count(self) -> None:
+        email = EmailTransport()
+        DigestNotifier(email, "team@example.com").digest(["3 deploys", "1 rollback"])
+        assert email.outbox == ["email to team@example.com: 2 updates: 3 deploys; 1 rollback"]
+
+    def test_sms_transport_truncates_long_texts(self) -> None:
+        sms = SmsTransport()
+        AlertNotifier(sms, "+15550100").alert("info", "x" * 200)
+        (message,) = sms.messages
+        assert len(message) <= len("sms +15550100: ") + SmsTransport.MAX_LEN
 
 
-class TestPythonic:
-    def test_one_abstraction_over_two_transports(self) -> None:
-        slack, email = pythonic.SlackTransport(), pythonic.EmailTransport()
-        pythonic.AlertNotifier(slack, "#ops").alert("critical", "disk full")
-        pythonic.AlertNotifier(email, "ops@x.com").alert("critical", "disk full")
-        assert slack.posts == ["slack #ops: [CRITICAL] disk full"]
-        assert email.outbox == ["email to ops@x.com: [CRITICAL] disk full"]
+class TestBridgeIsOneReference:
+    def test_a_new_transport_needs_no_notifier_changes(self) -> None:
+        received: list[tuple[str, str]] = []
 
-    def test_two_abstractions_over_one_transport(self) -> None:
-        slack = pythonic.SlackTransport()
-        pythonic.AlertNotifier(slack, "#ops").alert("warn", "slow queries")
-        pythonic.DigestNotifier(slack, "#ops").digest(["a", "b"])
-        assert len(slack.posts) == 2  # both sides vary independently
-
-    def test_transport_specific_behavior_stays_in_the_transport(self) -> None:
-        sms = pythonic.SmsTransport()
-        pythonic.AlertNotifier(sms, "+1555").alert("info", "x" * 200)
-        assert len(sms.messages[0]) <= len("sms +1555: ") + sms.MAX_LEN
-
-    def test_any_duck_typed_transport_works(self) -> None:
-        class Collector:
-            def __init__(self) -> None:
-                self.seen: list[str] = []
-
+        class PagerTransport:
             def deliver(self, recipient: str, text: str) -> None:
-                self.seen.append(text)
+                received.append((recipient, text))
 
-        collector = Collector()
-        pythonic.AlertNotifier(collector, "anyone").alert("info", "hello")
-        assert collector.seen == ["[INFO] hello"]
-
-
-class TestRealWorld:
-    def test_one_logger_call_reaches_both_implementations(self) -> None:
-        a: list[str] = []
-        b: list[str] = []
-        real_world.logger_with_two_backends("bridge-test", a, b).info("msg")
-        assert a == ["msg"] and b == ["msg"]
+        AlertNotifier(PagerTransport(), "oncall").alert("critical", "it's down")
+        assert received == [("oncall", "[CRITICAL] it's down")]

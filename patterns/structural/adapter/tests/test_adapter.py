@@ -1,32 +1,43 @@
-"""Behavioral tests for all three adapter variants."""
+"""Behavioral tests for the DelegatingAdapter building block."""
 
-import io
+from __future__ import annotations
 
-from patterns.structural.adapter import naive, pythonic, real_world
+import pytest
 
-
-class TestNaive:
-    def test_adapter_translates_the_interface(self) -> None:
-        adapter = naive.SensorAdapter(naive.FahrenheitSensor())
-        assert adapter.celsius() == 20.0
-
-    def test_client_code_sees_only_the_target_interface(self) -> None:
-        assert naive.describe(naive.SensorAdapter(naive.FahrenheitSensor())) == "20.0 °C"
+from patterns.structural.adapter import DelegatingAdapter
 
 
-class TestPythonic:
-    def test_function_adapter(self) -> None:
-        read = pythonic.celsius_reader(pythonic.FahrenheitSensor())
-        assert read() == 20.0
+class Legacy:
+    def speed_mph(self) -> float:
+        return 62.0
 
-    def test_class_adapter_translates_and_forwards(self) -> None:
-        adapter = pythonic.CelsiusAdapter(pythonic.FahrenheitSensor())
-        assert adapter.celsius() == 20.0
-        assert adapter.vendor_id() == "acme-42"  # forwarded untouched
+    def vendor_id(self) -> str:
+        return "acme-42"
 
 
-class TestRealWorld:
-    def test_textiowrapper_adapts_bytes_to_str(self) -> None:
-        text = real_world.read_as_text(io.BytesIO("héllo\n".encode()))
-        assert text == "héllo\n"
-        assert isinstance(text, str)
+class MetricAdapter(DelegatingAdapter[Legacy]):
+    def speed_kmh(self) -> float:
+        return self.adaptee.speed_mph() * 1.609344
+
+    def vendor_id(self) -> str:  # deliberately shadows the adaptee's method
+        return "translated"
+
+
+class TestDelegatingAdapter:
+    def test_translated_method_converts(self) -> None:
+        assert MetricAdapter(Legacy()).speed_kmh() == pytest.approx(99.78, abs=0.01)
+
+    def test_untranslated_methods_forward_to_the_adaptee(self) -> None:
+        adapter = MetricAdapter(Legacy())
+        assert adapter.speed_mph() == 62.0
+
+    def test_a_defined_method_always_beats_forwarding(self) -> None:
+        assert MetricAdapter(Legacy()).vendor_id() == "translated"
+
+    def test_missing_names_raise_attribute_error_not_silence(self) -> None:
+        with pytest.raises(AttributeError):
+            MetricAdapter(Legacy()).warp_drive()
+
+    def test_the_adaptee_stays_reachable(self) -> None:
+        legacy = Legacy()
+        assert MetricAdapter(legacy).adaptee is legacy
