@@ -155,6 +155,18 @@ class TestLegacyShapeErrors:
             result = await client.call_tool("read_source", {"pattern_id": "structural/decorator"})
             assert result.is_error
 
+    async def test_docs_resource_error_text_reaches_client(self) -> None:
+        # ResourceError (not ValueError) is required for the hint to survive
+        # the SDK's template wrapper — this pins that the text gets through.
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="not yet migrated"):
+                await client.read_resource("pattern://structural/decorator/docs/fundamentals")
+
+    async def test_variant_resource_error_text_reaches_client(self) -> None:
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="module-shape unit"):
+                await client.read_resource("pattern://behavioral/chain_of_responsibility/naive")
+
 
 class TestResources:
     async def test_catalog_index_resource(self) -> None:

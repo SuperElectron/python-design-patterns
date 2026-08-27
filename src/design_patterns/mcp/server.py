@@ -11,7 +11,7 @@ from functools import lru_cache
 from typing import Any
 
 from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.mcpserver.exceptions import ResourceError, ToolError
 
 from design_patterns.catalog import DOC_NAMES, Catalog, Pattern, load_catalog
 from design_patterns.mcp.sandbox import run_example as _run_example
@@ -241,7 +241,7 @@ def pattern_source(group: str, slug: str, variant: str) -> str:
             if pattern.shape == "module"
             else f"has: {sorted(variants)}"
         )
-        raise ValueError(f"{pattern.id} has no variant {variant!r} ({hint})")
+        raise ResourceError(f"{pattern.id} has no variant {variant!r} ({hint})")
     return variants[variant].read_text()
 
 
@@ -256,14 +256,14 @@ def pattern_docs_resource(group: str, slug: str, doc: str) -> str:
             if pattern.shape == "module"
             else "unit not yet migrated to the module shape; use get_pattern instead"
         )
-        raise ValueError(f"{pattern.id} has no doc {doc!r} ({hint})")
+        raise ResourceError(f"{pattern.id} has no doc {doc!r} ({hint})")
     return docs[doc].read_text(encoding="utf-8")
 
 
 @mcp.prompt()
 def refactor_toward(pattern_id: str, code: str) -> str:
     """Ask for a refactor of the given code toward one catalog pattern."""
-    pattern = get_catalog().get(pattern_id)
+    pattern = _get(pattern_id)
     caveats = "\n".join(f"- {c}" for c in pattern.caveats)
     reference = (
         f"read_source({pattern.id!r}) and get_pattern_docs({pattern.id!r}, 'implementation')"
@@ -281,7 +281,7 @@ def refactor_toward(pattern_id: str, code: str) -> str:
 @mcp.prompt()
 def explain_pattern(pattern_id: str, audience: str = "an intermediate Python developer") -> str:
     """Ask for an explanation of one pattern, tuned to an audience."""
-    pattern = get_catalog().get(pattern_id)
+    pattern = _get(pattern_id)
     contrast = (
         f"the classic-form vs Python contrast in get_pattern_docs({pattern.id!r}, 'fundamentals')"
         if pattern.shape == "module"
