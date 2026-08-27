@@ -26,5 +26,5 @@ chain is callables in a list, not objects with successor pointers.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation
+uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.main
 ```

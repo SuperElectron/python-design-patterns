@@ -33,7 +33,7 @@ def write_module_unit(root: Path) -> Path:
         (docs / f"{name}.md").write_text(f"# {name} of Thing\n")
     project = unit / "examples" / "demo"
     project.mkdir(parents=True)
-    (project / "__main__.py").write_text(
+    (project / "main.py").write_text(
         "from patterns.creational.thing.pattern.thing import build\n\nprint(build())\n"
     )
     tests = unit / "tests"

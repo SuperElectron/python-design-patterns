@@ -25,5 +25,5 @@ Pair acquire with release on every exit path, structurally — Python's RAII.
 | [`tests/`](tests/) | Behavioral tests for both managers and the mini-project |
 
 ```bash
-uv run python -m patterns.modern.context_manager.examples.atomic_deploy
+uv run python -m patterns.modern.context_manager.examples.atomic_deploy.main
 ```

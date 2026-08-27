@@ -27,5 +27,5 @@ class-per-state only pays at real size.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.state.examples.order_lifecycle
+uv run python -m patterns.behavioral.state.examples.order_lifecycle.main
 ```

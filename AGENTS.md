@@ -30,7 +30,7 @@ patterns/<group>/<slug>/
 │   ├── implementation.md# introducing it into a real system: smell, steps, idioms, pitfalls
 │   └── examples.md      # cited EXTERNAL usages: stdlib, OSS, articles
 ├── examples/            # runnable mini-projects that import pattern/
-│   └── <project>/       # realistic domain, no Foo/Bar; __main__.py + modules
+│   └── <project>/       # realistic domain, no Foo/Bar; main.py + modules
 └── tests/               # isolated: test_<named>.py + test_<project>.py
 ```
 
@@ -38,7 +38,7 @@ No other `__init__.py` exist — namespace packages (PEP 420) carry the rest;
 the loader rejects empty ones.
 
 - Everything import-safe (no side effects at import); mini-projects run via
-  `uv run python -m patterns.<group>.<slug>.examples.<project>`.
+  `uv run python -m patterns.<group>.<slug>.examples.<project>.main`.
 - Tests assert behavior, never just "it runs"; load-bearing claims get the
   mutation treatment (mutate the code, prove the suite fails, revert).
 - Examples must genuinely build on `pattern/` — the loader and a catalog test

@@ -26,5 +26,5 @@ power, the disguise is skin-deep.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.proxy.examples.db_gateway
+uv run python -m patterns.structural.proxy.examples.db_gateway.main
 ```

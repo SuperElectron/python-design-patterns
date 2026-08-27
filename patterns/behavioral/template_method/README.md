@@ -26,5 +26,5 @@ that hand them to you.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.template_method.examples.report_pipeline
+uv run python -m patterns.behavioral.template_method.examples.report_pipeline.main
 ```

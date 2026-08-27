@@ -23,7 +23,7 @@ patterns/structural/decorator/
 from patterns.structural.decorator import retry, logged
 ```
 
-Run any mini-project: `uv run python -m patterns.structural.decorator.examples.resilient_client`
+Run any mini-project: `uv run python -m patterns.structural.decorator.examples.resilient_client.main`
 
 Give it to your agents (MCP server with search, runnable examples, and
 pattern recommendations):

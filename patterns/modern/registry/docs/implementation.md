@@ -82,5 +82,5 @@ including a plugin in its own module whose `__init__` import is the
 documented fix for the import-time caveat:
 
 ```bash
-uv run python -m patterns.modern.registry.examples.export_plugins
+uv run python -m patterns.modern.registry.examples.export_plugins.main
 ```

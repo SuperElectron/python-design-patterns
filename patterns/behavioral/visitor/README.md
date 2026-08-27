@@ -26,5 +26,5 @@ the subclass form survives at stdlib boundaries (`ast.NodeVisitor`).
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.visitor.examples.doc_exporters
+uv run python -m patterns.behavioral.visitor.examples.doc_exporters.main
 ```

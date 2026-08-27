@@ -70,5 +70,5 @@ rush = menu.create("nightly-sales", fmt="csv")   # fresh, tweaked, template safe
 scheduler shape above, end to end — run it with:
 
 ```bash
-uv run python -m patterns.creational.prototype.examples.report_job_templates
+uv run python -m patterns.creational.prototype.examples.report_job_templates.main
 ```

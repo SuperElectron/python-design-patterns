@@ -27,5 +27,5 @@ genuinely staged.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.creational.builder.examples.sql_select_builder
+uv run python -m patterns.creational.builder.examples.sql_select_builder.main
 ```

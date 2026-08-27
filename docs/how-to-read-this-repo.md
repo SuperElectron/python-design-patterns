@@ -19,7 +19,7 @@ from patterns.behavioral.chain_of_responsibility import Chain
 ```
 
 ```bash
-uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation
+uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.main
 ```
 
 ## Where to start

@@ -65,5 +65,5 @@ of each kind — constant, prebuilt regex, lazy zone table — and a test that
 proves import does no work. Run it:
 
 ```bash
-uv run python -m patterns.python.global_object.examples.settings_module
+uv run python -m patterns.python.global_object.examples.settings_module.main
 ```

@@ -26,5 +26,5 @@ a keyword argument with a production default is the whole mechanism.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.modern.dependency_injection.examples.invoice_reminders
+uv run python -m patterns.modern.dependency_injection.examples.invoice_reminders.main
 ```

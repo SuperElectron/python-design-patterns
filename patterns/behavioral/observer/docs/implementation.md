@@ -80,5 +80,5 @@ one pipeline, four independent subscribers, a down webhook quarantined to a
 dead-letter list while the rest keep working. Run it with:
 
 ```bash
-uv run python -m patterns.behavioral.observer.examples.order_events
+uv run python -m patterns.behavioral.observer.examples.order_events.main
 ```

@@ -74,5 +74,5 @@ three analytics queries — including a conditionally-narrowed one — and runs
 them against a real in-memory sqlite database:
 
 ```bash
-uv run python -m patterns.creational.builder.examples.sql_select_builder
+uv run python -m patterns.creational.builder.examples.sql_select_builder.main
 ```

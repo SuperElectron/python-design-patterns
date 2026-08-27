@@ -83,5 +83,5 @@ service at a real composition root, with the demo pinning the clock through
 the same seam the tests use:
 
 ```bash
-uv run python -m patterns.modern.dependency_injection.examples.invoice_reminders
+uv run python -m patterns.modern.dependency_injection.examples.invoice_reminders.main
 ```

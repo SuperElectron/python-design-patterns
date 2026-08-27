@@ -26,5 +26,5 @@ real adapter both satisfy it, held together by shared contract tests.
 | [`tests/`](tests/) | Domain tests on the fake; one contract suite parametrized over both adapters |
 
 ```bash
-uv run python -m patterns.modern.repository.examples.invoice_ledger
+uv run python -m patterns.modern.repository.examples.invoice_ledger.main
 ```

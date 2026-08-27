@@ -5,12 +5,12 @@ from __future__ import annotations
 import pytest
 
 from patterns.behavioral.visitor import Operation, UnhandledNodeError
-from patterns.behavioral.visitor.examples.doc_exporters.__main__ import main, sample_document
 from patterns.behavioral.visitor.examples.doc_exporters.exporters import (
     markdown,
     plain_text,
     word_count,
 )
+from patterns.behavioral.visitor.examples.doc_exporters.main import main, sample_document
 from patterns.behavioral.visitor.examples.doc_exporters.nodes import (
     BulletList,
     CodeBlock,

@@ -75,5 +75,5 @@ quarterly report through the `MARKDOWN` and `HTML` families — same client
 code, both outputs:
 
 ```bash
-uv run python -m patterns.creational.abstract_factory.examples.report_renderer
+uv run python -m patterns.creational.abstract_factory.examples.report_renderer.main
 ```

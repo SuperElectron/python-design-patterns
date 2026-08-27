@@ -86,5 +86,5 @@ assert project.total() == 16
 cost up a nested org chart — run it with:
 
 ```bash
-uv run python -m patterns.structural.composite.examples.org_chart
+uv run python -m patterns.structural.composite.examples.org_chart.main
 ```

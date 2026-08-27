@@ -72,5 +72,5 @@ measured around the whole hardened call at the edge, not baked between the
 layers — slot it outermost when you want it:
 
 ```bash
-uv run python -m patterns.structural.decorator.examples.resilient_client
+uv run python -m patterns.structural.decorator.examples.resilient_client.main
 ```

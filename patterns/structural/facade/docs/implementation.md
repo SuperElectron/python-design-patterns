@@ -61,5 +61,5 @@ Unusually for this catalog, the pattern package carries the whole domain:
 processing and the full-controls bypass around it:
 
 ```bash
-uv run python -m patterns.structural.facade.examples.order_checkout
+uv run python -m patterns.structural.facade.examples.order_checkout.main
 ```

@@ -81,5 +81,5 @@ step: an eight-row table, three data guards, refusal of a too-late cancel, and
 the audit log printed at the end. Run it with:
 
 ```bash
-uv run python -m patterns.behavioral.state.examples.order_lifecycle
+uv run python -m patterns.behavioral.state.examples.order_lifecycle.main
 ```
