@@ -9,38 +9,24 @@ verdict: prefer-alternative
 caveats:
   - "The pattern exists because 1990s languages could not pass classes or functions as values — Python can, so a factory is usually just a callable argument."
   - "Reach for a factory *object* only when the family of factories is large enough that bundling them beats passing them individually."
+  - "The bundled HTML family is teaching code, not a sanitizer: content is interpolated unescaped, so escape untrusted text before rendering."
 stdlib_sightings: [json.load parse_float, decimal.Decimal, unittest.mock]
 ---
 
 # Abstract Factory
 
-## Problem
+Build families of related objects without naming their concrete classes.
+**Verdict: prefer an alternative** — in Python a factory is a callable
+argument; bundle callables into a family object only when they must stay
+consistent with each other.
 
-A JSON parser must build numbers, but which number type — `float`?
-`Decimal`? The parsing code shouldn't hardcode the class, and callers should
-be able to swap the whole family of built objects (numbers, lists, maps) at
-once.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `DocumentFamily`, `HTML`, `MARKDOWN` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/report_renderer/`](examples/report_renderer/) | Mini-project: one quarterly report through two document families |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the book's shape: an abstract factory interface, one concrete
-factory per family, and client code programmed against the interface.
-
-## Pythonic solution
-
-Classes and functions are first-class, so the guide's advice is: accept
-*callables*. `pythonic.py` renders one sales report through interchangeable
-document families (HTML for the web app, Markdown for the CLI) — each family
-a dataclass of builder callables that belong together, no abstract base
-required.
-
-## In the wild
-
-`json.load(fp, parse_float=Decimal)` is the exact pattern: the stdlib parser
-accepts factory callables for every family member it builds. `unittest.mock`
-is a factory for stand-ins of anything.
-
-## Verdict
-
-**Prefer an alternative:** pass callables. Bundle them in an object only when
-the family is genuinely large.
+```bash
+uv run python -m patterns.creational.abstract_factory.examples.report_renderer
+```

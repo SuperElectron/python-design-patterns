@@ -14,34 +14,18 @@ stdlib_sightings: [http.client.HTTPConnection.response_class, json.JSONDecoder]
 
 # Factory Method
 
-## Problem
+Let a class defer which helper it constructs, so subclasses, callers, or tests
+substitute another. **Verdict: prefer an alternative** — inject the object, or
+make the constructor call a class-attribute slot; the abstract-method form is
+Java with the serial numbers filed off.
 
-A class needs a helper object mid-work — an HTTP connection needs a response
-object — and users must be able to substitute their own helper class without
-rewriting the containing class.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `factory_slot` (trap-safe class-attribute factories) and the `Factory` alias; the three dodges — injection, class-attribute slot, instance override — documented best first |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/feed_client/`](examples/feed_client/) | Mini-project: a feed-client framework with a `response_class` slot |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the book's: an abstract creator with an abstract
-`factory_method()`, and one subclass per helper choice. Note the cost — a
-subclass per configuration, just to change one constructor call.
-
-## Pythonic solution
-
-The guide's ranking, in `pythonic.py`: (1) **dependency injection** — just
-pass the helper in; (2) a **class attribute factory** — creation stays
-internal, but overriding is assignment or a one-line subclass, and *any*
-callable is accepted; (3) an **instance attribute factory** for per-object
-overrides without any subclass at all.
-
-## In the wild
-
-`http.client.HTTPConnection.response_class` is the canonical class attribute
-factory: subclass, point it at your response type, done. `json.JSONDecoder`
-does the same with its parse hooks.
-
-## Verdict
-
-**Prefer an alternative:** inject the dependency; failing that, a class
-attribute factory. The abstract-method form is Java with the serial numbers
-filed off.
+```bash
+uv run python -m patterns.creational.factory_method.examples.feed_client
+```

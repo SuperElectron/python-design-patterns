@@ -27,6 +27,23 @@ class TestRealCatalog:
         module_ids = {p.id for p in load_catalog().patterns if p.shape == "module"}
         assert "behavioral/chain_of_responsibility" in module_ids
 
+    def test_every_module_example_builds_on_its_own_pattern_package(self) -> None:
+        # The mini-projects exist to show the pattern in practice: each one
+        # must import its unit's pattern/ package, not reimplement the idea.
+        import re
+
+        for pattern in load_catalog().patterns:
+            if pattern.shape != "module":
+                continue
+            group, slug = pattern.id.split("/")
+            absolute = f"patterns.{group}.{slug}.pattern"
+            relative = re.compile(r"from\s+\.+pattern\b|import\s+\.+pattern\b")
+            for name, path in pattern.examples().items():
+                sources = "\n".join(f.read_text() for f in sorted(path.rglob("*.py")))
+                assert absolute in sources or relative.search(sources), (
+                    f"{pattern.id} example {name!r} never imports its own pattern package"
+                )
+
     def test_every_unit_ships_its_shape_completely(self) -> None:
         for pattern in load_catalog().patterns:
             if pattern.shape == "module":
