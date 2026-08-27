@@ -17,7 +17,11 @@ typecheck:          ## mypy --strict
 test:               ## Run test suite with coverage
 	uv run pytest
 
+readme:             ## Regenerate the README catalog table
+	uv run python -m design_patterns.readme_table
+
 check: lint typecheck test   ## Everything CI runs
+	uv run python -m design_patterns.readme_table --check
 
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache .coverage htmlcov dist build

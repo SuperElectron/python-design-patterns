@@ -27,3 +27,5 @@ jobs:
         run: uv run mypy
       - name: Test
         run: uv run pytest
+      - name: README table drift
+        run: uv run python -m design_patterns.readme_table --check
