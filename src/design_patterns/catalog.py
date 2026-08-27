@@ -8,6 +8,7 @@ schema violation here fails loudly rather than propagating bad data.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -150,13 +151,20 @@ class Catalog:
 
 
 def find_patterns_root(start: Path | None = None) -> Path:
-    """Locate the ``patterns/`` directory from a file inside the repo."""
+    """Locate the ``patterns/`` directory.
+
+    Works both from a repo checkout (walk upward from this file) and from an
+    installed wheel (the ``patterns`` package ships inside the distribution).
+    """
     here = (start or Path(__file__)).resolve()
     for parent in [here, *here.parents]:
         candidate = parent / "patterns"
         if candidate.is_dir():
             return candidate
-    raise CatalogError(f"no patterns/ directory above {here}")
+    spec = importlib.util.find_spec("patterns")
+    if spec is not None and spec.origin is not None:
+        return Path(spec.origin).parent
+    raise CatalogError(f"no patterns/ directory above {here} and no installed patterns package")
 
 
 def load_catalog(root: Path | None = None) -> Catalog:

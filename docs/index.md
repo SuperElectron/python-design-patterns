@@ -1,6 +1,6 @@
 # Documentation
 
-- [How to read this repo](how-to-read-this-repo.md)
-- [Verdicts](verdicts.md) — what `pythonic` / `use-with-care` / `prefer-alternative` mean
+- [How to read this repo](how-to-read-this-repo.md) — the unit anatomy and where to start
+- [Verdicts](verdicts.md) — what ✅ / ⚠️ / 🔄 mean, and who decides
 - [MCP server](mcp.md) — connect agents to the catalog
-- [Contributing](contributing.md)
+- [Contributing](contributing.md) — adding or improving a pattern unit
