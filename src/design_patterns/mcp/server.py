@@ -39,10 +39,12 @@ mcp = MCPServer(
         "verdict. Start with search_patterns or recommend_pattern; verdicts of "
         "'prefer-alternative' tell you what to write instead. Migrated "
         "(module-shape) units offer three access levels: get_pattern_docs "
-        "(fundamentals/implementation/examples), list_examples + run_example "
-        "(runnable mini-projects), and read_source (the pattern/ package). "
-        "Legacy units still expose classic-form/pythonic/real_world variants "
-        "via get_pattern and run_example(variant=...)."
+        "(fundamentals/implementation/examples), then list_examples + "
+        "run_example(example=...) for runnable mini-projects, then read_source "
+        "(the pattern/ package). Legacy (not yet migrated) units instead ship "
+        "flat variant files, served via get_pattern(variant=...) and "
+        "run_example(variant=...) with variant one of 'naive', 'pythonic', "
+        "'real_world' (their literal filenames)."
     ),
 )
 
@@ -59,6 +61,7 @@ def _summary(pattern: Pattern) -> dict[str, Any]:
 def _detail(pattern: Pattern, include_source: str | None) -> dict[str, Any]:
     detail: dict[str, Any] = {
         **_summary(pattern),
+        "shape": pattern.shape,
         "aliases": list(pattern.aliases),
         "guide_url": pattern.guide_url,
         "symptoms": list(pattern.symptoms),
@@ -67,6 +70,15 @@ def _detail(pattern: Pattern, include_source: str | None) -> dict[str, Any]:
         "variants": sorted(pattern.variants()),
         "prose": pattern.prose,
     }
+    if pattern.shape == "module":
+        detail["docs"] = sorted(pattern.docs())
+        detail["examples"] = sorted(pattern.examples())
+        detail["note"] = (
+            "module-shape unit: variants are legacy-only. Read docs via "
+            "get_pattern_docs, run mini-projects via list_examples + "
+            "run_example(example=...), read code via read_source."
+        )
+        return detail
     if include_source:
         variants = pattern.variants()
         wanted = sorted(variants) if include_source == "all" else [include_source]
@@ -90,14 +102,10 @@ def list_patterns(group: str | None = None, verdict: str | None = None) -> list[
 @mcp.tool()
 def get_pattern(pattern_id: str, variant: str | None = None) -> dict[str, Any]:
     """Fetch one pattern's full documentation. pattern_id is '<group>/<slug>'
-    (e.g. 'structural/decorator'). variant: 'naive', 'pythonic', 'real_world',
-    or 'all' to include example source code."""
-    try:
-        pattern = get_catalog().get(pattern_id)
-    except KeyError:
-        known = ", ".join(get_catalog().ids())
-        raise ValueError(f"unknown pattern {pattern_id!r}; known ids: {known}") from None
-    return _detail(pattern, variant)
+    (e.g. 'structural/decorator'). For legacy units, variant ('naive',
+    'pythonic', 'real_world', or 'all') includes that flat file's source;
+    module-shape units serve code via read_source instead."""
+    return _detail(_get(pattern_id), variant)
 
 
 @mcp.tool()
@@ -197,9 +205,14 @@ def recommend_pattern(problem_statement: str, limit: int = 3) -> list[dict[str, 
             "stdlib_sightings": list(p.stdlib_sightings),
         }
         if p.verdict == "prefer-alternative":
+            where = (
+                f"read get_pattern_docs({p.id!r}, 'fundamentals') and read_source({p.id!r})"
+                if p.shape == "module"
+                else "see this unit's pythonic.py"
+            )
             rec["note"] = (
                 f"The guide's honest answer is usually not {p.name}: "
-                f"see this unit's pythonic.py for what to write instead."
+                f"{where} for what to write instead."
             )
         recommendations.append(rec)
     return recommendations
@@ -214,26 +227,36 @@ def catalog_index() -> str:
 @mcp.resource("pattern://{group}/{slug}")
 def pattern_doc(group: str, slug: str) -> str:
     """One pattern's README prose."""
-    return get_catalog().get(f"{group}/{slug}").prose
+    return _get(f"{group}/{slug}").prose
 
 
 @mcp.resource("pattern://{group}/{slug}/{variant}")
 def pattern_source(group: str, slug: str, variant: str) -> str:
     """One legacy pattern's example source (naive | pythonic | real_world)."""
-    pattern = get_catalog().get(f"{group}/{slug}")
+    pattern = _get(f"{group}/{slug}")
     variants = pattern.variants()
     if variant not in variants:
-        raise KeyError(f"{pattern.id} has no variant {variant!r}")
+        hint = (
+            "module-shape unit: use pattern://<id>/docs/<doc> or the read_source tool"
+            if pattern.shape == "module"
+            else f"has: {sorted(variants)}"
+        )
+        raise ValueError(f"{pattern.id} has no variant {variant!r} ({hint})")
     return variants[variant].read_text()
 
 
 @mcp.resource("pattern://{group}/{slug}/docs/{doc}")
 def pattern_docs_resource(group: str, slug: str, doc: str) -> str:
     """One migrated pattern's teaching doc (fundamentals | implementation | examples)."""
-    pattern = get_catalog().get(f"{group}/{slug}")
+    pattern = _get(f"{group}/{slug}")
     docs = pattern.docs()
     if doc not in docs:
-        raise KeyError(f"{pattern.id} has no doc {doc!r} (has: {sorted(docs)})")
+        hint = (
+            f"has: {sorted(docs)}"
+            if pattern.shape == "module"
+            else "unit not yet migrated to the module shape; use get_pattern instead"
+        )
+        raise ValueError(f"{pattern.id} has no doc {doc!r} ({hint})")
     return docs[doc].read_text(encoding="utf-8")
 
 
@@ -242,9 +265,14 @@ def refactor_toward(pattern_id: str, code: str) -> str:
     """Ask for a refactor of the given code toward one catalog pattern."""
     pattern = get_catalog().get(pattern_id)
     caveats = "\n".join(f"- {c}" for c in pattern.caveats)
+    reference = (
+        f"read_source({pattern.id!r}) and get_pattern_docs({pattern.id!r}, 'implementation')"
+        if pattern.shape == "module"
+        else "this unit's pythonic.py file"
+    )
     return (
         f"Refactor the following code toward the {pattern.name} pattern "
-        f"({pattern.id}), as done in this catalog's pythonic variant.\n"
+        f"({pattern.id}), as shown by {reference}.\n"
         f"Verdict for this pattern: {pattern.verdict}. Honor these caveats:\n"
         f"{caveats}\n\nCode:\n```python\n{code}\n```"
     )
@@ -254,9 +282,14 @@ def refactor_toward(pattern_id: str, code: str) -> str:
 def explain_pattern(pattern_id: str, audience: str = "an intermediate Python developer") -> str:
     """Ask for an explanation of one pattern, tuned to an audience."""
     pattern = get_catalog().get(pattern_id)
+    contrast = (
+        f"the classic-form vs Python contrast in get_pattern_docs({pattern.id!r}, 'fundamentals')"
+        if pattern.shape == "module"
+        else "the contrast between this unit's classic-form and pythonic example files"
+    )
     return (
         f"Explain the {pattern.name} pattern to {audience}. Problem it solves: "
-        f"{pattern.problem} Use the catalog's naive-vs-pythonic contrast, state "
+        f"{pattern.problem} Use {contrast}, state "
         f"the verdict ({pattern.verdict}) plainly, and show where the stdlib "
         f"already uses it ({', '.join(pattern.stdlib_sightings)})."
     )
@@ -270,8 +303,8 @@ def choose_pattern(problem: str) -> str:
         "Using the python-design-patterns catalog (search_patterns / "
         "recommend_pattern), name the best-fitting pattern or say plainly that "
         "no pattern is needed. If the top candidate's verdict is "
-        "'prefer-alternative', recommend the alternative its pythonic variant "
-        "shows instead."
+        "'prefer-alternative', recommend the alternative the unit itself "
+        "documents instead."
     )
 
 

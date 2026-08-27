@@ -32,6 +32,14 @@ class Chain(Generic[Req, Res]):
         self._handlers.append(handler)
         return handler
 
+    def insert(self, index: int, handler: Handler[Req, Res]) -> None:
+        """Insert a handler at ``index`` — order is policy, so it is editable."""
+        self._handlers.insert(index, handler)
+
+    def remove(self, handler: Handler[Req, Res]) -> None:
+        """Remove a handler; ``ValueError`` if it is not in the chain."""
+        self._handlers.remove(handler)
+
     def handle(self, request: Req) -> Res:
         """Return the first handler's answer; raise if every handler declines."""
         for handler in self._handlers:
@@ -41,11 +49,17 @@ class Chain(Generic[Req, Res]):
         raise UnhandledRequestError(f"no handler accepted {request!r}")
 
     def handle_or(self, request: Req, default: Res) -> Res:
-        """Like ``handle``, but fall back to ``default`` instead of raising."""
-        try:
-            return self.handle(request)
-        except UnhandledRequestError:
-            return default
+        """Like ``handle``, but fall back to ``default`` instead of raising.
+
+        Only this chain's own exhaustion falls back: an
+        ``UnhandledRequestError`` raised *inside* a handler (say, a nested
+        chain's ``handle``) propagates — it is a routing bug, not a decline.
+        """
+        for handler in self._handlers:
+            answer = handler(request)
+            if answer is not None:
+                return answer
+        return default
 
     def __iter__(self) -> Iterator[Handler[Req, Res]]:
         return iter(self._handlers)

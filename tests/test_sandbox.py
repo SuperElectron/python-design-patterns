@@ -57,6 +57,15 @@ class TestPackageSandbox:
         with pytest.raises(KeyError, match="no example"):
             run_example_package(CATALOG, "structural/flyweight", "pythonic")
 
+    def test_runs_the_real_pilot_unit(self) -> None:
+        # The migrated unit itself, through the python -I -m path CI must cover.
+        result = run_example_package(
+            CATALOG, "behavioral/chain_of_responsibility", "ticket_escalation"
+        )
+        assert result.exit_code == 0, result.stderr
+        assert "triage" in result.stdout
+        assert not result.timed_out
+
 
 class TestSearchIndex:
     def test_symptom_search_hits_the_right_unit(self) -> None:

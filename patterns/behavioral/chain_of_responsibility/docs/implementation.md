@@ -28,7 +28,8 @@ becomes data — an ordered list you configure.
 2. **Extract each ladder arm into a handler** `(request) -> answer | None`.
    The arm's condition becomes the handler's decline test (`return None`).
 3. **Choose the order deliberately.** Order is policy: put short-circuiting
-   handlers (cache hits, emergencies) before general ones. Write a test that
+   handlers (cache hits, emergencies) before general ones — `chain.insert(0, h)`
+   and `chain.remove(h)` edit that policy at runtime. Write a test that
    pins the order's observable behavior.
 4. **Decide the unhandled policy at the call site.** `chain.handle(req)`
    raises `UnhandledRequestError`; `chain.handle_or(req, default)` substitutes

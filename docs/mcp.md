@@ -29,7 +29,7 @@ python-design-patterns-mcp --http --host 127.0.0.1 --port 8734
 | Tool | What it does |
 |---|---|
 | `list_patterns(group?, verdict?)` | Catalog listing, filterable |
-| `get_pattern(pattern_id, variant?)` | Full prose (+ legacy example source: `naive`/`pythonic`/`real_world`/`all`) |
+| `get_pattern(pattern_id, variant?)` | Full prose (+ legacy variant source files: `naive.py` / `pythonic.py` / `real_world.py`, or `all`) |
 | `search_patterns(query, limit?)` | BM25 full-text search over names, aliases, problems, symptoms, prose |
 | `get_pattern_docs(pattern_id, doc)` | A migrated pattern's teaching doc: `fundamentals`, `implementation`, or `examples` |
 | `list_examples(pattern_id)` | A migrated pattern's runnable mini-projects |

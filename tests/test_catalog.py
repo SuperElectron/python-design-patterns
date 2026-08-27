@@ -19,6 +19,14 @@ class TestRealCatalog:
         assert len(catalog.patterns) == 32
         assert "structural/decorator" in catalog.ids()
 
+    def test_catalog_contains_both_shapes_during_migration(self) -> None:
+        # The pilot migrated at least one unit; a silent regression of a
+        # module unit back to legacy shape must fail here, not skip a branch.
+        shapes = {p.shape for p in load_catalog().patterns}
+        assert "module" in shapes
+        module_ids = {p.id for p in load_catalog().patterns if p.shape == "module"}
+        assert "behavioral/chain_of_responsibility" in module_ids
+
     def test_every_unit_ships_its_shape_completely(self) -> None:
         for pattern in load_catalog().patterns:
             if pattern.shape == "module":
@@ -120,6 +128,7 @@ def _write_module_unit(root: Path, group: str, slug: str, frontmatter: str) -> P
         (docs / f"{name}.md").write_text(f"# {name}\n")
     project = unit / "examples" / "demo"
     project.mkdir(parents=True)
+    (unit / "examples" / "__init__.py").write_text("")
     (project / "__init__.py").write_text("")
     (project / "__main__.py").write_text("print('demo ran')\n")
     tests = unit / "tests"
@@ -166,6 +175,27 @@ class TestModuleShapeValidation:
         unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
         (unit / "pattern" / "__init__.py").unlink()
         with pytest.raises(CatalogError, match=r"no __init__\.py"):
+            load_catalog(tmp_path)
+
+    def test_stale_legacy_variant_files_fail(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "pythonic.py").write_text("def main() -> None: ...\n")
+        with pytest.raises(CatalogError, match="legacy variant files"):
+            load_catalog(tmp_path)
+
+    def test_half_migration_is_claimed_and_fails_loudly(self, tmp_path: Path) -> None:
+        # docs/ alone marks the unit module-shape; strict validation then
+        # demands the rest instead of silently classifying it legacy.
+        unit = tmp_path / "creational" / "thing"
+        (unit / "docs").mkdir(parents=True)
+        (unit / "README.md").write_text(f"---\n{GOOD}\n---\n\n# x\n")
+        with pytest.raises(CatalogError, match="module unit missing docs"):
+            load_catalog(tmp_path)
+
+    def test_examples_dir_needs_init(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "examples" / "__init__.py").unlink()
+        with pytest.raises(CatalogError, match=r"examples/ is not a package"):
             load_catalog(tmp_path)
 
     def test_index_json_carries_shape(self, tmp_path: Path) -> None:

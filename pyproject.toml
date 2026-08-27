@@ -1,7 +1,7 @@
 [project]
 name = "python-design-patterns"
 version = "1.0.0"
-description = "Design patterns in Python: naive, pythonic, and real-world examples, with an MCP server for agents."
+description = "Design patterns as importable Python modules — docs, runnable mini-projects, and an MCP server for agents."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "SuperElectron" }]

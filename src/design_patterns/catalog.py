@@ -56,8 +56,14 @@ class Pattern:
 
     @property
     def shape(self) -> Shape:
-        """``module`` units keep code in ``pattern/``; ``legacy`` units ship flat variant files."""
-        return "module" if (self.path / "pattern").is_dir() else "legacy"
+        """``module`` units keep code in ``pattern/``; ``legacy`` units ship flat variant files.
+
+        Any module-shape marker (``pattern/``, ``docs/``, ``examples/``) claims
+        the unit for strict validation, so a half-migration fails CI loudly
+        instead of quietly loading as legacy.
+        """
+        markers = ("pattern", "docs", "examples")
+        return "module" if any((self.path / m).is_dir() for m in markers) else "legacy"
 
     def variants(self) -> dict[str, Path]:
         """The flat example files a legacy unit ships (empty for module units)."""
@@ -165,16 +171,21 @@ def _validate_shape(pattern: Pattern, readme: Path) -> None:
         return
 
     unit = pattern.path
+    if stale := sorted(pattern.variants()):
+        raise CatalogError(f"{readme}: module unit still ships legacy variant files: {stale}")
     missing_docs = [d for d in DOC_NAMES if not (unit / "docs" / f"{d}.md").is_file()]
     if missing_docs:
         raise CatalogError(f"{readme}: module unit missing docs/: {missing_docs}")
     if not (unit / "pattern" / "__init__.py").is_file():
         raise CatalogError(f"{readme}: module unit's pattern/ package has no __init__.py")
-    if not pattern.examples():
+    examples = pattern.examples()
+    if not examples:
         raise CatalogError(
             f"{readme}: module unit ships no runnable examples/<project>/__main__.py"
         )
-    for name, path in pattern.examples().items():
+    if not (unit / "examples" / "__init__.py").is_file():
+        raise CatalogError(f"{readme}: examples/ is not a package (no __init__.py)")
+    for name, path in examples.items():
         if not (path / "__init__.py").is_file():
             raise CatalogError(f"{readme}: example {name!r} is not a package (no __init__.py)")
     tests_dir = unit / "tests"
