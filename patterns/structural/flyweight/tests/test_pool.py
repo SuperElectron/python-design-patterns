@@ -53,3 +53,28 @@ def test_strict_pool_refuses_mutable_values() -> None:
     pool: InternPool[str, list[str]] = InternPool(lambda k: [k], strict=True)
     with pytest.raises(TypeError, match="must be immutable"):
         pool.get("red")
+
+
+def test_strict_pool_refuses_a_tuple_holding_a_mutable() -> None:
+    # A tuple is only as frozen as its elements: mutating the inner list
+    # would corrupt every holder of the shared value.
+    pool: InternPool[str, tuple[list[str]]] = InternPool(lambda k: ([k],), strict=True)
+    with pytest.raises(TypeError, match="must be immutable"):
+        pool.get("red")
+
+
+def test_strict_pool_accepts_deeply_frozen_nesting() -> None:
+    pool: InternPool[str, tuple[object, ...]] = InternPool(
+        lambda k: (k, frozenset({(k, 1)}), Color(k)), strict=True
+    )
+    assert pool.get("red") is pool.get("red")
+
+
+def test_strict_pool_refuses_a_frozen_dataclass_with_a_mutable_field() -> None:
+    @dataclass(frozen=True)
+    class Palette:
+        names: list[str]
+
+    pool: InternPool[str, Palette] = InternPool(lambda k: Palette([k]), strict=True)
+    with pytest.raises(TypeError, match="must be immutable"):
+        pool.get("red")

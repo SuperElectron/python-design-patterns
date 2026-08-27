@@ -17,21 +17,23 @@ class TestSandbox:
         assert "pythonic oldthing runs" in result.stdout
         assert not result.timed_out
 
-    def test_unknown_pattern_id_is_refused(self) -> None:
+    def test_unknown_pattern_id_is_refused(self, legacy_catalog: Catalog) -> None:
         with pytest.raises(KeyError):
-            run_example(CATALOG, "../../etc/passwd", "naive")
+            run_example(legacy_catalog, "../../etc/passwd", "naive")
 
-    def test_unknown_variant_is_refused(self) -> None:
+    def test_unknown_variant_is_refused(self, legacy_catalog: Catalog) -> None:
+        # Against a unit that HAS variants, so the refusal is a real selection
+        # miss, not the empty-variants degenerate case.
         with pytest.raises(KeyError, match="no variant"):
-            run_example(CATALOG, "structural/flyweight", "__init__")
+            run_example(legacy_catalog, "creational/oldthing", "__init__")
 
-    def test_traversal_shaped_variant_is_refused(self) -> None:
+    def test_traversal_shaped_variant_is_refused(self, legacy_catalog: Catalog) -> None:
         with pytest.raises(KeyError):
-            run_example(CATALOG, "structural/flyweight", "../../../tmp/evil")
+            run_example(legacy_catalog, "creational/oldthing", "../../../tmp/evil")
 
-    def test_failing_example_reports_not_raises(self) -> None:
+    def test_failing_example_reports_not_raises(self, legacy_catalog: Catalog) -> None:
         # every current example exits 0; simulate by checking the API shape
-        result = run_example(CATALOG, "behavioral/command", "real_world")
+        result = run_example(legacy_catalog, "creational/oldthing", "real_world")
         assert isinstance(result.exit_code, int)
         assert isinstance(result.stderr, str)
 
@@ -55,9 +57,9 @@ class TestPackageSandbox:
         with pytest.raises(KeyError):
             run_example_package(module_catalog, "../../etc/passwd", "demo")
 
-    def test_legacy_unit_has_no_packages(self) -> None:
+    def test_legacy_unit_has_no_packages(self, legacy_catalog: Catalog) -> None:
         with pytest.raises(KeyError, match="no example"):
-            run_example_package(CATALOG, "structural/flyweight", "pythonic")
+            run_example_package(legacy_catalog, "creational/oldthing", "pythonic")
 
     def test_runs_the_real_pilot_unit(self) -> None:
         # The migrated unit itself, through the python -I -m path CI must cover.
@@ -67,6 +69,26 @@ class TestPackageSandbox:
         assert result.exit_code == 0, result.stderr
         assert "triage" in result.stdout
         assert not result.timed_out
+
+
+def _every_module_example() -> list[tuple[str, str]]:
+    return [
+        (pattern.id, example)
+        for pattern in CATALOG.patterns
+        if pattern.shape == "module"
+        for example in sorted(pattern.examples())
+    ]
+
+
+class TestEveryExampleRuns:
+    """Demo rot check: every module unit's every example runs in the sandbox."""
+
+    @pytest.mark.parametrize(("pattern_id", "example"), _every_module_example())
+    def test_example_exits_cleanly(self, pattern_id: str, example: str) -> None:
+        result = run_example_package(CATALOG, pattern_id, example)
+        assert result.exit_code == 0, f"{pattern_id}/{example}: {result.stderr}"
+        assert not result.timed_out
+        assert result.stdout.strip(), f"{pattern_id}/{example} printed nothing"
 
 
 class TestSearchIndex:

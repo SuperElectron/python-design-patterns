@@ -15,6 +15,10 @@ from collections import Counter
 from collections.abc import Callable
 from typing import Any
 
+# Not-yet-built marker: ``None`` won't do, because a factory may legitimately
+# return ``None`` and that result must still be cached exactly once.
+_MISSING = object()
+
 
 class LazyProxy:
     """Defer construction: the subject is built on first attribute access."""
@@ -23,15 +27,15 @@ class LazyProxy:
         # object.__setattr__-free here: plain attributes are fine because
         # __getattr__ only fires for names *not* found on the proxy itself.
         self._factory = factory
-        self._subject: object | None = None
+        self._subject: object = _MISSING
 
     @property
     def is_built(self) -> bool:
         """Whether the expensive subject exists yet."""
-        return self._subject is not None
+        return self._subject is not _MISSING
 
     def __getattr__(self, name: str) -> Any:
-        if self._subject is None:
+        if self._subject is _MISSING:
             self._subject = self._factory()
         return getattr(self._subject, name)
 

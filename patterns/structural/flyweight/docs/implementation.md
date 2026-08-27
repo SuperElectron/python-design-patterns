@@ -60,7 +60,7 @@ and memory pays for the duplication a million-fold.
 ## Worked example
 
 [`examples/glyph_styles/`](../examples/glyph_styles/) holds a ~30,000-glyph
-document at three live `Style` objects and pins both the identity sharing
+document at two live `Style` objects and pins both the identity sharing
 and the ceiling in tests:
 
 ```bash

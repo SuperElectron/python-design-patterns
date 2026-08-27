@@ -28,7 +28,15 @@ class NotificationCenter:
     def __init__(self) -> None:
         self._channels: dict[str, TeamChannel] = {}
 
-    def register(self, channel: TeamChannel) -> None:
+    def register(self, channel: TeamChannel, *, replace: bool = False) -> None:
+        """Add a team's channel; refuses to silently drop an existing one.
+
+        Pass ``replace=True`` to intentionally swap a team's transport.
+        """
+        if channel.team in self._channels and not replace:
+            raise ValueError(
+                f"team {channel.team!r} already has a channel; pass replace=True to swap it"
+            )
         self._channels[channel.team] = channel
 
     @property
@@ -38,6 +46,8 @@ class NotificationCenter:
     def alert(self, teams: list[str], severity: str, message: str) -> None:
         """Page specific teams through their chosen transports."""
         for team in teams:
+            if team not in self._channels:
+                raise KeyError(f"unknown team {team!r}; registered teams: {self.teams}")
             channel = self._channels[team]
             AlertNotifier(channel.transport, channel.address).alert(severity, message)
 

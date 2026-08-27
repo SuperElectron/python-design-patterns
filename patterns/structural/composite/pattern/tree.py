@@ -38,7 +38,11 @@ class Composite(Generic[V]):
         self._children.append(child)
 
     def remove(self, child: HasTotal[V]) -> None:
-        """Remove a direct child; ``ValueError`` if it is not one."""
+        """Remove the first ``==``-equal direct child; ``ValueError`` if none.
+
+        With value-equal leaves (frozen dataclasses), "first equal" may not
+        be the identical object you hold a reference to.
+        """
         self._children.remove(child)
 
     def total(self) -> V:

@@ -62,6 +62,29 @@ def test_declined_payment_rolls_back_the_reservation() -> None:
     assert notifier.sent == []
 
 
+def test_gateway_blowup_also_releases_the_reservation() -> None:
+    # Rollback must cover ANY charge failure, not just the declined path.
+    class ExplodingGateway(PaymentGateway):
+        def charge(self, card: str, amount_cents: int) -> str:
+            raise ConnectionError("gateway unreachable")
+
+    warehouse, _, shipping, notifier = build_subsystem()
+    with pytest.raises(ConnectionError):
+        place_order(
+            warehouse,
+            ExplodingGateway(),
+            shipping,
+            notifier,
+            sku="mug",
+            quantity=3,
+            price_cents=1000,
+            card="4242",
+            address="9 Hopper St",
+        )
+    assert warehouse.stock["mug"] == 10  # released, not leaked
+    assert shipping.labels == []
+
+
 def test_insufficient_stock_stops_before_any_charge() -> None:
     warehouse, gateway, shipping, notifier = build_subsystem(stock=1)
     with pytest.raises(LookupError):

@@ -52,9 +52,10 @@ everyone and therefore to no one. Each becomes a decorator written once.
 
 - **Forgetting `functools.wraps`** — the wrapped function's name, docstring,
   and signature vanish; stack traces and debuggers lie.
-- **Order accidents.** `retry(logged(f))` logs once per attempt;
-  `logged(retry(f))` logs once per operation. Both are useful; only one is
-  what you meant.
+- **Order accidents.** These are decorator *factories* — call them first.
+  `retry(3)(logged(log)(f))` logs once per attempt;
+  `logged(log)(retry(3)(f))` logs once per operation. Both are useful; only
+  one is what you meant.
 - **Decorators that swallow exceptions** turn control flow invisible; add
   behavior around the call, don't change its contract.
 - **Hidden effects** (module-level clocks, global sleeps) make wrapped code
@@ -65,7 +66,10 @@ everyone and therefore to no one. Each becomes a decorator written once.
 ## Worked example
 
 [`examples/resilient_client/`](../examples/resilient_client/) hardens a flaky
-payments client with the full stack and pins the ordering policy in tests:
+payments client with the retry/logging/rate-limit stack and pins the ordering
+policy in tests. `timed` is deliberately left out of that stack: latency is
+measured around the whole hardened call at the edge, not baked between the
+layers — slot it outermost when you want it:
 
 ```bash
 uv run python -m patterns.structural.decorator.examples.resilient_client

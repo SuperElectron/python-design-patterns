@@ -37,7 +37,18 @@ container once; operations become one method both node kinds answer.
    `not hasattr(leaf, "add")`).
 
 ```python
+from dataclasses import dataclass
+
 from patterns.structural.composite import Composite
+
+
+@dataclass(frozen=True)
+class Task:  # a leaf: totals itself, has no child API
+    hours: int
+
+    def total(self) -> int:
+        return self.hours
+
 
 team = Composite(sum, [Task(3), Task(5)])
 project = Composite(sum, [team, Task(8)])

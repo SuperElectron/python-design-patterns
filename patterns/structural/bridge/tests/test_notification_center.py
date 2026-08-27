@@ -40,12 +40,19 @@ class TestRouting:
         center.broadcast_digest(["3 deploys"])
         assert len(slack.posts) == len(sms.messages) == len(email.outbox) == 1
 
-    def test_reregistering_a_team_switches_its_transport(self) -> None:
+    def test_reregistering_a_team_requires_explicit_replace(self) -> None:
         center, slack, _, email = build_center()
-        center.register(TeamChannel("platform", email, "platform@example.com"))
+        with pytest.raises(ValueError, match="platform"):
+            center.register(TeamChannel("platform", email, "platform@example.com"))
+        center.register(TeamChannel("platform", email, "platform@example.com"), replace=True)
         center.alert(["platform"], "warn", "retrying")
         assert slack.posts == []
         assert "platform@example.com" in email.outbox[0]
+
+    def test_alerting_an_unregistered_team_names_the_known_ones(self) -> None:
+        center, *_ = build_center()
+        with pytest.raises(KeyError, match="payments"):
+            center.alert(["nope"], "critical", "who hears this?")
 
     def test_teams_lists_registrations(self) -> None:
         center, *_ = build_center()

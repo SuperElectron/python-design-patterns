@@ -8,16 +8,25 @@ from patterns.structural.bridge import (
     EmailTransport,
     SlackTransport,
     SmsTransport,
+    Transport,
 )
 
 
 class TestAxesCompose:
     def test_any_notifier_works_over_any_transport(self) -> None:
-        for make_transport in (EmailTransport, SlackTransport, SmsTransport):
-            transport = make_transport()
+        # 2 notifiers x 3 transports: every combination must actually deliver.
+        email, slack, sms = EmailTransport(), SlackTransport(), SmsTransport()
+        channels: list[tuple[Transport, list[str]]] = [
+            (email, email.outbox),
+            (slack, slack.posts),
+            (sms, sms.messages),
+        ]
+        for transport, delivered in channels:
             AlertNotifier(transport, "ops").alert("critical", "disk full")
             DigestNotifier(transport, "ops").digest(["a", "b"])
-        # No combination raised: 2 kinds x 3 transports from 5 classes.
+            assert len(delivered) == 2
+            assert "[CRITICAL] disk full" in delivered[0]
+            assert "2 updates" in delivered[1]
 
     def test_alert_formats_severity_upfront(self) -> None:
         slack = SlackTransport()

@@ -42,6 +42,24 @@ def test_lazy_proxy_builds_exactly_once() -> None:
     assert built == ["now"]
 
 
+def test_lazy_proxy_caches_a_none_subject_once() -> None:
+    # A factory may legitimately produce None (e.g. a failed connect that the
+    # caller inspects); that result is still "built" and must not retrigger.
+    built: list[str] = []
+
+    def factory() -> None:
+        built.append("now")
+        return None
+
+    proxy = LazyProxy(factory)
+    with pytest.raises(AttributeError):
+        proxy.anything  # noqa: B018 — the access itself is the trigger
+    with pytest.raises(AttributeError):
+        proxy.other  # noqa: B018
+    assert built == ["now"]
+    assert proxy.is_built
+
+
 def test_protection_proxy_forwards_allowed_and_denies_the_rest() -> None:
     proxy = ProtectionProxy(Subject(), allow=lambda name: name == "greet")
     assert proxy.greet() == "hello"
@@ -72,5 +90,12 @@ def test_stacked_proxies_compose_their_mediations() -> None:
 
 
 def test_the_disguise_is_skin_deep() -> None:
-    proxy = LazyProxy(Subject)
-    assert not isinstance(proxy, Subject)  # the caveat, pinned
+    # Dunder lookups bypass __getattr__: a subject that supports len() does
+    # not make the proxy support it. That is the caveat, behaviorally.
+    class Sized:
+        def __len__(self) -> int:
+            return 3
+
+    proxy = LazyProxy(Sized)
+    with pytest.raises(TypeError):
+        len(proxy)

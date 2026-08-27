@@ -122,3 +122,8 @@ def test_wraps_preserves_identity_through_a_stack() -> None:
 
     assert documented.__name__ == "documented"
     assert documented.__doc__ == "The docstring survives the stack."
+
+
+def test_retry_refuses_a_nonsensical_attempt_count() -> None:
+    with pytest.raises(ValueError, match="attempts"):
+        retry(0)

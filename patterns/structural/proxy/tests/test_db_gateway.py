@@ -43,3 +43,25 @@ def test_metering_counts_all_traffic_including_denials() -> None:
     with pytest.raises(PermissionError):
         gateway.drop_table("stock")
     assert gateway.access_counts == {"query": 2, "drop_table": 1}
+
+
+def test_analyst_can_read_connected_but_not_dsn() -> None:
+    gateway = build_gateway("warehouse://prod", role="analyst")
+    gateway.query("SELECT 1")  # force the connection into existence
+    assert gateway.connected is True
+    with pytest.raises(PermissionError):
+        gateway.dsn  # noqa: B018 — the access itself is the assertion
+
+
+def test_admin_reads_dsn_and_query_log() -> None:
+    gateway = build_gateway("warehouse://prod", role="admin")
+    gateway.query("SELECT 1")
+    assert gateway.dsn == "warehouse://prod"
+    assert gateway.queries_run == ["SELECT 1"]
+
+
+def test_is_built_passes_through_the_stack() -> None:
+    gateway = build_gateway("warehouse://prod", role="analyst")
+    assert gateway.is_built is False
+    gateway.query("SELECT 1")
+    assert gateway.is_built is True

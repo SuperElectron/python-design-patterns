@@ -19,13 +19,16 @@ V = TypeVar("V")
 def _is_frozen(value: object) -> bool:
     # Best-effort immutability check for the guard rail: frozen dataclasses
     # and common immutable builtins pass; everything else is the caller's
-    # own risk and rejected under strict=True.
+    # own risk and rejected under strict=True. Containers are only as frozen
+    # as their elements — a tuple holding a list is mutable where it counts.
     if is_dataclass(value) and not isinstance(value, type):
         params = getattr(type(value), "__dataclass_params__", None)
         return bool(params and params.frozen) and all(
             _is_frozen(getattr(value, f.name)) for f in fields(value)
         )
-    return isinstance(value, (str, bytes, int, float, bool, frozenset, tuple, type(None)))
+    if isinstance(value, (tuple, frozenset)):
+        return all(_is_frozen(item) for item in value)
+    return isinstance(value, (str, bytes, int, float, bool, type(None)))
 
 
 class InternPool(Generic[K, V]):

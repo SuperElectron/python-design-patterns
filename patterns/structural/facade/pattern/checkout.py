@@ -78,8 +78,10 @@ def place_order(
     warehouse.reserve(sku, quantity)
     try:
         txn = gateway.charge(card, price_cents * quantity)
-    except PermissionError:
-        warehouse.release(sku, quantity)  # the step copy-paste always forgets
+    except Exception:
+        # Any charge failure — declined card or gateway blowup — must hand
+        # the reservation back; this is the step copy-paste always forgets.
+        warehouse.release(sku, quantity)
         raise
     # Honest boundary: a crash below this line leaves the charge captured.
     # Real systems make charge/label/notify a saga (compensate on failure)

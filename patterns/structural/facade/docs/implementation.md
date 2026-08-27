@@ -55,7 +55,10 @@ policy; policies live in one place.
 ## Worked example
 
 [`examples/order_checkout/`](../examples/order_checkout/) processes a batch of
-orders — one declined card among them — through the single checkout door:
+orders — one declined card among them — through the single checkout door.
+Unusually for this catalog, the pattern package carries the whole domain:
+`place_order` *is* the facade, so the mini-project adds only the batch
+processing and the full-controls bypass around it:
 
 ```bash
 uv run python -m patterns.structural.facade.examples.order_checkout

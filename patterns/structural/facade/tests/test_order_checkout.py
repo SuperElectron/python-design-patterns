@@ -39,6 +39,19 @@ def test_declined_order_leaves_stock_untouched_for_the_rest_of_the_batch() -> No
     assert len(store.gateway.charges) == 1
 
 
+def test_insufficient_stock_lands_in_the_failed_bucket() -> None:
+    store = build_store()
+    fulfilled, failed = store.process(
+        [
+            Order("tee", 99, 2500, "4242", "9 Hopper St"),  # only 3 in stock
+            Order("mug", 1, 1200, "4242", "12 Grace Ave"),
+        ]
+    )
+    assert len(fulfilled) == 1
+    assert [(o.sku, "tee" in reason) for o, reason in failed] == [("tee", True)]
+    assert store.gateway.charges == [("4242", 1200)]  # the doomed order never charged
+
+
 def test_full_controls_path_bypasses_the_facade() -> None:
     store = build_store()
     store.restock("mug", 5)

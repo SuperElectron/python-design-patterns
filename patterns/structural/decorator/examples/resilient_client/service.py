@@ -8,6 +8,7 @@ the network at all. That ordering is policy, and the tests pin it.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 
 from patterns.structural.decorator.examples.resilient_client.client import (
@@ -24,7 +25,7 @@ def build_charge(
     max_attempts: int = 3,
     max_calls: int = 5,
     window: float = 1.0,
-    clock: Callable[[], float] | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> Callable[[str, int], str]:
     """Wrap ``api.charge`` in retry -> logging -> rate limit, innermost first."""
 
@@ -34,5 +35,4 @@ def build_charge(
 
     hardened = retry(max_attempts, on=(TransientNetworkError,))(charge)
     hardened = logged(log)(hardened)
-    limiter = rate_limited(max_calls, window, clock) if clock else rate_limited(max_calls, window)
-    return limiter(hardened)
+    return rate_limited(max_calls, window, clock)(hardened)
