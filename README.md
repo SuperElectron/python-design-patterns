@@ -7,13 +7,15 @@ runnable mini-project, and an honest verdict when the right answer is "don't".
 ## MCP
 
 ```bash
+# add to Claude Code
 claude mcp add design-patterns -- uv run --directory <this-repo> python-design-patterns-mcp
-```
 
-- Agents get search and recommendations over the catalog, then per pattern:
-  docs → run the examples (sandboxed) → read the source.
-- HTTP instead of stdio: `python-design-patterns-mcp --http`.
-- Sandbox: `python -I`, scrubbed env, 10s/64KB caps, catalog-resolved packages only.
+# stdio server, for any MCP client
+uv run python-design-patterns-mcp
+
+# streamable HTTP on /mcp
+uv run python-design-patterns-mcp --http --host 127.0.0.1 --port 8734
+```
 
 ## Use it
 
