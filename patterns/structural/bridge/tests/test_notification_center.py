@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.structural.bridge.examples.notification_center import (
+from patterns.structural.bridge.examples.notification_center.__main__ import main
+from patterns.structural.bridge.examples.notification_center.center import (
     NotificationCenter,
     TeamChannel,
 )
-from patterns.structural.bridge.examples.notification_center.__main__ import main
 from patterns.structural.bridge.pattern import EmailTransport, SlackTransport, SmsTransport
 
 

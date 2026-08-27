@@ -1,8 +1,3 @@
-"""Template Method — public API.
-
->>> from patterns.behavioral.template_method import Skeleton
-"""
-
-from patterns.behavioral.template_method.pattern import Skeleton, discard, keep_all
-
-__all__ = ["Skeleton", "discard", "keep_all"]
+from patterns.behavioral.template_method.pattern import Skeleton as Skeleton
+from patterns.behavioral.template_method.pattern import discard as discard
+from patterns.behavioral.template_method.pattern import keep_all as keep_all

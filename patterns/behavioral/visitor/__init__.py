@@ -1,8 +1,2 @@
-"""Visitor — public API.
-
->>> from patterns.behavioral.visitor import Operation
-"""
-
-from patterns.behavioral.visitor.pattern import Operation, UnhandledNodeError
-
-__all__ = ["Operation", "UnhandledNodeError"]
+from patterns.behavioral.visitor.pattern import Operation as Operation
+from patterns.behavioral.visitor.pattern import UnhandledNodeError as UnhandledNodeError

@@ -1,10 +1,6 @@
-"""The State pattern, importable as library code."""
-
+from patterns.behavioral.state.pattern.machine import Guard as Guard
 from patterns.behavioral.state.pattern.machine import (
-    Guard,
-    IllegalTransitionError,
-    StateMachine,
-    Step,
+    IllegalTransitionError as IllegalTransitionError,
 )
-
-__all__ = ["Guard", "IllegalTransitionError", "StateMachine", "Step"]
+from patterns.behavioral.state.pattern.machine import StateMachine as StateMachine
+from patterns.behavioral.state.pattern.machine import Step as Step

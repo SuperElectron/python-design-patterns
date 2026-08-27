@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.observer.examples.order_events import (
+from patterns.behavioral.observer.examples.order_events.__main__ import main
+from patterns.behavioral.observer.examples.order_events.subscribers import (
     AuditLog,
     EmailNotifier,
     MetricsCounter,
     OrderPipeline,
     flaky_webhook,
 )
-from patterns.behavioral.observer.examples.order_events.__main__ import main
 
 
 def wired_pipeline() -> tuple[OrderPipeline, EmailNotifier, MetricsCounter, AuditLog]:

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from patterns.behavioral.command.examples.editor_undo import (
-    Document,
+from patterns.behavioral.command.examples.editor_undo.editing import (
     delete_span,
     insert_text,
     replace_span,
 )
+from patterns.behavioral.command.examples.editor_undo.models import Document
 from patterns.behavioral.command.pattern import UndoStack
 
 

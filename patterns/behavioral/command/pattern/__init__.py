@@ -1,9 +1,3 @@
-"""The Command pattern, importable as library code."""
-
-from patterns.behavioral.command.pattern.commands import (
-    Action,
-    Undoable,
-    UndoStack,
-)
-
-__all__ = ["Action", "UndoStack", "Undoable"]
+from patterns.behavioral.command.pattern.commands import Action as Action
+from patterns.behavioral.command.pattern.commands import Undoable as Undoable
+from patterns.behavioral.command.pattern.commands import UndoStack as UndoStack

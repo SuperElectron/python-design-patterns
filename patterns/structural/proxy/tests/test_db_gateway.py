@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.structural.proxy.examples.db_gateway import (
-    WarehouseConnection,
-    build_gateway,
-)
+from patterns.structural.proxy.examples.db_gateway.gateway import WarehouseConnection, build_gateway
 
 
 @pytest.fixture(autouse=True)

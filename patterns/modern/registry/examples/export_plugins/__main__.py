@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from patterns.modern.registry.examples.export_plugins import EXPORTERS, export
+from patterns.modern.registry.examples.export_plugins.exporters import EXPORTERS, export
 from patterns.modern.registry.pattern import UnknownKeyError
 
 

@@ -1,6 +1,6 @@
 """Behavioral tests for the report-job mini-project."""
 
-from patterns.creational.prototype.examples.report_job_templates import Scheduler
+from patterns.creational.prototype.examples.report_job_templates.scheduler import Scheduler
 
 
 class TestScheduler:

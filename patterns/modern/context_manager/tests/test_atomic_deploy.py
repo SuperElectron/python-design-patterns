@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from patterns.modern.context_manager.examples.atomic_deploy import (
+from patterns.modern.context_manager.examples.atomic_deploy.__main__ import main
+from patterns.modern.context_manager.examples.atomic_deploy.deploy import (
     ReleaseError,
     deploy,
     require_nonempty,
 )
-from patterns.modern.context_manager.examples.atomic_deploy.__main__ import main
 
 V1 = {"app.toml": "retries = 3\n", "logging.toml": "level = 'info'\n"}
 

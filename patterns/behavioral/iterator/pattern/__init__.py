@@ -1,5 +1,2 @@
-"""The Iterator pattern, importable as library code."""
-
-from patterns.behavioral.iterator.pattern.paging import PageFetcher, iterate_pages
-
-__all__ = ["PageFetcher", "iterate_pages"]
+from patterns.behavioral.iterator.pattern.paging import PageFetcher as PageFetcher
+from patterns.behavioral.iterator.pattern.paging import iterate_pages as iterate_pages

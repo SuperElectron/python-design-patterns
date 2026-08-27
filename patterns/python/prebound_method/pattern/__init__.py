@@ -1,10 +1,4 @@
-"""The Prebound Method pattern, importable as library code."""
-
-from patterns.python.prebound_method.pattern.prebound import (
-    Counter,
-    increment,
-    peek,
-    shares_instance,
-)
-
-__all__ = ["Counter", "increment", "peek", "shares_instance"]
+from patterns.python.prebound_method.pattern.prebound import Counter as Counter
+from patterns.python.prebound_method.pattern.prebound import increment as increment
+from patterns.python.prebound_method.pattern.prebound import peek as peek
+from patterns.python.prebound_method.pattern.prebound import shares_instance as shares_instance

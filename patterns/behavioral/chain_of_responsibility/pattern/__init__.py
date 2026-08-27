@@ -1,9 +1,5 @@
-"""The Chain of Responsibility pattern, importable as library code."""
-
+from patterns.behavioral.chain_of_responsibility.pattern.chain import Chain as Chain
+from patterns.behavioral.chain_of_responsibility.pattern.chain import Handler as Handler
 from patterns.behavioral.chain_of_responsibility.pattern.chain import (
-    Chain,
-    Handler,
-    UnhandledRequestError,
+    UnhandledRequestError as UnhandledRequestError,
 )
-
-__all__ = ["Chain", "Handler", "UnhandledRequestError"]

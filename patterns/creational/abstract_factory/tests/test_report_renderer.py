@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from patterns.creational.abstract_factory.examples.report_renderer import (
+from patterns.creational.abstract_factory.examples.report_renderer.__main__ import Q3
+from patterns.creational.abstract_factory.examples.report_renderer.renderer import render
+from patterns.creational.abstract_factory.examples.report_renderer.report import (
     Report,
     Section,
     Table,
-    render,
 )
-from patterns.creational.abstract_factory.examples.report_renderer.__main__ import Q3
 from patterns.creational.abstract_factory.pattern import HTML, MARKDOWN
 from patterns.creational.abstract_factory.tests.test_family import make_recording_family
 

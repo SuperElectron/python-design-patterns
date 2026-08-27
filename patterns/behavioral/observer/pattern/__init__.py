@@ -1,5 +1,3 @@
-"""The Observer pattern, importable as library code."""
-
-from patterns.behavioral.observer.pattern.signal import ErrorPolicy, Signal, Subscriber
-
-__all__ = ["ErrorPolicy", "Signal", "Subscriber"]
+from patterns.behavioral.observer.pattern.signal import ErrorPolicy as ErrorPolicy
+from patterns.behavioral.observer.pattern.signal import Signal as Signal
+from patterns.behavioral.observer.pattern.signal import Subscriber as Subscriber

@@ -10,15 +10,17 @@ from collections.abc import Callable
 
 import pytest
 
-from patterns.structural.adapter.examples.payment_gateways import (
+from patterns.structural.adapter.examples.payment_gateways.__main__ import main
+from patterns.structural.adapter.examples.payment_gateways.adapters import (
     PaymentProcessor,
     PayPalAdapter,
-    PayPalLikeGateway,
     StripeAdapter,
-    StripeLikeClient,
-    checkout,
 )
-from patterns.structural.adapter.examples.payment_gateways.__main__ import main
+from patterns.structural.adapter.examples.payment_gateways.checkout import checkout
+from patterns.structural.adapter.examples.payment_gateways.vendors import (
+    PayPalLikeGateway,
+    StripeLikeClient,
+)
 
 
 def stripe() -> PaymentProcessor:

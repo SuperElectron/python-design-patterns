@@ -1,8 +1,4 @@
-"""The Strategy pattern, importable as library code."""
-
+from patterns.behavioral.strategy.pattern.registry import StrategyRegistry as StrategyRegistry
 from patterns.behavioral.strategy.pattern.registry import (
-    StrategyRegistry,
-    UnknownStrategyError,
+    UnknownStrategyError as UnknownStrategyError,
 )
-
-__all__ = ["StrategyRegistry", "UnknownStrategyError"]

@@ -1,13 +1,4 @@
-"""Prebound Method — public API.
-
->>> from patterns.python.prebound_method import increment, peek
-"""
-
-from patterns.python.prebound_method.pattern import (
-    Counter,
-    increment,
-    peek,
-    shares_instance,
-)
-
-__all__ = ["Counter", "increment", "peek", "shares_instance"]
+from patterns.python.prebound_method.pattern import Counter as Counter
+from patterns.python.prebound_method.pattern import increment as increment
+from patterns.python.prebound_method.pattern import peek as peek
+from patterns.python.prebound_method.pattern import shares_instance as shares_instance

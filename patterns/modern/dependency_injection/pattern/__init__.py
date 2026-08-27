@@ -1,11 +1,5 @@
-"""Dependency Injection as importable, typed building blocks."""
-
-from patterns.modern.dependency_injection.pattern.service import (
-    Clock,
-    Invoice,
-    InvoiceSource,
-    MailTransport,
-    ReminderService,
-)
-
-__all__ = ["Clock", "Invoice", "InvoiceSource", "MailTransport", "ReminderService"]
+from patterns.modern.dependency_injection.pattern.service import Clock as Clock
+from patterns.modern.dependency_injection.pattern.service import Invoice as Invoice
+from patterns.modern.dependency_injection.pattern.service import InvoiceSource as InvoiceSource
+from patterns.modern.dependency_injection.pattern.service import MailTransport as MailTransport
+from patterns.modern.dependency_injection.pattern.service import ReminderService as ReminderService

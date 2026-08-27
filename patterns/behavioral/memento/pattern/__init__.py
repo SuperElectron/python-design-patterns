@@ -1,5 +1,2 @@
-"""The Memento pattern, importable as library code."""
-
-from patterns.behavioral.memento.pattern.history import History, NoSnapshotError
-
-__all__ = ["History", "NoSnapshotError"]
+from patterns.behavioral.memento.pattern.history import History as History
+from patterns.behavioral.memento.pattern.history import NoSnapshotError as NoSnapshotError

@@ -5,13 +5,13 @@ from __future__ import annotations
 import pytest
 
 from patterns.behavioral.state import IllegalTransitionError
-from patterns.behavioral.state.examples.order_lifecycle import (
+from patterns.behavioral.state.examples.order_lifecycle.__main__ import main
+from patterns.behavioral.state.examples.order_lifecycle.lifecycle import build_lifecycle
+from patterns.behavioral.state.examples.order_lifecycle.models import (
     Order,
     OrderAction,
     OrderStatus,
-    build_lifecycle,
 )
-from patterns.behavioral.state.examples.order_lifecycle.__main__ import main
 
 
 def order_with_items() -> Order:

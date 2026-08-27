@@ -1,22 +1,6 @@
-"""Bridge — public API.
-
->>> from patterns.structural.bridge import AlertNotifier, SlackTransport
-"""
-
-from patterns.structural.bridge.pattern import (
-    AlertNotifier,
-    DigestNotifier,
-    EmailTransport,
-    SlackTransport,
-    SmsTransport,
-    Transport,
-)
-
-__all__ = [
-    "AlertNotifier",
-    "DigestNotifier",
-    "EmailTransport",
-    "SlackTransport",
-    "SmsTransport",
-    "Transport",
-]
+from patterns.structural.bridge.pattern import AlertNotifier as AlertNotifier
+from patterns.structural.bridge.pattern import DigestNotifier as DigestNotifier
+from patterns.structural.bridge.pattern import EmailTransport as EmailTransport
+from patterns.structural.bridge.pattern import SlackTransport as SlackTransport
+from patterns.structural.bridge.pattern import SmsTransport as SmsTransport
+from patterns.structural.bridge.pattern import Transport as Transport

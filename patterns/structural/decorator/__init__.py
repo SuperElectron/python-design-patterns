@@ -1,14 +1,5 @@
-"""Decorator — public API.
-
->>> from patterns.structural.decorator import retry
-"""
-
-from patterns.structural.decorator.pattern import (
-    RateLimitExceededError,
-    logged,
-    rate_limited,
-    retry,
-    timed,
-)
-
-__all__ = ["RateLimitExceededError", "logged", "rate_limited", "retry", "timed"]
+from patterns.structural.decorator.pattern import RateLimitExceededError as RateLimitExceededError
+from patterns.structural.decorator.pattern import logged as logged
+from patterns.structural.decorator.pattern import rate_limited as rate_limited
+from patterns.structural.decorator.pattern import retry as retry
+from patterns.structural.decorator.pattern import timed as timed

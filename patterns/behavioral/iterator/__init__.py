@@ -1,8 +1,2 @@
-"""Iterator — public API.
-
->>> from patterns.behavioral.iterator import iterate_pages
-"""
-
-from patterns.behavioral.iterator.pattern import PageFetcher, iterate_pages
-
-__all__ = ["PageFetcher", "iterate_pages"]
+from patterns.behavioral.iterator.pattern import PageFetcher as PageFetcher
+from patterns.behavioral.iterator.pattern import iterate_pages as iterate_pages

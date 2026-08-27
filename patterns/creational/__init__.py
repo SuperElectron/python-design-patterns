@@ -1,1 +1,0 @@
-"""creational patterns."""

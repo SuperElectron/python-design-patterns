@@ -1,8 +1,2 @@
-"""Context Manager — public API.
-
->>> from patterns.modern.context_manager import AtomicWrite
-"""
-
-from patterns.modern.context_manager.pattern import AtomicWrite, temporarily
-
-__all__ = ["AtomicWrite", "temporarily"]
+from patterns.modern.context_manager.pattern import AtomicWrite as AtomicWrite
+from patterns.modern.context_manager.pattern import temporarily as temporarily

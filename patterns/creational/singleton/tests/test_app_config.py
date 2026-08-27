@@ -5,7 +5,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from patterns.creational.singleton.examples.app_config import (
+from patterns.creational.singleton.examples.app_config.settings import (
     get_settings,
     load_settings,
     reset_settings,

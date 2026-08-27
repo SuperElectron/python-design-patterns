@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from patterns.modern.registry.examples.export_plugins import EXPORTERS, export
 from patterns.modern.registry.examples.export_plugins.__main__ import main
+from patterns.modern.registry.examples.export_plugins.exporters import EXPORTERS, export
 from patterns.modern.registry.pattern import UnknownKeyError
 
 ROWS = [{"name": "ada", "role": "eng"}, {"name": "grace", "role": "ops"}]
