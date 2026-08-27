@@ -15,13 +15,14 @@ from pathlib import Path
 from typing import Literal, get_args
 
 Verdict = Literal["pythonic", "use-with-care", "prefer-alternative"]
-VariantName = Literal["naive", "pythonic", "real_world"]
-Shape = Literal["module", "legacy"]
 DocName = Literal["fundamentals", "implementation", "examples"]
 
 VERDICTS: tuple[str, ...] = get_args(Verdict)
-VARIANTS: tuple[str, ...] = get_args(VariantName)
 DOC_NAMES: tuple[str, ...] = get_args(DocName)
+
+# Pre-v2 units shipped flat naive/pythonic/real_world files; their presence in
+# a unit today is stale debris and fails validation.
+_RETIRED_VARIANT_FILES = ("naive.py", "pythonic.py", "real_world.py")
 
 _REQUIRED_KEYS = frozenset({"id", "name", "guide_url", "problem", "symptoms", "verdict", "caveats"})
 
@@ -54,23 +55,8 @@ class Pattern:
     def slug(self) -> str:
         return self.id.split("/", 1)[1]
 
-    @property
-    def shape(self) -> Shape:
-        """``module`` units keep code in ``pattern/``; ``legacy`` units ship flat variant files.
-
-        Any module-shape marker (``pattern/``, ``docs/``, ``examples/``) claims
-        the unit for strict validation, so a half-migration fails CI loudly
-        instead of quietly loading as legacy.
-        """
-        markers = ("pattern", "docs", "examples")
-        return "module" if any((self.path / m).is_dir() for m in markers) else "legacy"
-
-    def variants(self) -> dict[str, Path]:
-        """The flat example files a legacy unit ships (empty for module units)."""
-        return {v: self.path / f"{v}.py" for v in VARIANTS if (self.path / f"{v}.py").is_file()}
-
     def docs(self) -> dict[str, Path]:
-        """The unit's teaching docs (fundamentals/implementation/examples), if present."""
+        """The unit's teaching docs (fundamentals/implementation/examples)."""
         return {
             d: self.path / "docs" / f"{d}.md"
             for d in DOC_NAMES
@@ -89,7 +75,7 @@ class Pattern:
         }
 
     def sources(self) -> dict[str, Path]:
-        """The pattern's own code: ``pattern/*.py``, keyed by filename (module units)."""
+        """The pattern's own code: ``pattern/*.py``, keyed by filename."""
         pattern_dir = self.path / "pattern"
         if not pattern_dir.is_dir():
             return {}
@@ -164,14 +150,9 @@ def _parse_pattern(readme: Path, root: Path) -> Pattern:
 
 
 def _validate_shape(pattern: Pattern, readme: Path) -> None:
-    """Module-shape units get strict structural validation; legacy units keep the old rule."""
-    if pattern.shape == "legacy":
-        if not pattern.variants():
-            raise CatalogError(f"{readme}: unit ships no naive/pythonic/real_world example")
-        return
-
+    """Every unit must ship the complete module shape: pattern/ docs/ examples/ tests/."""
     unit = pattern.path
-    if stale := sorted(pattern.variants()):
+    if stale := sorted(f for f in _RETIRED_VARIANT_FILES if (unit / f).is_file()):
         raise CatalogError(f"{readme}: module unit still ships legacy variant files: {stale}")
     missing_docs = [d for d in DOC_NAMES if not (unit / "docs" / f"{d}.md").is_file()]
     if missing_docs:
@@ -209,13 +190,11 @@ class Catalog:
         return tuple(p.id for p in self.patterns)
 
     def to_json(self) -> str:
-        """The ``catalog://index`` payload: everything except prose and paths."""
+        """The ``catalog://index`` payload: metadata plus docs/examples listings."""
         entries = []
         for p in self.patterns:
             entry = asdict(p)
             del entry["prose"], entry["path"]
-            entry["shape"] = p.shape
-            entry["variants"] = sorted(p.variants())
             entry["docs"] = sorted(p.docs())
             entry["examples"] = sorted(p.examples())
             entries.append(entry)

@@ -27,20 +27,15 @@ class TestTools:
             ids = [p["id"] for p in result.structured_content["result"]]
             assert len(ids) == 5 and all(i.startswith("creational/") for i in ids)
 
-    async def test_get_pattern_with_source(
-        self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        # Variant source is a legacy-shape feature; every real unit migrates,
-        # so this runs against the synthetic legacy unit.
-        monkeypatch.setattr(server_module, "get_catalog", lambda: legacy_catalog)
+    async def test_get_pattern_lists_docs_and_examples(self) -> None:
         async with Client(mcp) as client:
-            result = await client.call_tool(
-                "get_pattern", {"pattern_id": "creational/oldthing", "variant": "pythonic"}
-            )
+            result = await client.call_tool("get_pattern", {"pattern_id": "structural/decorator"})
             assert result.structured_content is not None
             detail = result.structured_content
-            assert detail["verdict"] == "prefer-alternative"
-            assert "pythonic oldthing runs" in detail["source"]["pythonic"]
+            assert detail["verdict"] == "pythonic"
+            assert detail["docs"] == ["examples", "fundamentals", "implementation"]
+            assert "resilient_client" in detail["examples"]
+            assert detail["prose"]
 
     async def test_get_pattern_unknown_id_names_the_catalog(self) -> None:
         async with Client(mcp) as client:
@@ -85,23 +80,16 @@ class TestTools:
             assert singleton["caveats"]
 
 
-class TestRecommendNoteByShape:
-    """The prefer-alternative note is pinned per shape, via synthetic units."""
+class TestRecommendNote:
+    """The prefer-alternative note is pinned via the synthetic unit."""
 
-    @staticmethod
-    def _point_at(
-        catalog: Catalog,
-        monkeypatch: pytest.MonkeyPatch,
+    async def test_note_names_the_docs_and_source_tools(
+        self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         from design_patterns.mcp.search import SearchIndex
 
-        monkeypatch.setattr(server_module, "get_catalog", lambda: catalog)
-        monkeypatch.setattr(server_module, "get_index", lambda: SearchIndex(catalog))
-
-    async def test_module_unit_note_names_the_module_tools(
-        self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        self._point_at(module_catalog, monkeypatch)
+        monkeypatch.setattr(server_module, "get_catalog", lambda: module_catalog)
+        monkeypatch.setattr(server_module, "get_index", lambda: SearchIndex(module_catalog))
         async with Client(mcp) as client:
             result = await client.call_tool(
                 "recommend_pattern", {"problem_statement": "thing needed"}
@@ -111,22 +99,9 @@ class TestRecommendNoteByShape:
             assert rec["id"] == "creational/thing"
             assert "get_pattern_docs" in rec["note"] and "read_source" in rec["note"]
 
-    async def test_legacy_unit_note_points_at_pythonic_file(
-        self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        self._point_at(legacy_catalog, monkeypatch)
-        async with Client(mcp) as client:
-            result = await client.call_tool(
-                "recommend_pattern", {"problem_statement": "old thing needed"}
-            )
-            assert result.structured_content is not None
-            rec = result.structured_content["result"][0]
-            assert rec["id"] == "creational/oldthing"
-            assert "pythonic.py" in rec["note"]
-
 
 class TestModuleShapeTools:
-    """The three new access levels, against a synthetic migrated unit."""
+    """The three access levels, against the synthetic unit."""
 
     @pytest.fixture(autouse=True)
     def _use_module_catalog(self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -164,11 +139,6 @@ class TestModuleShapeTools:
             run = result.structured_content
             assert run["exit_code"] == 0 and "built a thing" in run["stdout"]
 
-    async def test_run_example_requires_exactly_one_selector(self) -> None:
-        async with Client(mcp) as client:
-            result = await client.call_tool("run_example", {"pattern_id": "creational/thing"})
-            assert result.is_error
-
     async def test_read_source_returns_pattern_package(self) -> None:
         async with Client(mcp) as client:
             result = await client.call_tool("read_source", {"pattern_id": "creational/thing"})
@@ -183,59 +153,12 @@ class TestModuleShapeTools:
             assert isinstance(first, TextResourceContents)
             assert "implementation of Thing" in first.text
 
-    async def test_variant_resource_error_text_reaches_client(self) -> None:
-        # A module-shape unit refusing a legacy variant read must explain itself.
-        async with Client(mcp) as client:
-            with pytest.raises(Exception, match="module-shape unit"):
-                await client.read_resource("pattern://creational/thing/naive")
-
-
-class TestLegacyShapeErrors:
-    """Module-shape tools refuse un-migrated units with a clear message, not a crash.
-
-    Uses a synthetic legacy unit: every real unit migrates to the module shape,
-    so no real id can be relied on to stay legacy.
-    """
-
-    @pytest.fixture(autouse=True)
-    def _use_legacy_catalog(self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(server_module, "get_catalog", lambda: legacy_catalog)
-
-    async def test_get_pattern_docs_on_legacy_unit(self) -> None:
-        async with Client(mcp) as client:
-            result = await client.call_tool(
-                "get_pattern_docs", {"pattern_id": "creational/oldthing", "doc": "fundamentals"}
-            )
-            assert result.is_error
-            assert "not yet migrated" in str(result.content[0])
-
-    async def test_list_examples_on_legacy_unit(self) -> None:
-        async with Client(mcp) as client:
-            result = await client.call_tool("list_examples", {"pattern_id": "creational/oldthing"})
-            assert result.is_error
-
-    async def test_read_source_on_legacy_unit(self) -> None:
-        async with Client(mcp) as client:
-            result = await client.call_tool("read_source", {"pattern_id": "creational/oldthing"})
-            assert result.is_error
-
-    async def test_run_example_legacy_variant_dispatch(self) -> None:
-        # The variant= arm is what every un-migrated unit still relies on.
-        async with Client(mcp) as client:
-            result = await client.call_tool(
-                "run_example", {"pattern_id": "creational/oldthing", "variant": "pythonic"}
-            )
-            assert result.structured_content is not None
-            run = result.structured_content
-            assert run["exit_code"] == 0 and not run["timed_out"]
-            assert "pythonic oldthing runs" in run["stdout"]
-
-    async def test_docs_resource_error_text_reaches_client(self) -> None:
+    async def test_unknown_doc_resource_error_text_reaches_client(self) -> None:
         # ResourceError (not ValueError) is required for the hint to survive
         # the SDK's template wrapper — this pins that the text gets through.
         async with Client(mcp) as client:
-            with pytest.raises(Exception, match="not yet migrated"):
-                await client.read_resource("pattern://creational/oldthing/docs/fundamentals")
+            with pytest.raises(Exception, match="has no doc"):
+                await client.read_resource("pattern://creational/thing/docs/naive")
 
 
 class TestResources:
@@ -257,16 +180,6 @@ class TestResources:
             first_fund = fund.contents[0]
             assert isinstance(first_fund, TextResourceContents)
             assert "# Iterator — fundamentals" in first_fund.text
-
-    async def test_legacy_variant_source_template(
-        self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setattr(server_module, "get_catalog", lambda: legacy_catalog)
-        async with Client(mcp) as client:
-            src = await client.read_resource("pattern://creational/oldthing/pythonic")
-            first_src = src.contents[0]
-            assert isinstance(first_src, TextResourceContents)
-            assert "pythonic oldthing runs" in first_src.text
 
 
 class TestPrompts:

@@ -1,24 +1,29 @@
 # Python Design Patterns
 
 Look up any design pattern and see what a fluent Python developer would
-*actually* write — the classic GoF form, the pythonic form, and where the
-standard library already does it — with an honest verdict when the right
-answer is "don't". All 23 Gang of Four patterns plus Python-native and
-modern ones, every example typed, tested, and runnable.
+*actually* write — the classic GoF form contrasted with the Python form,
+importable reference code, and a mini-project that puts it to work — with an
+honest verdict when the right answer is "don't". All 23 Gang of Four patterns
+plus Python-native and modern ones, every unit typed, tested, and runnable.
 
 ## Use it
 
-Each pattern is a folder — read them in this order:
+Each pattern is a self-contained module:
 
 ```
 patterns/structural/decorator/
-├── README.md       # the problem, the trade-offs, the verdict
-├── naive.py        # the classic 1994 translation
-├── pythonic.py     # what you actually write in Python
-└── real_world.py   # where the stdlib already does this
+├── README.md       # the problem, the verdict, the map
+├── pattern/        # the pattern as importable, typed code
+├── docs/           # fundamentals · implementation · cited external examples
+├── examples/       # runnable mini-projects that use pattern/
+└── tests/          # behavioral tests for both
 ```
 
-Run any example: `uv run python -m patterns.structural.decorator.pythonic`
+```python
+from patterns.structural.decorator import retry, logged
+```
+
+Run any mini-project: `uv run python -m patterns.structural.decorator.examples.resilient_client`
 
 Give it to your agents (MCP server with search, runnable examples, and
 pattern recommendations):

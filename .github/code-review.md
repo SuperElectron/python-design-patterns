@@ -23,7 +23,7 @@ tests that's idiomatic, not a finding.
 - **PEP 8** (style) · **PEP 257** (docstrings) · **PEP 20** (design sensibility)
 - **Google Python Style Guide** — the most common team-level extension
 - This repo's own bar: [CLAUDE.md](../CLAUDE.md) (unit template, frontmatter
-  schema) and [verdicts.md](verdicts.md)
+  schema) and [docs/verdicts.md](../docs/verdicts.md)
 
 ## Layer 2: what human reviewers actually check
 
@@ -53,6 +53,36 @@ Severity-ordered — block on CRITICAL/HIGH, note MEDIUM:
 - **This repo's own MCP server** — `claude mcp add design-patterns -- uv run --directory <repo> python-design-patterns-mcp`. `recommend_pattern` answers "should this be a Singleton?" with python-patterns.guide's verdicts and caveats; `get_pattern` serves the reference implementation to compare against.
 - **Context7 MCP** — current library/framework docs, for "is this the right API usage?" questions.
 - **python-patterns.guide** — the prose authority behind this catalog's verdicts.
+
+## House rules (settled during the v2 migration, enforced in review)
+
+- Name-keyed registries and caretakers refuse silent duplicates: `ValueError`
+  unless `replace=True`. Ordered collections where repeats are meaningful —
+  chains, signals — append freely; `functools.singledispatch`'s own overwrite
+  behavior is inherited, noted not fought.
+- `ParamSpec` typing only where a wrapper callable is returned
+  (`structural/decorator` is the precedent); registries that return callables
+  unchanged use plain identity typing.
+- Never use `None` as a cache sentinel — a factory may legitimately return
+  `None` and it must still cache once (`LazyProxy._MISSING` precedent).
+  Immutability guards recurse into containers: a tuple holding a list is
+  mutable where it counts (`InternPool` precedent).
+- Every unit's `examples/` must genuinely build on its `pattern/` package —
+  an AST import check enforces the import; reviewers judge token imports
+  (an annotation-only import that vanishes at runtime does not count).
+- Frontmatter stays stable; deliberate caveat improvements are allowed and
+  called out in review.
+
+## Mutation discipline
+
+Reading a diff is not verification. For any load-bearing claim — a shutdown
+discipline, a durability promise, a security guard, an "import does no work"
+assertion — apply the mutation that would falsify it (swap the operator,
+collapse the branch, make the write non-atomic) and confirm the suite fails.
+During the v2 migration this caught four real defects that reading alone did
+not: an untestable shutdown switch, a sqlite adapter that never committed, a
+fixture that erased its own evidence, and a runtime-erased annotation import.
+If the mutant survives, the finding is the missing test, not the mutation.
 
 ## Review etiquette
 
