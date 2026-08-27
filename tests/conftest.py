@@ -42,9 +42,47 @@ def write_module_unit(root: Path) -> Path:
     return unit
 
 
+def write_legacy_unit(root: Path) -> Path:
+    """Build ``<root>/creational/oldthing`` as a pre-migration legacy-shape unit."""
+    unit = root / "creational" / "oldthing"
+    unit.mkdir(parents=True)
+    for pkg in (root, root / "creational", unit):
+        init = pkg / "__init__.py"
+        if not init.exists():
+            init.write_text("")
+    (unit / "README.md").write_text(
+        "---\n"
+        "id: creational/oldthing\nname: Oldthing\nguide_url: null\n"
+        'problem: "Build an old thing."\nsymptoms: ["old thing needed"]\n'
+        "verdict: prefer-alternative\ncaveats: []\n"
+        "---\n\n# Oldthing\n"
+    )
+    for variant in ("naive", "pythonic", "real_world"):
+        (unit / f"{variant}.py").write_text(
+            f'def main() -> None:\n    print("{variant} oldthing runs")\n\n\n'
+            'if __name__ == "__main__":\n    main()\n'
+        )
+    tests = unit / "tests"
+    tests.mkdir()
+    (tests / "test_oldthing.py").write_text("def test_ok() -> None:\n    assert True\n")
+    return unit
+
+
 @pytest.fixture
 def module_catalog(tmp_path: Path) -> Catalog:
     """A catalog whose ``patterns/`` root holds one synthetic module-shape unit."""
     root = tmp_path / "patterns"
     write_module_unit(root)
+    return load_catalog(root)
+
+
+@pytest.fixture
+def legacy_catalog(tmp_path: Path) -> Catalog:
+    """A catalog holding one synthetic legacy-shape unit.
+
+    Real units migrate to the module shape group by group, so tests of the
+    legacy behavior must not depend on any real unit staying legacy.
+    """
+    root = tmp_path / "patterns"
+    write_legacy_unit(root)
     return load_catalog(root)

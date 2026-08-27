@@ -24,3 +24,6 @@ uv.lock
 
 # local working files (plans, research briefs)
 .cache/
+
+# agent worktrees
+.claude/worktrees/
