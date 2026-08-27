@@ -26,5 +26,5 @@ is a module-level function, and the subsystem stays public beside it.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.facade.examples.order_checkout
+uv run python -m patterns.structural.facade.examples.order_checkout.main
 ```

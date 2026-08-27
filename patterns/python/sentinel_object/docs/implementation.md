@@ -73,5 +73,5 @@ CLI ← file ← defaults where a stored `None` means "explicitly disabled", and
 hands back a `NullNotifier` so callers never branch. Run it:
 
 ```bash
-uv run python -m patterns.python.sentinel_object.examples.layered_config
+uv run python -m patterns.python.sentinel_object.examples.layered_config.main
 ```

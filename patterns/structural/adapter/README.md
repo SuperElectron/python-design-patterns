@@ -26,5 +26,5 @@ reconcile interfaces you don't control.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.adapter.examples.payment_gateways
+uv run python -m patterns.structural.adapter.examples.payment_gateways.main
 ```

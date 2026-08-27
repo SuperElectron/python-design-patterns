@@ -7,8 +7,8 @@ from collections.abc import Iterator
 import pytest
 
 from patterns.python.prebound_method.examples.metrics import api
-from patterns.python.prebound_method.examples.metrics.__main__ import main
 from patterns.python.prebound_method.examples.metrics.collector import MetricsCollector
+from patterns.python.prebound_method.examples.metrics.main import main
 from patterns.python.prebound_method.pattern import shares_instance
 
 

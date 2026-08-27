@@ -26,5 +26,5 @@ freely, expensive things lazily, mutation only where it is the documented job.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.python.global_object.examples.settings_module
+uv run python -m patterns.python.global_object.examples.settings_module.main
 ```

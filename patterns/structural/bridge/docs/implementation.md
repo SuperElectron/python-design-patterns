@@ -77,5 +77,5 @@ notifier.alert("critical", "db pool exhausted")
 alerts and digests for three teams over three transports — run it with:
 
 ```bash
-uv run python -m patterns.structural.bridge.examples.notification_center
+uv run python -m patterns.structural.bridge.examples.notification_center.main
 ```

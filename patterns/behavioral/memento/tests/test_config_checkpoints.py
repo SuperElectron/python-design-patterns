@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.memento.examples.config_checkpoints.__main__ import main
 from patterns.behavioral.memento.examples.config_checkpoints.editor import ConfigEditor
+from patterns.behavioral.memento.examples.config_checkpoints.main import main
 from patterns.behavioral.memento.examples.config_checkpoints.models import (
     InvalidConfigError,
     ServiceConfig,

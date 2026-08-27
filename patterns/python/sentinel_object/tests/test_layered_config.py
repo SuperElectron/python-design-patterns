@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.python.sentinel_object.examples.layered_config.__main__ import main
 from patterns.python.sentinel_object.examples.layered_config.config import LayeredConfig
+from patterns.python.sentinel_object.examples.layered_config.main import main
 from patterns.python.sentinel_object.examples.layered_config.notifier import (
     EmailNotifier,
     NullNotifier,

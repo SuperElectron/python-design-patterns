@@ -26,5 +26,5 @@ alternative** — composition with dependency injection *is* the bridge.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.bridge.examples.notification_center
+uv run python -m patterns.structural.bridge.examples.notification_center.main
 ```

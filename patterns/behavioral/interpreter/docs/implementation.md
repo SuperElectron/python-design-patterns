@@ -65,5 +65,5 @@ feature-flag engine — rules as data, per-user evaluation, hostile input
 rejected:
 
 ```bash
-uv run python -m patterns.behavioral.interpreter.examples.flag_rules
+uv run python -m patterns.behavioral.interpreter.examples.flag_rules.main
 ```

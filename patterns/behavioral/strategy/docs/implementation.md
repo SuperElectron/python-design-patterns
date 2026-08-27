@@ -77,5 +77,5 @@ checkout pricing — three registered rules, a best-rule engine, and a
 comparison report:
 
 ```bash
-uv run python -m patterns.behavioral.strategy.examples.promotions
+uv run python -m patterns.behavioral.strategy.examples.promotions.main
 ```

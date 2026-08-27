@@ -62,5 +62,5 @@ Both grow unbounded and neither can answer "what exactly did the user do?".
 text editor — insert/delete/replace with undo, redo, and a session log:
 
 ```bash
-uv run python -m patterns.behavioral.command.examples.editor_undo
+uv run python -m patterns.behavioral.command.examples.editor_undo.main
 ```

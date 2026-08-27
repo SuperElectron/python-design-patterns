@@ -76,5 +76,5 @@ adapter and prints identical domain answers from both backends; the shared
 contract tests live in [`tests/test_invoice_ledger.py`](../tests/test_invoice_ledger.py):
 
 ```bash
-uv run python -m patterns.modern.repository.examples.invoice_ledger
+uv run python -m patterns.modern.repository.examples.invoice_ledger.main
 ```

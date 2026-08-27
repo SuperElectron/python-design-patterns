@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from patterns.modern.repository.examples.invoice_ledger.__main__ import main
+from patterns.modern.repository.examples.invoice_ledger.main import main
 from patterns.modern.repository.examples.invoice_ledger.sqlite_repo import SqliteInvoices
 from patterns.modern.repository.pattern import (
     InMemoryInvoices,

@@ -26,5 +26,5 @@ Fan I/O-bound work out to N workers over a bounded queue — backpressure by
 | [`tests/`](tests/) | Behavioral tests for the pool and the mini-project |
 
 ```bash
-uv run python -m patterns.modern.async_producer_consumer.examples.feed_fetcher
+uv run python -m patterns.modern.async_producer_consumer.examples.feed_fetcher.main
 ```

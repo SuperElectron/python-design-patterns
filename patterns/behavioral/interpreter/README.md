@@ -26,5 +26,5 @@ most little-language needs; grammar-as-data covers the rest.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.interpreter.examples.flag_rules
+uv run python -m patterns.behavioral.interpreter.examples.flag_rules.main
 ```

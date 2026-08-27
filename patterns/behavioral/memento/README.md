@@ -27,5 +27,5 @@ state and the pattern is nearly free.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.memento.examples.config_checkpoints
+uv run python -m patterns.behavioral.memento.examples.config_checkpoints.main
 ```

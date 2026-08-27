@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.template_method.examples.report_pipeline.__main__ import main
+from patterns.behavioral.template_method.examples.report_pipeline.main import main
 from patterns.behavioral.template_method.examples.report_pipeline.models import Sale
 from patterns.behavioral.template_method.examples.report_pipeline.pipeline import (
     build_csv_report,

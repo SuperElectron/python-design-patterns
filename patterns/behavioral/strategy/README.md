@@ -26,5 +26,5 @@ the registry below is for families that grow.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.strategy.examples.promotions
+uv run python -m patterns.behavioral.strategy.examples.promotions.main
 ```

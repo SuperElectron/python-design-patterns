@@ -26,5 +26,5 @@ for `if/elif` dispatch.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.modern.registry.examples.export_plugins
+uv run python -m patterns.modern.registry.examples.export_plugins.main
 ```

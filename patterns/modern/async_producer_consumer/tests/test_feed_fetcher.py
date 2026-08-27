@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.modern.async_producer_consumer.examples.feed_fetcher.__main__ import main
 from patterns.modern.async_producer_consumer.examples.feed_fetcher.fetcher import (
     fetch_all,
     summarize,
 )
+from patterns.modern.async_producer_consumer.examples.feed_fetcher.main import main
 from patterns.modern.async_producer_consumer.examples.feed_fetcher.models import Feed
 from patterns.modern.async_producer_consumer.pattern import Shutdown
 

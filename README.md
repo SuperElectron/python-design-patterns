@@ -23,7 +23,7 @@ uv run python-design-patterns-mcp --http --host 127.0.0.1 --port 8734
 from patterns.structural.decorator import retry, logged
 ```
 
-Run any mini-project: `uv run python -m patterns.structural.decorator.examples.resilient_client`
+Run any mini-project: `uv run python -m patterns.structural.decorator.examples.resilient_client.main`
 
 ## Catalog
 

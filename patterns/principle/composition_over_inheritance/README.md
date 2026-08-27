@@ -26,5 +26,5 @@ load-bearing idea behind the rest of this catalog.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.principle.composition_over_inheritance.examples.notification_router
+uv run python -m patterns.principle.composition_over_inheritance.examples.notification_router.main
 ```

@@ -69,5 +69,5 @@ step above to sales reporting — one spine, CSV and Markdown variants derived
 from a baseline:
 
 ```bash
-uv run python -m patterns.behavioral.template_method.examples.report_pipeline
+uv run python -m patterns.behavioral.template_method.examples.report_pipeline.main
 ```

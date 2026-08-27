@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from patterns.python.global_object.examples.settings_module import settings
-from patterns.python.global_object.examples.settings_module.__main__ import main
+from patterns.python.global_object.examples.settings_module.main import main
 from patterns.python.global_object.examples.settings_module.shipping import (
     is_valid_slug,
     shipping_zone,

@@ -26,5 +26,5 @@ for god-object drift.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.mediator.examples.checkout_form
+uv run python -m patterns.behavioral.mediator.examples.checkout_form.main
 ```

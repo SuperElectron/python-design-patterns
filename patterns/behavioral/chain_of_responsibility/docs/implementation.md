@@ -75,5 +75,5 @@ resolution = chain.handle_or(ticket, triage(ticket))
 step above to support-ticket routing — run it with:
 
 ```bash
-uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation
+uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.main
 ```

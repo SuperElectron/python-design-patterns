@@ -79,5 +79,5 @@ above to a document tree — Markdown, plain-text, and word-count operations
 over five node types the operations never edit:
 
 ```bash
-uv run python -m patterns.behavioral.visitor.examples.doc_exporters
+uv run python -m patterns.behavioral.visitor.examples.doc_exporters.main
 ```

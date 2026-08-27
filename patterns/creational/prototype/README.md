@@ -26,5 +26,5 @@ with a `clone()` protocol; tweak frozen products with `dataclasses.replace`.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.creational.prototype.examples.report_job_templates
+uv run python -m patterns.creational.prototype.examples.report_job_templates.main
 ```

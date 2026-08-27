@@ -74,5 +74,5 @@ with lazy build, cached reads, env re-read after reset, and an injected
 mapping for tests — run it with:
 
 ```bash
-uv run python -m patterns.creational.singleton.examples.app_config
+uv run python -m patterns.creational.singleton.examples.app_config.main
 ```
