@@ -14,31 +14,17 @@ stdlib_sightings: [random.random, random.seed, secrets.token_hex]
 
 # Prebound Method
 
-## Problem
+A `random.random()`-style module API: one hidden instance built at import,
+its bound methods published as module functions, the class kept public for
+isolation. **Verdict: pythonic** — the stdlib's own favorite move.
 
-You want the ergonomic module-level API — `random.random()`, not
-`random.get_default_generator().random()` — but the functions must share
-state (a seed, a counter, a connection).
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: canonical `Counter` + prebound `increment`/`peek`, and `shares_instance` (proves the wiring) |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/metrics/`](examples/metrics/) | Mini-project: process-wide metrics API prebound from a hidden collector |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` shows the alternatives the guide rejects: bare module functions
-mutating a loose module global (state and behavior drift apart), or making
-every caller instantiate the class themselves (ergonomics lost).
-
-## Pythonic solution
-
-Define a normal class, build **one instance** at module level, then assign
-its bound methods to module-global names: `roll = _instance.roll`. Callers
-get plain functions; the instance travels along inside each bound method.
-
-## In the wild
-
-`random.random`, `random.seed`, and friends are exactly this — bound methods
-of a hidden `random.Random()` built at import; `random.Random` stays public
-for anyone needing isolated streams.
-
-## Verdict
-
-**Pythonic.** The stdlib's own favorite way to put a friendly face on shared
-state.
+```bash
+uv run python -m patterns.python.prebound_method.examples.metrics
+```
