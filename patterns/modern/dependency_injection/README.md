@@ -28,9 +28,11 @@ clock.
 
 ## Pythonic solution
 
-Pass the collaborators in. A `Protocol` types the seam, a keyword argument
-carries the production default, and a test hands in a fake. No container, no
-framework, no decorators.
+Pass the collaborators in. `pythonic.py` is an overdue-invoice reminder
+service with three seams — the clock, the invoice source, the mail transport —
+each a `Protocol` or callable with a production default. Tests hand in a
+frozen date and a capturing mailbox and become fully deterministic. No
+container, no framework, no decorators.
 
 ## In the wild
 

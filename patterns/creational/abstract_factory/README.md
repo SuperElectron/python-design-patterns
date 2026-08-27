@@ -29,9 +29,10 @@ factory per family, and client code programmed against the interface.
 ## Pythonic solution
 
 Classes and functions are first-class, so the guide's advice is: accept
-*callables*. `pythonic.py` passes `Decimal` itself as the number factory; the
-"complete" factory bundling several builders is just a small dataclass of
-callables — no abstract base required.
+*callables*. `pythonic.py` renders one sales report through interchangeable
+document families (HTML for the web app, Markdown for the CLI) — each family
+a dataclass of builder callables that belong together, no abstract base
+required.
 
 ## In the wild
 

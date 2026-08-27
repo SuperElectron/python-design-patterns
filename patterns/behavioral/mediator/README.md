@@ -29,8 +29,10 @@ and *only* the mediator decides who reacts.
 ## Pythonic solution
 
 The mediator doesn't need a Colleague base class — widgets accept a
-`notify` callable, and the mediator is a small coordinator holding the
-interaction rules in one readable place.
+`notify` callable and hold zero rules. `pythonic.py` scales the idea to a
+checkout form whose rules genuinely tangle (country restricts shipping,
+shipping gates payment and changes the total): one `_recheck` method holds
+every rule, and a country change cascades through the dependent fields.
 
 ## In the wild
 

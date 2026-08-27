@@ -30,9 +30,10 @@ touching the other.
 ## Pythonic solution
 
 Strip the ceremony and the Bridge is *composition with an injected
-dependency* — which is why the verdict points there. `pythonic.py` keeps the
-two axes but needs no abstract bases: the renderer is a `Protocol`, shapes
-are dataclasses holding one.
+dependency* — which is why the verdict points there. `pythonic.py` bridges
+notifiers (alerts, digests) over delivery transports (email, Slack, SMS):
+the transport is a `Protocol`, notifiers are dataclasses holding one, and
+"outage alert to Slack" is a constructor call, not a class.
 
 ## In the wild
 

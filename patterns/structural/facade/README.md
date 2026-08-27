@@ -28,9 +28,10 @@ resource, and the copy-paste bill comes due.
 ## Pythonic solution
 
 Modules are namespaces and functions are entry points, so the natural Python
-facade is a *function*: `pythonic.py` wraps a fiddly multi-step text
-pipeline behind one call with sensible defaults — full controls still
-importable beside it.
+facade is a *function*: `pythonic.py` puts `place_order()` in front of an
+order-fulfillment subsystem (inventory, payment, shipping, notification) —
+including the payment-failure rollback every call site used to forget. The
+subsystem stays public for callers needing the full controls.
 
 ## In the wild
 
