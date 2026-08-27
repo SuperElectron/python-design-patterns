@@ -1,2 +1,2 @@
-from patterns.modern.registry.pattern import Registry as Registry
-from patterns.modern.registry.pattern import UnknownKeyError as UnknownKeyError
+from .pattern import Registry as Registry
+from .pattern import UnknownKeyError as UnknownKeyError

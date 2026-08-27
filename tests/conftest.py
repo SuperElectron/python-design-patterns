@@ -15,8 +15,11 @@ def write_module_unit(root: Path) -> Path:
     """Build ``<root>/creational/thing`` as a complete, runnable module-shape unit."""
     unit = root / "creational" / "thing"
     (unit / "pattern").mkdir(parents=True)
-    for pkg in (root, root / "creational", unit, unit / "pattern"):
+    for pkg in (root, root / "creational"):
         (pkg / "__init__.py").write_text("")
+    # The two API files model the house style: bare as-alias re-exports.
+    (unit / "__init__.py").write_text("from .pattern.thing import build as build\n")
+    (unit / "pattern" / "__init__.py").write_text("from .thing import build as build\n")
     (unit / "README.md").write_text(
         "---\n"
         "id: creational/thing\nname: Thing\nguide_url: null\n"
