@@ -33,10 +33,23 @@ out of the class and pass the result in.
    lambda, capture mail in a list; assert on behavior, not on mocks' innards.
 
 ```python
-from patterns.modern.dependency_injection import ReminderService
+from datetime import date
 
+from patterns.modern.dependency_injection import Invoice, ReminderService
+from patterns.modern.dependency_injection.examples.invoice_reminders import (
+    ConsoleMail,
+    InMemoryInvoices,
+)
+
+source = InMemoryInvoices(
+    [
+        Invoice("INV-1", "ada@example.com", 120_00, date(2026, 8, 1)),
+        Invoice("INV-3", "sam@example.com", 60_00, date(2026, 7, 20)),
+    ]
+)
+outbox = ConsoleMail()
 service = ReminderService(invoices=source, mail=outbox, today=lambda: date(2026, 8, 27))
-assert service.send_reminders() == ["INV-1"]
+assert service.send_reminders() == ["INV-1", "INV-3"]
 ```
 
 ## Python idioms that keep it small

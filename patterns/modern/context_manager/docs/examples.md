@@ -25,4 +25,4 @@ Real embodiments of the pattern outside this repo, for deeper study.
   *(unverified)* <https://docs.pytest.org/en/stable/how-to/fixtures.html>
 - **Django `transaction.atomic`** — one transaction seam usable as context
   manager or decorator. *(unverified)*
-  <https://docs.djangoproject.com/en/5.0/topics/db/transactions/>
+  <https://docs.djangoproject.com/en/stable/topics/db/transactions/>

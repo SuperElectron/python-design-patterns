@@ -25,7 +25,11 @@ class Invoice:
 
 
 class Invoices(Protocol):
-    """The port: what the domain may ask of invoice storage."""
+    """The port: what the domain may ask of invoice storage.
+
+    Contract (held by the shared tests): ``add`` refuses a duplicate invoice
+    number with ``ValueError``; ``list_all`` returns insertion order.
+    """
 
     def add(self, invoice: Invoice) -> None: ...
 
@@ -41,6 +45,8 @@ class InMemoryInvoices:
         self._items: list[Invoice] = []
 
     def add(self, invoice: Invoice) -> None:
+        if any(existing.number == invoice.number for existing in self._items):
+            raise ValueError(f"invoice {invoice.number!r} already exists")
         self._items.append(invoice)
 
     def for_customer(self, customer: str) -> list[Invoice]:

@@ -17,10 +17,10 @@ class FixedInvoices:
 
 class CapturingMail:
     def __init__(self) -> None:
-        self.outbox: list[tuple[str, str]] = []
+        self.outbox: list[tuple[str, str, str]] = []
 
     def send(self, to: str, subject: str, body: str) -> None:
-        self.outbox.append((to, subject))
+        self.outbox.append((to, subject, body))
 
 
 def invoice(number: str, due: date, email: str = "ada@example.com") -> Invoice:
@@ -37,7 +37,16 @@ class TestReminderPolicy:
         mail = CapturingMail()
         reminded = self.service([invoice("INV-1", date(2026, 8, 1))], mail).send_reminders()
         assert reminded == ["INV-1"]
-        assert mail.outbox == [("ada@example.com", "Invoice INV-1 is 26 days overdue")]
+        assert mail.outbox == [
+            ("ada@example.com", "Invoice INV-1 is 26 days overdue", "Please pay 100.00.")
+        ]  # cents rendered as currency, not 10000
+
+    def test_grace_days_parameter_actually_widens_the_grace(self) -> None:
+        mail = CapturingMail()
+        overdue_26_days = invoice("INV-1", date(2026, 8, 1))
+        service = self.service([overdue_26_days], mail)
+        assert service.send_reminders(grace_days=30) == []  # 26 < 30: quiet
+        assert service.send_reminders(grace_days=25) == ["INV-1"]  # 26 > 25
 
     def test_exactly_at_grace_is_not_reminded(self) -> None:
         mail = CapturingMail()

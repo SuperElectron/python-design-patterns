@@ -33,7 +33,9 @@ tested — or changed — without dragging storage along.
    `repo: Invoices` stay importable, testable, and driver-free.
 
 ```python
-from patterns.modern.repository import InMemoryInvoices, total_owed
+from datetime import date
+
+from patterns.modern.repository import InMemoryInvoices, Invoice, total_owed
 
 repo = InMemoryInvoices()
 repo.add(Invoice("INV-1", "ada", 120_00, date(2026, 8, 1)))
@@ -64,6 +66,8 @@ assert total_owed(repo, "ada") == 120_00
   an aggregate, not a schema.
 - **Transactions smeared across repositories.** Commit/rollback is its own
   seam (unit of work); bolting `commit()` onto each repository hides it.
+  (The mini-project's sqlite adapter commits per write so its durability
+  claim stays true at demo scale; a production design lifts commit here.)
 
 ## Worked example
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable, Iterable
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 Item = TypeVar("Item")
 Result = TypeVar("Result")
@@ -68,8 +68,14 @@ class WorkerPool(Generic[Item, Result]):
             return await self._run_sentinel(items)
         return await self._run_join_and_cancel(items)
 
+    def _make_channel(self, maxsize: int) -> asyncio.Queue[Any]:
+        """Observability seam: tests substitute a recording queue here to
+        assert the shutdown *mechanism* (sentinel count, task_done
+        bookkeeping, backpressure bound), not just the results."""
+        return asyncio.Queue(maxsize=maxsize)
+
     async def _run_join_and_cancel(self, items: Iterable[Item]) -> list[Result]:
-        channel: asyncio.Queue[Item] = asyncio.Queue(maxsize=self._maxsize)
+        channel: asyncio.Queue[Item] = self._make_channel(self._maxsize)
         results: list[Result] = []
 
         async def worker() -> None:
@@ -90,7 +96,7 @@ class WorkerPool(Generic[Item, Result]):
         return results
 
     async def _run_sentinel(self, items: Iterable[Item]) -> list[Result]:
-        channel: asyncio.Queue[Item | _End] = asyncio.Queue(maxsize=self._maxsize)
+        channel: asyncio.Queue[Item | _End] = self._make_channel(self._maxsize)
         results: list[Result] = []
 
         async def worker() -> None:

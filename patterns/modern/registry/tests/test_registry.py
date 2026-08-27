@@ -60,3 +60,13 @@ class TestLookup:
         assert registry.names() == ("a", "b")
         assert "a" in registry and "z" not in registry
         assert len(registry) == 2
+
+
+class TestDefaultKind:
+    def test_default_kind_names_entries_in_errors(self) -> None:
+        registry: Registry[str] = Registry()  # no kind given
+        registry.register("x")("value")
+        with pytest.raises(ValueError, match="entry 'x' is already registered"):
+            registry.register("x")("other")
+        with pytest.raises(UnknownKeyError, match="unknown entry 'y'"):
+            registry.get("y")

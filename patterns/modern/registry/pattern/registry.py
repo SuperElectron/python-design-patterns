@@ -36,7 +36,7 @@ class Registry(Generic[T]):
 
         def decorator(entry: T) -> T:
             if name in self._entries and not replace:
-                raise ValueError(f"{self._kind} {name!r} is already registered")
+                raise ValueError(f"{self._kind} {name!r} is already registered (pass replace=True)")
             self._entries[name] = entry
             return entry
 

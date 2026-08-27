@@ -18,8 +18,9 @@ clock shows it — sequential awaits over independent I/O. Or the opposite:
 4. **Pick the shutdown discipline — and write the test the same day.**
    - `Shutdown.JOIN_AND_CANCEL` when a coordinator knows the item set and
      wants "everything finished" as a joinable event.
-   - `Shutdown.SENTINEL` when the producer itself signals the end of a
-     stream and workers should drain and stop.
+   - `Shutdown.SENTINEL` when workers should drain the queue and stop:
+     the pool enqueues one end-marker per worker after the items are
+     exhausted.
 5. **Decide the failure policy at the edge.** The pool is fail-fast (one bad
    item cancels the run, surfacing as an `ExceptionGroup`). If a bad item
    must not kill the batch, catch inside *your* processor and return an

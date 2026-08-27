@@ -4,7 +4,9 @@ Each file is written with ``AtomicWrite`` (old-or-new, never half). The
 release as a whole is made transactional with ``ExitStack``: every written
 file pushes a rollback callback, and only a fully validated release pops
 them off uncalled — the commit *is* ``pop_all()``. Any exception on the way
-unwinds the stack, restoring every file already touched.
+unwinds the stack, restoring every file already touched. (Each rollback
+targets its own file, so the LIFO unwind order is deliberately not
+load-bearing here; what matters is that every callback runs.)
 """
 
 from __future__ import annotations

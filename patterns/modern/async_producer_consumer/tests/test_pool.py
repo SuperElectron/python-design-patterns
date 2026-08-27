@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 import pytest
 
@@ -11,6 +12,7 @@ from patterns.modern.async_producer_consumer.pattern import (
     WorkerPool,
     process_all,
 )
+from patterns.modern.async_producer_consumer.pattern.pool import _End
 
 
 async def upper(item: str) -> str:
@@ -72,3 +74,77 @@ class TestConcurrencyContract:
     def test_pool_requires_at_least_one_worker(self) -> None:
         with pytest.raises(ValueError):
             WorkerPool(upper, workers=0)
+
+
+class RecordingQueue(asyncio.Queue[Any]):
+    """An asyncio.Queue that logs puts, task_done calls, and peak backlog."""
+
+    def __init__(self, maxsize: int = 0) -> None:
+        super().__init__(maxsize)
+        self.created_maxsize = maxsize
+        self.put_log: list[Any] = []
+        self.max_backlog = 0
+        self.task_done_calls = 0
+
+    async def put(self, item: Any) -> None:
+        await super().put(item)
+        self.put_log.append(item)
+        self.max_backlog = max(self.max_backlog, self.qsize())
+
+    def task_done(self) -> None:
+        self.task_done_calls += 1
+        super().task_done()
+
+
+class ObservablePool(WorkerPool[str, str]):
+    """WorkerPool with the channel seam swapped for a RecordingQueue."""
+
+    channel: RecordingQueue
+
+    def _make_channel(self, maxsize: int) -> asyncio.Queue[Any]:
+        self.channel = RecordingQueue(maxsize)
+        return self.channel
+
+
+class TestShutdownMechanism:
+    """The disciplines must differ observably — not just agree on results.
+
+    Collapsing ``run``'s switch to either branch fails one of these tests,
+    so the switch itself is pinned, not merely the outcomes.
+    """
+
+    async def test_sentinel_enqueues_one_marker_per_worker_and_drains(self) -> None:
+        pool = ObservablePool(upper, workers=3, shutdown=Shutdown.SENTINEL)
+        await pool.run(["a", "b", "c", "d", "e"])
+        markers = [x for x in pool.channel.put_log if isinstance(x, _End)]
+        assert len(markers) == 3  # exactly one per worker, no orphans
+        assert pool.channel.qsize() == 0  # every marker consumed: clean drain
+        assert pool.channel.task_done_calls == 0  # no join bookkeeping here
+
+    async def test_join_and_cancel_uses_task_done_and_no_sentinels(self) -> None:
+        pool = ObservablePool(upper, workers=3, shutdown=Shutdown.JOIN_AND_CANCEL)
+        await pool.run(["a", "b", "c", "d", "e"])
+        assert pool.channel.task_done_calls == 5  # join() waits on these
+        assert not any(isinstance(x, _End) for x in pool.channel.put_log)
+        assert pool.channel.qsize() == 0
+
+    async def test_backpressure_bounds_the_queue(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Observes the REAL pool's queue (not the test seam), so making the
+        pool construct an unbounded queue fails here."""
+        created: list[RecordingQueue] = []
+
+        class TrackingQueue(RecordingQueue):
+            def __init__(self, maxsize: int = 0) -> None:
+                super().__init__(maxsize)
+                created.append(self)
+
+        monkeypatch.setattr(asyncio, "Queue", TrackingQueue)
+
+        async def slow(item: str) -> str:
+            await asyncio.sleep(0.001)
+            return item.upper()
+
+        await process_all([chr(ord("a") + n) for n in range(10)], slow, workers=2, maxsize=2)
+        (channel,) = created
+        assert channel.created_maxsize == 2  # the bound is actually passed through
+        assert channel.max_backlog <= 2  # and never exceeded during the run

@@ -24,7 +24,7 @@ that neither drops items nor hangs.
    backpressure valve — `put` blocks when the buffer is full.
 2. N workers start, each looping `get → process`.
 3. Producers enqueue items; slow consumers automatically slow the producers.
-4. Shutdown, the part naive versions get wrong, is one of two disciplines:
+4. Shutdown, the part first attempts get wrong, is one of two disciplines:
    - **Sentinel** — after the last item, enqueue one end-marker per worker;
      each worker exits on dequeuing one.
    - **Join and cancel** — workers mark `task_done()`; the coordinator awaits
@@ -37,7 +37,7 @@ Before asyncio this was the thread pattern — an OS thread per worker, a lock
 around shared results, and hand-rolled sentinel plumbing:
 
 ```python
-def process_all(items: list[str], worker_count: int = 2) -> list[str]:
+def process_all_threaded(items: list[str], worker_count: int = 2) -> list[str]:
     channel: queue.Queue[str | None] = queue.Queue()
     results: list[str] = []
     lock = threading.Lock()

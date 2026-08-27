@@ -34,6 +34,14 @@ Before `with`, the guarantee was hand-written `try/finally` at every call
 site — correct, and unscalable:
 
 ```python
+class Resource:
+    def __init__(self, name: str, log: list[str]) -> None:
+        self.name, self.log = name, log
+
+    def close(self) -> None:
+        self.log.append(f"closed {self.name}")
+
+
 def use_two(log: list[str]) -> None:
     first = Resource("a", log)
     try:

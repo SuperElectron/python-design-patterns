@@ -36,7 +36,12 @@ gets re-decided (differently) at every ladder in the codebase.
    the honest place — with a comment saying the import is load-bearing.
 
 ```python
+from collections.abc import Callable
+
 from patterns.modern.registry import Registry
+
+Rows = list[dict[str, str]]
+Exporter = Callable[[Rows], str]
 
 EXPORTERS: Registry[Exporter] = Registry(kind="format")
 

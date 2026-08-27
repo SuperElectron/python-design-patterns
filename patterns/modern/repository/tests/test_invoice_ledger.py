@@ -10,6 +10,7 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Iterator
 from datetime import date
+from pathlib import Path
 
 import pytest
 
@@ -49,16 +50,37 @@ class TestRepositoryContract:
         repo.add(Invoice("INV-2", "grace", 200, TODAY))
         assert [i.number for i in repo.for_customer("grace")] == ["INV-2"]
 
-    def test_list_all_returns_everything(self, repo: Invoices) -> None:
+    def test_list_all_returns_everything_in_insertion_order(self, repo: Invoices) -> None:
+        repo.add(Invoice("INV-2", "grace", 200, TODAY))  # non-alphabetical on purpose
         repo.add(Invoice("INV-1", "ada", 100, TODAY))
-        repo.add(Invoice("INV-2", "grace", 200, TODAY))
-        assert {i.number for i in repo.list_all()} == {"INV-1", "INV-2"}
+        assert [i.number for i in repo.list_all()] == ["INV-2", "INV-1"]
+
+    def test_duplicate_invoice_numbers_are_refused(self, repo: Invoices) -> None:
+        repo.add(Invoice("INV-1", "ada", 100, TODAY))
+        with pytest.raises(ValueError, match="INV-1"):
+            repo.add(Invoice("INV-1", "grace", 999, TODAY))
+        assert len(repo.list_all()) == 1  # the original survives, nothing half-added
 
     def test_domain_logic_cannot_tell_the_adapters_apart(self, repo: Invoices) -> None:
         repo.add(Invoice("INV-1", "ada", 120_00, date(2026, 8, 1)))
         repo.add(Invoice("INV-2", "ada", 80_00, date(2026, 9, 15)))
         assert total_owed(repo, "ada") == 200_00
         assert [i.number for i in overdue(repo, TODAY)] == ["INV-1"]
+
+
+class TestSqliteDurability:
+    def test_writes_survive_closing_and_reopening_the_file(self, tmp_path: Path) -> None:
+        db = tmp_path / "ledger.db"
+        conn = sqlite3.connect(db)
+        SqliteInvoices(conn).add(Invoice("INV-1", "ada", 120_00, date(2026, 8, 1)))
+        conn.close()
+
+        reopened = sqlite3.connect(db)
+        try:
+            rows = SqliteInvoices(reopened).list_all()
+        finally:
+            reopened.close()
+        assert [i.number for i in rows] == ["INV-1"]  # durable, as the docstring claims
 
 
 class TestDemo:
