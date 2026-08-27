@@ -30,7 +30,12 @@ _lazy_instance: Logger | None = None
 
 
 def get_logger() -> Logger:
-    """Build the shared instance on first call, then keep handing it back."""
+    """Build the shared instance on first call, then keep handing it back.
+
+    Not thread-safe: two threads racing the first call can each build a
+    Logger (one wins the slot). Harmless for a cheap object; guard with a
+    threading.Lock if construction has side effects.
+    """
     global _lazy_instance
     if _lazy_instance is None:
         _lazy_instance = Logger()

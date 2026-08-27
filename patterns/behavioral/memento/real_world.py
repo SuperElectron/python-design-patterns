@@ -2,6 +2,11 @@
 
 dumps() produces an opaque snapshot; loads() restores an equivalent object
 -- checkpoint/rollback for anything picklable.
+
+SECURITY: ``pickle.loads`` executes code during deserialization. Only ever
+unpickle snapshots your own process produced and stored somewhere untrusted
+input cannot reach (CWE-502). For snapshots that cross a trust boundary,
+serialize explicit state as JSON instead.
 """
 
 from __future__ import annotations
@@ -21,6 +26,7 @@ def checkpoint(game: Game) -> bytes:
 
 
 def rollback(snapshot: bytes) -> Game:
+    # Safe ONLY because `snapshot` came from checkpoint() in this process.
     restored = pickle.loads(snapshot)
     assert isinstance(restored, Game)
     return restored
