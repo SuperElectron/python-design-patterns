@@ -16,9 +16,12 @@ from typing import Literal, get_args
 
 Verdict = Literal["pythonic", "use-with-care", "prefer-alternative"]
 VariantName = Literal["naive", "pythonic", "real_world"]
+Shape = Literal["module", "legacy"]
+DocName = Literal["fundamentals", "implementation", "examples"]
 
 VERDICTS: tuple[str, ...] = get_args(Verdict)
 VARIANTS: tuple[str, ...] = get_args(VariantName)
+DOC_NAMES: tuple[str, ...] = get_args(DocName)
 
 _REQUIRED_KEYS = frozenset({"id", "name", "guide_url", "problem", "symptoms", "verdict", "caveats"})
 
@@ -51,9 +54,46 @@ class Pattern:
     def slug(self) -> str:
         return self.id.split("/", 1)[1]
 
+    @property
+    def shape(self) -> Shape:
+        """``module`` units keep code in ``pattern/``; ``legacy`` units ship flat variant files.
+
+        Any module-shape marker (``pattern/``, ``docs/``, ``examples/``) claims
+        the unit for strict validation, so a half-migration fails CI loudly
+        instead of quietly loading as legacy.
+        """
+        markers = ("pattern", "docs", "examples")
+        return "module" if any((self.path / m).is_dir() for m in markers) else "legacy"
+
     def variants(self) -> dict[str, Path]:
-        """The example files this unit actually ships."""
+        """The flat example files a legacy unit ships (empty for module units)."""
         return {v: self.path / f"{v}.py" for v in VARIANTS if (self.path / f"{v}.py").is_file()}
+
+    def docs(self) -> dict[str, Path]:
+        """The unit's teaching docs (fundamentals/implementation/examples), if present."""
+        return {
+            d: self.path / "docs" / f"{d}.md"
+            for d in DOC_NAMES
+            if (self.path / "docs" / f"{d}.md").is_file()
+        }
+
+    def examples(self) -> dict[str, Path]:
+        """Runnable mini-project packages: ``examples/<project>/`` with a ``__main__.py``."""
+        examples_dir = self.path / "examples"
+        if not examples_dir.is_dir():
+            return {}
+        return {
+            child.name: child
+            for child in sorted(examples_dir.iterdir())
+            if child.is_dir() and (child / "__main__.py").is_file()
+        }
+
+    def sources(self) -> dict[str, Path]:
+        """The pattern's own code: ``pattern/*.py``, keyed by filename (module units)."""
+        pattern_dir = self.path / "pattern"
+        if not pattern_dir.is_dir():
+            return {}
+        return {p.name: p for p in sorted(pattern_dir.glob("*.py"))}
 
 
 def _split_frontmatter(text: str, readme: Path) -> tuple[str, str]:
@@ -119,9 +159,38 @@ def _parse_pattern(readme: Path, root: Path) -> Pattern:
         prose=prose,
         path=unit_dir,
     )
-    if not pattern.variants():
-        raise CatalogError(f"{readme}: unit ships no naive/pythonic/real_world example")
+    _validate_shape(pattern, readme)
     return pattern
+
+
+def _validate_shape(pattern: Pattern, readme: Path) -> None:
+    """Module-shape units get strict structural validation; legacy units keep the old rule."""
+    if pattern.shape == "legacy":
+        if not pattern.variants():
+            raise CatalogError(f"{readme}: unit ships no naive/pythonic/real_world example")
+        return
+
+    unit = pattern.path
+    if stale := sorted(pattern.variants()):
+        raise CatalogError(f"{readme}: module unit still ships legacy variant files: {stale}")
+    missing_docs = [d for d in DOC_NAMES if not (unit / "docs" / f"{d}.md").is_file()]
+    if missing_docs:
+        raise CatalogError(f"{readme}: module unit missing docs/: {missing_docs}")
+    if not (unit / "pattern" / "__init__.py").is_file():
+        raise CatalogError(f"{readme}: module unit's pattern/ package has no __init__.py")
+    examples = pattern.examples()
+    if not examples:
+        raise CatalogError(
+            f"{readme}: module unit ships no runnable examples/<project>/__main__.py"
+        )
+    if not (unit / "examples" / "__init__.py").is_file():
+        raise CatalogError(f"{readme}: examples/ is not a package (no __init__.py)")
+    for name, path in examples.items():
+        if not (path / "__init__.py").is_file():
+            raise CatalogError(f"{readme}: example {name!r} is not a package (no __init__.py)")
+    tests_dir = unit / "tests"
+    if not any(tests_dir.glob("test_*.py")):
+        raise CatalogError(f"{readme}: module unit has no tests/test_*.py")
 
 
 @dataclass(frozen=True)
@@ -145,7 +214,10 @@ class Catalog:
         for p in self.patterns:
             entry = asdict(p)
             del entry["prose"], entry["path"]
+            entry["shape"] = p.shape
             entry["variants"] = sorted(p.variants())
+            entry["docs"] = sorted(p.docs())
+            entry["examples"] = sorted(p.examples())
             entries.append(entry)
         return json.dumps(entries, indent=2)
 
