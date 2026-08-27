@@ -14,33 +14,17 @@ stdlib_sightings: [copy.copy, copy.deepcopy, functools.partial]
 
 # Prototype
 
-## Problem
+Stamp out new objects from named, pre-configured starting points. **Verdict:
+prefer an alternative** — store callables (`functools.partial`), not exemplars
+with a `clone()` protocol; tweak frozen products with `dataclasses.replace`.
 
-A framework needs to stamp out new objects without knowing how to construct
-them — the classic case is a menu of pre-configured instances the user picks
-from. The GoF answer: store an exemplar ("prototype") and `clone()` it.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `TemplateRegistry`, `Template` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/report_job_templates/`](examples/report_job_templates/) | Mini-project: a report scheduler stamping jobs from a template menu |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` follows the book: an abstract `clone()` method, concrete prototypes,
-and a registry mapping names to exemplars that get cloned on demand.
-
-## Pythonic solution
-
-Python doesn't need the interface, because *callables* are the interface.
-`pythonic.py` shows the guide's recommendation on a real shape — a scheduler
-stamping out report jobs from `functools.partial` templates, with per-run
-tweaks via `dataclasses.replace` on the frozen product. No `clone()`
-anywhere.
-
-## In the wild
-
-`copy.copy` and `copy.deepcopy` are the stdlib's clone operation, complete
-with the `__copy__`/`__deepcopy__` protocol for classes that need custom
-cloning — that protocol *is* the Prototype pattern, absorbed into the language.
-
-## Verdict
-
-**Prefer an alternative.** Store callables, not exemplars. Reach for
-`copy.deepcopy` only when instances are genuinely expensive or awkward to
-rebuild from arguments.
+```bash
+uv run python -m patterns.creational.prototype.examples.report_job_templates
+```
