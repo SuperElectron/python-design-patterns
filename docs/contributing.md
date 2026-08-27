@@ -25,7 +25,8 @@ takes only reviewed milestone merges. CI (3.11/3.12/3.13) must pass.
 
 - Full type hints; import-safe modules (no side effects at import).
 - Tests assert behavior, not "it runs" — and load-bearing claims get the
-  mutation treatment (see [.github/code-review.md](../.github/code-review.md)).
+  mutation treatment (mutate the code, prove the suite fails, revert). Reviews
+  are severity-ordered; machines own style, humans argue design.
 - Mini-projects use realistic domains, no Foo/Bar.
 - Prose: one page, problem-first, no UML, no history lessons. The classic
   (GoF) form lives in `docs/fundamentals.md` as an annotated listing.

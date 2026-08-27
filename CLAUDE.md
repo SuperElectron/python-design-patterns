@@ -38,7 +38,7 @@ patterns/<group>/<slug>/
 - Everything import-safe (no side effects at import); mini-projects run via
   `uv run python -m patterns.<group>.<slug>.examples.<project>`.
 - Tests assert behavior, never just "it runs"; load-bearing claims get the
-  mutation treatment (`.github/code-review.md`).
+  mutation treatment (mutate the code, prove the suite fails, revert).
 - Examples must genuinely build on `pattern/` — the loader and a catalog test
   enforce the structure and the import; reviewers reject token imports.
 - Full type hints; `mypy --strict` must pass.
@@ -49,6 +49,8 @@ patterns/<group>/<slug>/
   `replace=True`); ordered collections append freely.
 - `ParamSpec` only where a wrapper callable is returned; identity typing otherwise.
 - Never `None` as a cache sentinel; immutability guards recurse into containers.
+- `__init__.py` is empty unless it is the unit's public-API re-export file
+  (`from .pattern.x import Y as Y` — the as-alias form); never `__all__`.
 
 ## Frontmatter schema (the MCP server indexes this — keep it valid)
 
