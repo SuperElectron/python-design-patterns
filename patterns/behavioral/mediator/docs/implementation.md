@@ -62,5 +62,5 @@ assert form.payment_options == ("card", "cod")
 country/shipping/payment with cascading resets and submit gating:
 
 ```bash
-uv run python -m patterns.behavioral.mediator.examples.checkout_form
+uv run python -m patterns.behavioral.mediator.examples.checkout_form.main
 ```

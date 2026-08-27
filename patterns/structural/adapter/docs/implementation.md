@@ -74,5 +74,5 @@ class StripeAdapter(DelegatingAdapter[StripeLikeClient]):
 mismatched fake vendor SDKs behind one `PaymentProcessor` — run it with:
 
 ```bash
-uv run python -m patterns.structural.adapter.examples.payment_gateways
+uv run python -m patterns.structural.adapter.examples.payment_gateways.main
 ```

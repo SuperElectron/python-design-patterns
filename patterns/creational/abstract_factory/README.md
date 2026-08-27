@@ -28,5 +28,5 @@ consistent with each other.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.creational.abstract_factory.examples.report_renderer
+uv run python -m patterns.creational.abstract_factory.examples.report_renderer.main
 ```

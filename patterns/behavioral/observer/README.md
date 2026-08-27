@@ -26,5 +26,5 @@ list; the only real design decisions are order and failure policy.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.observer.examples.order_events
+uv run python -m patterns.behavioral.observer.examples.order_events.main
 ```

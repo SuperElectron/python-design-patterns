@@ -140,7 +140,7 @@ def _write_module_unit(root: Path, group: str, slug: str, frontmatter: str) -> P
         (docs / f"{name}.md").write_text(f"# {name}\n")
     project = unit / "examples" / "demo"
     project.mkdir(parents=True)
-    (project / "__main__.py").write_text("print('demo ran')\n")
+    (project / "main.py").write_text("print('demo ran')\n")
     tests = unit / "tests"
     tests.mkdir()
     (tests / "test_thing.py").write_text("def test_ok() -> None:\n    assert True\n")
@@ -163,7 +163,7 @@ class TestModuleShapeValidation:
 
     def test_no_example_fails(self, tmp_path: Path) -> None:
         unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
-        (unit / "examples" / "demo" / "__main__.py").unlink()
+        (unit / "examples" / "demo" / "main.py").unlink()
         with pytest.raises(CatalogError, match="no runnable examples"):
             load_catalog(tmp_path)
 
@@ -171,6 +171,12 @@ class TestModuleShapeValidation:
         unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
         (unit / "examples" / "demo" / "__init__.py").write_text("")
         with pytest.raises(CatalogError, match=r"delete empty __init__\.py"):
+            load_catalog(tmp_path)
+
+    def test_dunder_main_is_banned(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "examples" / "demo" / "__main__.py").write_text("print('old style')\n")
+        with pytest.raises(CatalogError, match=r"__main__\.py is banned"):
             load_catalog(tmp_path)
 
     def test_empty_tests_fails(self, tmp_path: Path) -> None:

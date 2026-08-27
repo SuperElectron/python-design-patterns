@@ -27,5 +27,5 @@ per meaning, compared with `is`.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.python.sentinel_object.examples.layered_config
+uv run python -m patterns.python.sentinel_object.examples.layered_config.main
 ```

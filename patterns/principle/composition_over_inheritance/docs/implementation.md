@@ -70,5 +70,5 @@ severity ≥ 2, deduped JSON to a webhook at severity ≥ 4 — one `Notifier`
 class, zero combination subclasses. Run it:
 
 ```bash
-uv run python -m patterns.principle.composition_over_inheritance.examples.notification_router
+uv run python -m patterns.principle.composition_over_inheritance.examples.notification_router.main
 ```

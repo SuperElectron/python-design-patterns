@@ -61,15 +61,15 @@ def _run_module(repo_root: str, module: str) -> RunResult:
 
 
 def run_example_package(catalog: Catalog, pattern_id: str, example: str) -> RunResult:
-    """Execute a unit's ``examples/<example>`` mini-project package in a subprocess."""
+    """Execute a unit's ``examples/<example>`` mini-project in a subprocess."""
     pattern = catalog.get(pattern_id)  # KeyError for unknown ids -- by design
     examples = pattern.examples()
     if example not in examples:
         raise KeyError(f"{pattern_id} has no example {example!r} (has: {sorted(examples)})")
     path = examples[example]  # resolved by the catalog, never by the caller
-    if not (path / "__main__.py").is_file():  # a real check, not an assert: survives python -O
-        raise FileNotFoundError(f"catalog names {path} but it has no __main__.py")
+    if not (path / "main.py").is_file():  # a real check, not an assert: survives python -O
+        raise FileNotFoundError(f"catalog names {path} but it has no main.py")
 
     repo_root = pattern.path.parents[2]
-    module = f"patterns.{pattern.group}.{pattern.slug}.examples.{example}"
+    module = f"patterns.{pattern.group}.{pattern.slug}.examples.{example}.main"
     return _run_module(str(repo_root), module)

@@ -64,5 +64,5 @@ document at two live `Style` objects and pins both the identity sharing
 and the ceiling in tests:
 
 ```bash
-uv run python -m patterns.structural.flyweight.examples.glyph_styles
+uv run python -m patterns.structural.flyweight.examples.glyph_styles.main
 ```

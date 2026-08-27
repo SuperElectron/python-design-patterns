@@ -26,5 +26,5 @@ for trees; keep the leaf's interface honest.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.composite.examples.org_chart
+uv run python -m patterns.structural.composite.examples.org_chart.main
 ```

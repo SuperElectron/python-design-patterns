@@ -65,5 +65,5 @@ def register(name, handler): ...  # ... and its functions, drifting apart
 `MetricsCollector`, with the class public for isolated collectors. Run it:
 
 ```bash
-uv run python -m patterns.python.prebound_method.examples.metrics
+uv run python -m patterns.python.prebound_method.examples.metrics.main
 ```

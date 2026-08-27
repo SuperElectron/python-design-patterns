@@ -27,5 +27,5 @@ Java with the serial numbers filed off.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.creational.factory_method.examples.feed_client
+uv run python -m patterns.creational.factory_method.examples.feed_client.main
 ```

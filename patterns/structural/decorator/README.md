@@ -27,5 +27,5 @@ language absorbed the pattern into `@decorator` syntax.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.decorator.examples.resilient_client
+uv run python -m patterns.structural.decorator.examples.resilient_client.main
 ```

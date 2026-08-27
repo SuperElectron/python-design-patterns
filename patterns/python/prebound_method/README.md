@@ -26,5 +26,5 @@ isolation. **Verdict: pythonic** — the stdlib's own favorite move.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.python.prebound_method.examples.metrics
+uv run python -m patterns.python.prebound_method.examples.metrics.main
 ```

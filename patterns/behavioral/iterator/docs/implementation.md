@@ -61,5 +61,5 @@ million records.
 step to an article API client with an observably lazy fetch log:
 
 ```bash
-uv run python -m patterns.behavioral.iterator.examples.paginated_client
+uv run python -m patterns.behavioral.iterator.examples.paginated_client.main
 ```

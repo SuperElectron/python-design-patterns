@@ -26,5 +26,5 @@ the whole pattern until commands need undo, logs, or metadata.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.command.examples.editor_undo
+uv run python -m patterns.behavioral.command.examples.editor_undo.main
 ```

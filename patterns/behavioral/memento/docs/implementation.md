@@ -82,5 +82,5 @@ every step: atomic validate-or-reject batches, LIFO undo, and a named
 "before-upgrade" checkpoint. Run it with:
 
 ```bash
-uv run python -m patterns.behavioral.memento.examples.config_checkpoints
+uv run python -m patterns.behavioral.memento.examples.config_checkpoints.main
 ```

@@ -75,5 +75,5 @@ class StrictClient(FeedClient):  # or per-subclass; factory_slot because
 subclass, by instance, and by a test double — run it with:
 
 ```bash
-uv run python -m patterns.creational.factory_method.examples.feed_client
+uv run python -m patterns.creational.factory_method.examples.feed_client.main
 ```

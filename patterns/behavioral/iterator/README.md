@@ -25,5 +25,5 @@ Traverse elements without exposing storage — lazily when it matters.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.behavioral.iterator.examples.paginated_client
+uv run python -m patterns.behavioral.iterator.examples.paginated_client.main
 ```

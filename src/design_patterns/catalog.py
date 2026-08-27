@@ -64,14 +64,14 @@ class Pattern:
         }
 
     def examples(self) -> dict[str, Path]:
-        """Runnable mini-project packages: ``examples/<project>/`` with a ``__main__.py``."""
+        """Runnable mini-project packages: ``examples/<project>/`` with a ``main.py``."""
         examples_dir = self.path / "examples"
         if not examples_dir.is_dir():
             return {}
         return {
             child.name: child
             for child in sorted(examples_dir.iterdir())
-            if child.is_dir() and (child / "__main__.py").is_file()
+            if child.is_dir() and (child / "main.py").is_file()
         }
 
     def sources(self) -> dict[str, Path]:
@@ -161,8 +161,12 @@ def _validate_shape(pattern: Pattern, readme: Path) -> None:
         raise CatalogError(f"{readme}: module unit's pattern/ package has no __init__.py")
     examples = pattern.examples()
     if not examples:
+        raise CatalogError(f"{readme}: module unit ships no runnable examples/<project>/main.py")
+    if dunder_mains := sorted(unit.rglob("__main__.py")):
         raise CatalogError(
-            f"{readme}: module unit ships no runnable examples/<project>/__main__.py"
+            f"{readme}: __main__.py is banned "
+            f"({[str(f.relative_to(unit)) for f in dunder_mains]}) — "
+            "entry points are main.py, run via python -m <package>.main"
         )
     for stray in _empty_inits(unit):
         raise CatalogError(

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.strategy.examples.promotions.__main__ import main
+from patterns.behavioral.strategy.examples.promotions.main import main
 from patterns.behavioral.strategy.examples.promotions.models import LineItem, Order
 from patterns.behavioral.strategy.examples.promotions.rules import best_promo, due, promotion
 from patterns.behavioral.strategy.pattern import StrategyRegistry

@@ -34,7 +34,7 @@ class TestPackageSandbox:
         # A crashing demo must come back as a RunResult, not an exception.
         root = tmp_path / "patterns"
         unit = write_module_unit(root)
-        (unit / "examples" / "demo" / "__main__.py").write_text(
+        (unit / "examples" / "demo" / "main.py").write_text(
             "import sys\n\nprint('about to fail')\nsys.exit(3)\n"
         )
         result = run_example_package(load_catalog(root), "creational/thing", "demo")

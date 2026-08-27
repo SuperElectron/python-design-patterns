@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.__main__ import main
 from patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.handlers import (
     build_escalation_chain,
     route,
 )
+from patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.main import main
 from patterns.behavioral.chain_of_responsibility.examples.ticket_escalation.models import Ticket
 
 

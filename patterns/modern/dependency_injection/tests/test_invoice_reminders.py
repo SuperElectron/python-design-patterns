@@ -6,7 +6,6 @@ from datetime import date
 
 import pytest
 
-from patterns.modern.dependency_injection.examples.invoice_reminders.__main__ import main
 from patterns.modern.dependency_injection.examples.invoice_reminders.adapters import (
     ConsoleMail,
     InMemoryInvoices,
@@ -15,6 +14,7 @@ from patterns.modern.dependency_injection.examples.invoice_reminders.app import 
     build_service,
     sample_invoices,
 )
+from patterns.modern.dependency_injection.examples.invoice_reminders.main import main
 from patterns.modern.dependency_injection.pattern import Invoice
 
 

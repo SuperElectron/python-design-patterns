@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.observer.examples.order_events.__main__ import main
+from patterns.behavioral.observer.examples.order_events.main import main
 from patterns.behavioral.observer.examples.order_events.subscribers import (
     AuditLog,
     EmailNotifier,

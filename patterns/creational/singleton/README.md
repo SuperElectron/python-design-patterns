@@ -28,5 +28,5 @@ seam for tests.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.creational.singleton.examples.app_config
+uv run python -m patterns.creational.singleton.examples.app_config.main
 ```

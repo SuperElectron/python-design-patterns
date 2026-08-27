@@ -7,9 +7,6 @@ from collections.abc import Callable
 
 import pytest
 
-from patterns.principle.composition_over_inheritance.examples.notification_router.__main__ import (
-    main,
-)
 from patterns.principle.composition_over_inheritance.examples.notification_router.axes import (
     Dedup,
     FakeWebhook,
@@ -18,6 +15,9 @@ from patterns.principle.composition_over_inheritance.examples.notification_route
     console,
     min_severity,
     plain_text,
+)
+from patterns.principle.composition_over_inheritance.examples.notification_router.main import (
+    main,
 )
 from patterns.principle.composition_over_inheritance.examples.notification_router.models import (
     Alert,

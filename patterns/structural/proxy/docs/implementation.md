@@ -63,5 +63,5 @@ side can ignore.
 role-protection over a lazy warehouse connection:
 
 ```bash
-uv run python -m patterns.structural.proxy.examples.db_gateway
+uv run python -m patterns.structural.proxy.examples.db_gateway.main
 ```

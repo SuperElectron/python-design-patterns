@@ -27,5 +27,5 @@ frozen, prefer an explicit factory over `__new__` tricks.
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
 ```bash
-uv run python -m patterns.structural.flyweight.examples.glyph_styles
+uv run python -m patterns.structural.flyweight.examples.glyph_styles.main
 ```
