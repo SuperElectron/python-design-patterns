@@ -1,19 +1,6 @@
-"""The Bridge pattern, importable as library code."""
-
-from patterns.structural.bridge.pattern.bridge import (
-    AlertNotifier,
-    DigestNotifier,
-    EmailTransport,
-    SlackTransport,
-    SmsTransport,
-    Transport,
-)
-
-__all__ = [
-    "AlertNotifier",
-    "DigestNotifier",
-    "EmailTransport",
-    "SlackTransport",
-    "SmsTransport",
-    "Transport",
-]
+from .bridge import AlertNotifier as AlertNotifier
+from .bridge import DigestNotifier as DigestNotifier
+from .bridge import EmailTransport as EmailTransport
+from .bridge import SlackTransport as SlackTransport
+from .bridge import SmsTransport as SmsTransport
+from .bridge import Transport as Transport

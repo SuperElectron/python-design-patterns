@@ -1,12 +1,3 @@
-"""Proxy — public API.
-
->>> from patterns.structural.proxy import LazyProxy
-"""
-
-from patterns.structural.proxy.pattern import (
-    LazyProxy,
-    MeteringProxy,
-    ProtectionProxy,
-)
-
-__all__ = ["LazyProxy", "MeteringProxy", "ProtectionProxy"]
+from .pattern.proxies import LazyProxy as LazyProxy
+from .pattern.proxies import MeteringProxy as MeteringProxy
+from .pattern.proxies import ProtectionProxy as ProtectionProxy

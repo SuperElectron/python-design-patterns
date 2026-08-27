@@ -6,7 +6,7 @@ import dataclasses
 
 import pytest
 
-from patterns.structural.flyweight.examples.glyph_styles import Document
+from patterns.structural.flyweight.examples.glyph_styles.document import Document
 
 
 def test_many_glyphs_share_a_handful_of_styles() -> None:

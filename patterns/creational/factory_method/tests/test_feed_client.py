@@ -2,7 +2,7 @@
 
 import pytest
 
-from patterns.creational.factory_method.examples.feed_client import (
+from patterns.creational.factory_method.examples.feed_client.client import (
     DigestClient,
     DigestResponse,
     FeedClient,

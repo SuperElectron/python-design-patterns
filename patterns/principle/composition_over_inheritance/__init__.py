@@ -1,15 +1,6 @@
-"""Composition Over Inheritance — public API.
-
->>> from patterns.principle.composition_over_inheritance import Pipeline, Logger
-"""
-
-from patterns.principle.composition_over_inheritance.pattern import (
-    Filter,
-    Logger,
-    Pipeline,
-    Sink,
-    Transform,
-    identity,
-)
-
-__all__ = ["Filter", "Logger", "Pipeline", "Sink", "Transform", "identity"]
+from .pattern import Filter as Filter
+from .pattern import Logger as Logger
+from .pattern import Pipeline as Pipeline
+from .pattern import Sink as Sink
+from .pattern import Transform as Transform
+from .pattern import identity as identity

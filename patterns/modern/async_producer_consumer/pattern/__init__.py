@@ -1,10 +1,4 @@
-"""The async producer/consumer pattern, importable as library code."""
-
-from patterns.modern.async_producer_consumer.pattern.pool import (
-    Processor,
-    Shutdown,
-    WorkerPool,
-    process_all,
-)
-
-__all__ = ["Processor", "Shutdown", "WorkerPool", "process_all"]
+from .pool import Processor as Processor
+from .pool import Shutdown as Shutdown
+from .pool import WorkerPool as WorkerPool
+from .pool import process_all as process_all

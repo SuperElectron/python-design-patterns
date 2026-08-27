@@ -1,5 +1,2 @@
-"""The importable Builder building block."""
-
-from patterns.creational.builder.pattern.query import Query, SelectBuilder
-
-__all__ = ["Query", "SelectBuilder"]
+from .query import Query as Query
+from .query import SelectBuilder as SelectBuilder

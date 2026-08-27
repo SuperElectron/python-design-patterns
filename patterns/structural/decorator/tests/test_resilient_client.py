@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.structural.decorator.examples.resilient_client import (
-    FlakyPaymentAPI,
-    build_charge,
-)
+from patterns.structural.decorator.examples.resilient_client.client import FlakyPaymentAPI
+from patterns.structural.decorator.examples.resilient_client.service import build_charge
 from patterns.structural.decorator.pattern import RateLimitExceededError
 
 

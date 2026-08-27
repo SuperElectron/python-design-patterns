@@ -1,7 +1,7 @@
-"""Smoke test: the package imports and reports a version."""
+"""Smoke test: the package is installed and reports a version."""
 
-import design_patterns
+from importlib.metadata import version
 
 
 def test_version() -> None:
-    assert design_patterns.__version__
+    assert version("python-design-patterns")

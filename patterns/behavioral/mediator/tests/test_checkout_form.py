@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from patterns.behavioral.mediator.examples.checkout_form import CheckoutForm
+from patterns.behavioral.mediator.examples.checkout_form.form import CheckoutForm
 
 
 class TestCheckoutForm:

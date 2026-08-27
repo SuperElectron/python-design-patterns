@@ -1,8 +1,2 @@
-"""Mediator — public API.
-
->>> from patterns.behavioral.mediator import Field, Form
-"""
-
-from patterns.behavioral.mediator.pattern import Field, Form
-
-__all__ = ["Field", "Form"]
+from .pattern.form import Field as Field
+from .pattern.form import Form as Form

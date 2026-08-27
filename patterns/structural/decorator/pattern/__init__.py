@@ -1,11 +1,5 @@
-"""The Decorator pattern, importable as library code."""
-
-from patterns.structural.decorator.pattern.decorators import (
-    RateLimitExceededError,
-    logged,
-    rate_limited,
-    retry,
-    timed,
-)
-
-__all__ = ["RateLimitExceededError", "logged", "rate_limited", "retry", "timed"]
+from .decorators import RateLimitExceededError as RateLimitExceededError
+from .decorators import logged as logged
+from .decorators import rate_limited as rate_limited
+from .decorators import retry as retry
+from .decorators import timed as timed

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from patterns.structural.facade.examples.order_checkout import Order, Store
+from patterns.structural.facade.examples.order_checkout.store import Order, Store
 from patterns.structural.facade.pattern import PaymentGateway, Warehouse
 
 

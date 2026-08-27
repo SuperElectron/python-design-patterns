@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import itertools
 
-from patterns.behavioral.iterator.examples.paginated_client import (
-    ArticleClient,
-    FakeBackend,
-)
+from patterns.behavioral.iterator.examples.paginated_client.backend import FakeBackend
+from patterns.behavioral.iterator.examples.paginated_client.client import ArticleClient
 
 
 def _backend(count: int = 30, page_size: int = 5) -> FakeBackend:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.interpreter.examples.flag_rules import FlagEngine
+from patterns.behavioral.interpreter.examples.flag_rules.engine import FlagEngine
 from patterns.behavioral.interpreter.pattern import Expr, Value
 
 FLAGS: dict[str, Expr] = {

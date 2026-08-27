@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from patterns.creational.builder.examples.sql_select_builder import (
+from patterns.creational.builder.examples.sql_select_builder.database import seed_orders
+from patterns.creational.builder.examples.sql_select_builder.reports import (
     big_orders,
     orders_in_region,
-    seed_orders,
     top_orders,
 )
 

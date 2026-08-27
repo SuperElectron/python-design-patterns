@@ -1,5 +1,2 @@
-"""The Registry pattern, importable as library code."""
-
-from patterns.modern.registry.pattern.registry import Registry, UnknownKeyError
-
-__all__ = ["Registry", "UnknownKeyError"]
+from .registry import Registry as Registry
+from .registry import UnknownKeyError as UnknownKeyError

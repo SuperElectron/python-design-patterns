@@ -1,8 +1,2 @@
-"""Strategy — public API.
-
->>> from patterns.behavioral.strategy import StrategyRegistry
-"""
-
-from patterns.behavioral.strategy.pattern import StrategyRegistry, UnknownStrategyError
-
-__all__ = ["StrategyRegistry", "UnknownStrategyError"]
+from .pattern.registry import StrategyRegistry as StrategyRegistry
+from .pattern.registry import UnknownStrategyError as UnknownStrategyError

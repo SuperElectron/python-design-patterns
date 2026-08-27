@@ -1,8 +1,2 @@
-"""Prototype — public API.
-
->>> from patterns.creational.prototype import TemplateRegistry
-"""
-
-from patterns.creational.prototype.pattern import Template, TemplateRegistry
-
-__all__ = ["Template", "TemplateRegistry"]
+from .pattern import Template as Template
+from .pattern import TemplateRegistry as TemplateRegistry

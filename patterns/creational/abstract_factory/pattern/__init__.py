@@ -1,9 +1,3 @@
-"""The importable Abstract Factory building block."""
-
-from patterns.creational.abstract_factory.pattern.family import (
-    HTML,
-    MARKDOWN,
-    DocumentFamily,
-)
-
-__all__ = ["HTML", "MARKDOWN", "DocumentFamily"]
+from .family import HTML as HTML
+from .family import MARKDOWN as MARKDOWN
+from .family import DocumentFamily as DocumentFamily

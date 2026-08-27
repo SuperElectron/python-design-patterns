@@ -1,12 +1,3 @@
-"""Abstract Factory — public API.
-
->>> from patterns.creational.abstract_factory import DocumentFamily
-"""
-
-from patterns.creational.abstract_factory.pattern import (
-    HTML,
-    MARKDOWN,
-    DocumentFamily,
-)
-
-__all__ = ["HTML", "MARKDOWN", "DocumentFamily"]
+from .pattern import HTML as HTML
+from .pattern import MARKDOWN as MARKDOWN
+from .pattern import DocumentFamily as DocumentFamily

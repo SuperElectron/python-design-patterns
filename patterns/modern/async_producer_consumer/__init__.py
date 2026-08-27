@@ -1,13 +1,4 @@
-"""Async Producer/Consumer — public API.
-
->>> from patterns.modern.async_producer_consumer import WorkerPool
-"""
-
-from patterns.modern.async_producer_consumer.pattern import (
-    Processor,
-    Shutdown,
-    WorkerPool,
-    process_all,
-)
-
-__all__ = ["Processor", "Shutdown", "WorkerPool", "process_all"]
+from .pattern import Processor as Processor
+from .pattern import Shutdown as Shutdown
+from .pattern import WorkerPool as WorkerPool
+from .pattern import process_all as process_all

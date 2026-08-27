@@ -1,8 +1,2 @@
-"""Memento — public API.
-
->>> from patterns.behavioral.memento import History
-"""
-
-from patterns.behavioral.memento.pattern import History, NoSnapshotError
-
-__all__ = ["History", "NoSnapshotError"]
+from .pattern.history import History as History
+from .pattern.history import NoSnapshotError as NoSnapshotError

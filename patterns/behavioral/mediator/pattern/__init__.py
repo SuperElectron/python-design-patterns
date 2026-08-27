@@ -1,5 +1,2 @@
-"""The Mediator pattern, importable as library code."""
-
-from patterns.behavioral.mediator.pattern.form import Field, Form
-
-__all__ = ["Field", "Form"]
+from .form import Field as Field
+from .form import Form as Form

@@ -1,8 +1,4 @@
-"""State — public API.
-
->>> from patterns.behavioral.state import StateMachine
-"""
-
-from patterns.behavioral.state.pattern import Guard, IllegalTransitionError, StateMachine, Step
-
-__all__ = ["Guard", "IllegalTransitionError", "StateMachine", "Step"]
+from .pattern.machine import Guard as Guard
+from .pattern.machine import IllegalTransitionError as IllegalTransitionError
+from .pattern.machine import StateMachine as StateMachine
+from .pattern.machine import Step as Step

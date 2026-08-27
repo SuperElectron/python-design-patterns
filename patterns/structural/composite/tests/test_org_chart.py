@@ -4,12 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.structural.composite.examples.org_chart import (
-    Department,
-    Employee,
-    OrgMetrics,
-)
 from patterns.structural.composite.examples.org_chart.__main__ import main
+from patterns.structural.composite.examples.org_chart.org import Department, Employee, OrgMetrics
 
 
 def build_company() -> tuple[Department, Department]:

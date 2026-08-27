@@ -1,14 +1,5 @@
-"""Repository — public API.
-
->>> from patterns.modern.repository import Invoices, InMemoryInvoices
-"""
-
-from patterns.modern.repository.pattern import (
-    InMemoryInvoices,
-    Invoice,
-    Invoices,
-    overdue,
-    total_owed,
-)
-
-__all__ = ["InMemoryInvoices", "Invoice", "Invoices", "overdue", "total_owed"]
+from .pattern import InMemoryInvoices as InMemoryInvoices
+from .pattern import Invoice as Invoice
+from .pattern import Invoices as Invoices
+from .pattern import overdue as overdue
+from .pattern import total_owed as total_owed

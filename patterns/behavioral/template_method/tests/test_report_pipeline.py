@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import pytest
 
-from patterns.behavioral.template_method.examples.report_pipeline import (
-    Sale,
+from patterns.behavioral.template_method.examples.report_pipeline.__main__ import main
+from patterns.behavioral.template_method.examples.report_pipeline.models import Sale
+from patterns.behavioral.template_method.examples.report_pipeline.pipeline import (
     build_csv_report,
     build_markdown_report,
     csv_rows,
     drop_refunds,
     markdown_table,
 )
-from patterns.behavioral.template_method.examples.report_pipeline.__main__ import main
 
 
 class TestSteps:
