@@ -19,9 +19,16 @@ class TestRealCatalog:
         assert len(catalog.patterns) == 32
         assert "structural/decorator" in catalog.ids()
 
-    def test_every_unit_ships_all_three_variants(self) -> None:
+    def test_every_unit_ships_its_shape_completely(self) -> None:
         for pattern in load_catalog().patterns:
-            assert sorted(pattern.variants()) == ["naive", "pythonic", "real_world"], pattern.id
+            if pattern.shape == "module":
+                assert sorted(pattern.docs()) == ["examples", "fundamentals", "implementation"], (
+                    pattern.id
+                )
+                assert pattern.examples(), pattern.id
+                assert pattern.sources(), pattern.id
+            else:
+                assert sorted(pattern.variants()) == ["naive", "pythonic", "real_world"], pattern.id
 
     def test_verdicts_are_from_the_vocabulary(self) -> None:
         for pattern in load_catalog().patterns:
@@ -97,6 +104,76 @@ class TestValidation:
     def test_empty_tree_fails(self, tmp_path: Path) -> None:
         with pytest.raises(CatalogError, match="no pattern units"):
             load_catalog(tmp_path)
+
+
+def _write_module_unit(root: Path, group: str, slug: str, frontmatter: str) -> Path:
+    """A minimal valid module-shape unit: pattern/ + docs/ + examples/ + tests/."""
+    unit = root / group / slug
+    (unit / "pattern").mkdir(parents=True)
+    (unit / "README.md").write_text(f"---\n{frontmatter}\n---\n\n# x\n")
+    (unit / "__init__.py").write_text("")
+    (unit / "pattern" / "__init__.py").write_text("")
+    (unit / "pattern" / "thing.py").write_text("def build() -> str:\n    return 'thing'\n")
+    docs = unit / "docs"
+    docs.mkdir()
+    for name in ("fundamentals", "implementation", "examples"):
+        (docs / f"{name}.md").write_text(f"# {name}\n")
+    project = unit / "examples" / "demo"
+    project.mkdir(parents=True)
+    (project / "__init__.py").write_text("")
+    (project / "__main__.py").write_text("print('demo ran')\n")
+    tests = unit / "tests"
+    tests.mkdir()
+    (tests / "test_thing.py").write_text("def test_ok() -> None:\n    assert True\n")
+    return unit
+
+
+class TestModuleShapeValidation:
+    def test_valid_module_unit_loads_with_shape_fields(self, tmp_path: Path) -> None:
+        _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        pattern = load_catalog(tmp_path).get("creational/thing")
+        assert pattern.shape == "module"
+        assert sorted(pattern.docs()) == ["examples", "fundamentals", "implementation"]
+        assert sorted(pattern.examples()) == ["demo"]
+        assert sorted(pattern.sources()) == ["__init__.py", "thing.py"]
+        assert pattern.variants() == {}
+
+    def test_missing_doc_fails(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "docs" / "implementation.md").unlink()
+        with pytest.raises(CatalogError, match=r"missing docs.*implementation"):
+            load_catalog(tmp_path)
+
+    def test_no_example_fails(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "examples" / "demo" / "__main__.py").unlink()
+        with pytest.raises(CatalogError, match="no runnable examples"):
+            load_catalog(tmp_path)
+
+    def test_example_not_a_package_fails(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "examples" / "demo" / "__init__.py").unlink()
+        with pytest.raises(CatalogError, match="not a package"):
+            load_catalog(tmp_path)
+
+    def test_empty_tests_fails(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "tests" / "test_thing.py").unlink()
+        with pytest.raises(CatalogError, match="no tests"):
+            load_catalog(tmp_path)
+
+    def test_pattern_package_needs_init(self, tmp_path: Path) -> None:
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "pattern" / "__init__.py").unlink()
+        with pytest.raises(CatalogError, match=r"no __init__\.py"):
+            load_catalog(tmp_path)
+
+    def test_index_json_carries_shape(self, tmp_path: Path) -> None:
+        _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        entries = json.loads(load_catalog(tmp_path).to_json())
+        assert entries[0]["shape"] == "module"
+        assert entries[0]["examples"] == ["demo"]
+        assert entries[0]["docs"] == ["examples", "fundamentals", "implementation"]
 
 
 def test_find_patterns_root_from_repo() -> None:

@@ -27,7 +27,7 @@ Homepage = "https://github.com/SuperElectron/python-design-patterns"
 Reference = "https://python-patterns.guide/"
 
 [project.scripts]
-python-design-patterns-mcp = "design_patterns_mcp.server:main"
+python-design-patterns-mcp = "design_patterns.mcp.server:main"
 
 [dependency-groups]
 dev = [
@@ -44,7 +44,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/design_patterns", "src/design_patterns_mcp", "patterns"]
+packages = ["src/design_patterns", "patterns"]
 
 [tool.ruff]
 line-length = 100

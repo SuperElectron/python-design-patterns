@@ -2,10 +2,13 @@
 
 import json
 
+import pytest
 from mcp import Client
 from mcp.types import TextResourceContents
 
-from design_patterns_mcp.server import mcp
+import design_patterns.mcp.server as server_module
+from design_patterns.catalog import Catalog
+from design_patterns.mcp.server import mcp
 
 
 class TestTools:
@@ -70,6 +73,87 @@ class TestTools:
             assert singleton["verdict"] == "prefer-alternative"
             assert "pythonic.py" in singleton["note"]
             assert singleton["caveats"]
+
+
+class TestModuleShapeTools:
+    """The three new access levels, against a synthetic migrated unit."""
+
+    @pytest.fixture(autouse=True)
+    def _use_module_catalog(self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(server_module, "get_catalog", lambda: module_catalog)
+
+    async def test_get_pattern_docs(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "get_pattern_docs", {"pattern_id": "creational/thing", "doc": "fundamentals"}
+            )
+            assert not result.is_error
+            assert "fundamentals of Thing" in str(result.content[0])
+
+    async def test_get_pattern_docs_rejects_unknown_doc(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "get_pattern_docs", {"pattern_id": "creational/thing", "doc": "naive"}
+            )
+            assert result.is_error
+
+    async def test_list_examples_names_the_run_call(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("list_examples", {"pattern_id": "creational/thing"})
+            assert result.structured_content is not None
+            examples = result.structured_content["result"]
+            assert [e["name"] for e in examples] == ["demo"]
+            assert "run_example" in examples[0]["run"]
+
+    async def test_run_example_by_package(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "run_example", {"pattern_id": "creational/thing", "example": "demo"}
+            )
+            assert result.structured_content is not None
+            run = result.structured_content
+            assert run["exit_code"] == 0 and "built a thing" in run["stdout"]
+
+    async def test_run_example_requires_exactly_one_selector(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("run_example", {"pattern_id": "creational/thing"})
+            assert result.is_error
+
+    async def test_read_source_returns_pattern_package(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("read_source", {"pattern_id": "creational/thing"})
+            assert result.structured_content is not None
+            sources = result.structured_content
+            assert "built a thing" in sources["thing.py"]
+
+    async def test_docs_resource(self) -> None:
+        async with Client(mcp) as client:
+            doc = await client.read_resource("pattern://creational/thing/docs/implementation")
+            first = doc.contents[0]
+            assert isinstance(first, TextResourceContents)
+            assert "implementation of Thing" in first.text
+
+
+class TestLegacyShapeErrors:
+    """Module-shape tools refuse un-migrated units with a clear message, not a crash."""
+
+    async def test_get_pattern_docs_on_legacy_unit(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "get_pattern_docs", {"pattern_id": "structural/decorator", "doc": "fundamentals"}
+            )
+            assert result.is_error
+            assert "not yet migrated" in str(result.content[0])
+
+    async def test_list_examples_on_legacy_unit(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("list_examples", {"pattern_id": "structural/decorator"})
+            assert result.is_error
+
+    async def test_read_source_on_legacy_unit(self) -> None:
+        async with Client(mcp) as client:
+            result = await client.call_tool("read_source", {"pattern_id": "structural/decorator"})
+            assert result.is_error
 
 
 class TestResources:

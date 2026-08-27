@@ -11,10 +11,12 @@ from functools import lru_cache
 from typing import Any
 
 from mcp.server import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
-from design_patterns.catalog import Catalog, Pattern, load_catalog
-from design_patterns_mcp.sandbox import run_example as _run_example
-from design_patterns_mcp.search import SearchIndex
+from design_patterns.catalog import DOC_NAMES, Catalog, Pattern, load_catalog
+from design_patterns.mcp.sandbox import run_example as _run_example
+from design_patterns.mcp.sandbox import run_example_package as _run_example_package
+from design_patterns.mcp.search import SearchIndex
 
 
 # Lazy initialization (see patterns/python/global_object): importing this
@@ -33,11 +35,14 @@ mcp = MCPServer(
     "python-design-patterns",
     instructions=(
         "Design patterns in Python: 32 units covering all 23 GoF patterns, "
-        "Python-native patterns, and modern additions. Each unit has prose, a "
-        "naive (GoF-literal) example, a pythonic example, a real_world stdlib "
-        "sighting, and an honest verdict. Start with search_patterns or "
-        "recommend_pattern; verdicts of 'prefer-alternative' tell you what to "
-        "write instead."
+        "Python-native patterns, and modern additions, each with an honest "
+        "verdict. Start with search_patterns or recommend_pattern; verdicts of "
+        "'prefer-alternative' tell you what to write instead. Migrated "
+        "(module-shape) units offer three access levels: get_pattern_docs "
+        "(fundamentals/implementation/examples), list_examples + run_example "
+        "(runnable mini-projects), and read_source (the pattern/ package). "
+        "Legacy units still expose classic-form/pythonic/real_world variants "
+        "via get_pattern and run_example(variant=...)."
     ),
 )
 
@@ -102,17 +107,79 @@ def search_patterns(query: str, limit: int = 5) -> list[dict[str, Any]]:
     return [{**_summary(h.pattern), "score": h.score} for h in get_index().search(query, limit)]
 
 
+def _get(pattern_id: str) -> Pattern:
+    try:
+        return get_catalog().get(pattern_id)
+    except KeyError:
+        known = ", ".join(get_catalog().ids())
+        raise ValueError(f"unknown pattern {pattern_id!r}; known ids: {known}") from None
+
+
+def _require_module_shape(pattern: Pattern) -> Pattern:
+    if pattern.shape != "module":
+        raise ToolError(
+            f"{pattern.id} is not yet migrated to the module shape "
+            "(no pattern/, docs/, examples/); use get_pattern with a variant instead"
+        )
+    return pattern
+
+
 @mcp.tool()
-def run_example(pattern_id: str, variant: str) -> dict[str, Any]:
-    """Execute one of a pattern's vendored example files ('naive', 'pythonic',
-    'real_world') in a sandboxed subprocess and return its real output."""
-    result = _run_example(get_catalog(), pattern_id, variant)
+def run_example(
+    pattern_id: str, variant: str | None = None, example: str | None = None
+) -> dict[str, Any]:
+    """Execute one of a pattern's vendored examples in a sandboxed subprocess
+    and return its real output. For migrated (module-shape) patterns pass
+    example=<mini-project name from list_examples>; for legacy patterns pass
+    variant='naive'|'pythonic'|'real_world'. Exactly one of the two."""
+    if (variant is None) == (example is None):
+        raise ValueError("pass exactly one of 'variant' (legacy) or 'example' (module-shape)")
+    if example is not None:
+        result = _run_example_package(get_catalog(), pattern_id, example)
+    else:
+        assert variant is not None
+        result = _run_example(get_catalog(), pattern_id, variant)
     return {
         "exit_code": result.exit_code,
         "stdout": result.stdout,
         "stderr": result.stderr,
         "timed_out": result.timed_out,
     }
+
+
+@mcp.tool()
+def get_pattern_docs(pattern_id: str, doc: str) -> str:
+    """Read one of a migrated pattern's teaching docs: 'fundamentals' (intent,
+    participants, mechanism, classic-form contrast), 'implementation' (how to
+    introduce it into a real system), or 'examples' (cited external usages)."""
+    pattern = _require_module_shape(_get(pattern_id))
+    docs = pattern.docs()
+    if doc not in docs:
+        raise ValueError(f"doc must be one of {sorted(DOC_NAMES)}; {pattern_id} has {sorted(docs)}")
+    return docs[doc].read_text(encoding="utf-8")
+
+
+@mcp.tool()
+def list_examples(pattern_id: str) -> list[dict[str, Any]]:
+    """List a migrated pattern's runnable mini-projects (examples/<project>);
+    run one with run_example(pattern_id, example=<name>)."""
+    pattern = _require_module_shape(_get(pattern_id))
+    return [
+        {
+            "name": name,
+            "modules": sorted(p.name for p in path.glob("*.py")),
+            "run": f"run_example(pattern_id={pattern.id!r}, example={name!r})",
+        }
+        for name, path in pattern.examples().items()
+    ]
+
+
+@mcp.tool()
+def read_source(pattern_id: str) -> dict[str, str]:
+    """Read a migrated pattern's own implementation: every file in its
+    pattern/ package, keyed by filename."""
+    pattern = _require_module_shape(_get(pattern_id))
+    return {name: path.read_text(encoding="utf-8") for name, path in pattern.sources().items()}
 
 
 @mcp.tool()
@@ -152,12 +219,22 @@ def pattern_doc(group: str, slug: str) -> str:
 
 @mcp.resource("pattern://{group}/{slug}/{variant}")
 def pattern_source(group: str, slug: str, variant: str) -> str:
-    """One pattern's example source (naive | pythonic | real_world)."""
+    """One legacy pattern's example source (naive | pythonic | real_world)."""
     pattern = get_catalog().get(f"{group}/{slug}")
     variants = pattern.variants()
     if variant not in variants:
         raise KeyError(f"{pattern.id} has no variant {variant!r}")
     return variants[variant].read_text()
+
+
+@mcp.resource("pattern://{group}/{slug}/docs/{doc}")
+def pattern_docs_resource(group: str, slug: str, doc: str) -> str:
+    """One migrated pattern's teaching doc (fundamentals | implementation | examples)."""
+    pattern = get_catalog().get(f"{group}/{slug}")
+    docs = pattern.docs()
+    if doc not in docs:
+        raise KeyError(f"{pattern.id} has no doc {doc!r} (has: {sorted(docs)})")
+    return docs[doc].read_text(encoding="utf-8")
 
 
 @mcp.prompt()

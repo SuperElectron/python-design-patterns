@@ -14,30 +14,17 @@ stdlib_sightings: [logging propagation, urllib.request opener chain]
 
 # Chain of Responsibility
 
-## Problem
+Pass a request along an ordered line of handlers until one takes it — without
+the sender knowing which. **Verdict: prefer an alternative** — in Python the
+chain is callables in a list, not objects with successor pointers.
 
-A support ticket should be handled by the first tier able to deal with it;
-an HTTP request passes middleware until something produces a response. The
-sender must not know which handler will answer.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Chain`, `Handler`, `UnhandledRequestError` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/ticket_escalation/`](examples/ticket_escalation/) | Mini-project: support-ticket routing built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` threads successor pointers through handler objects, GoF-style:
-each handler either handles or forwards to `self.successor`.
-
-## Pythonic solution
-
-A chain is a *list of callables* tried in order — the first non-`None` answer
-wins. Registration is appending; reordering is list surgery; the
-fell-off-the-end case is explicit. That's the whole pattern.
-
-## In the wild
-
-`logging` propagation is a chain: a record climbs the logger hierarchy,
-offered to each logger's handlers on the way up. `urllib.request` passes
-requests through its chain of openers/handlers until one claims the scheme.
-
-## Verdict
-
-**Prefer an alternative:** a list and a loop. Objects with successor
-pointers, only if handlers already are stateful objects.
+```bash
+uv run python -m patterns.behavioral.chain_of_responsibility.examples.ticket_escalation
+```

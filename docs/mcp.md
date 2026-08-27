@@ -29,16 +29,24 @@ python-design-patterns-mcp --http --host 127.0.0.1 --port 8734
 | Tool | What it does |
 |---|---|
 | `list_patterns(group?, verdict?)` | Catalog listing, filterable |
-| `get_pattern(pattern_id, variant?)` | Full prose + example source (`naive`/`pythonic`/`real_world`/`all`) |
+| `get_pattern(pattern_id, variant?)` | Full prose (+ legacy example source: `naive`/`pythonic`/`real_world`/`all`) |
 | `search_patterns(query, limit?)` | BM25 full-text search over names, aliases, problems, symptoms, prose |
-| `run_example(pattern_id, variant)` | Executes the vendored example in a sandboxed subprocess; returns real stdout |
+| `get_pattern_docs(pattern_id, doc)` | A migrated pattern's teaching doc: `fundamentals`, `implementation`, or `examples` |
+| `list_examples(pattern_id)` | A migrated pattern's runnable mini-projects |
+| `run_example(pattern_id, variant?/example?)` | Executes a vendored example (legacy `variant` or migrated `example`) in a sandboxed subprocess; returns real stdout |
+| `read_source(pattern_id)` | A migrated pattern's own implementation (`pattern/` package) |
 | `recommend_pattern(problem_statement, limit?)` | Ranked candidates with caveats; `prefer-alternative` verdicts tell you what to write instead |
+
+Migrated (module-shape) patterns follow three access levels: scan docs
+(`get_pattern_docs`) → run a use case (`list_examples` + `run_example`) →
+read the source (`read_source`).
 
 ## Resources
 
 - `catalog://index` — the whole catalog as JSON
 - `pattern://<group>/<slug>` — one pattern's prose
-- `pattern://<group>/<slug>/<variant>` — one example's source
+- `pattern://<group>/<slug>/<variant>` — one legacy example's source
+- `pattern://<group>/<slug>/docs/<doc>` — one migrated pattern's teaching doc
 
 ## Prompts
 
@@ -47,6 +55,7 @@ python-design-patterns-mcp --http --host 127.0.0.1 --port 8734
 ## Sandbox contract
 
 `run_example` executes only files resolved from the catalog index — the
-`(id, variant)` pair is a dictionary lookup, never joined into a path. The
+`(id, variant)` / `(id, example)` pair is a dictionary lookup, never joined
+into a path. The
 subprocess runs `python -I` in a temp cwd with a scrubbed environment, a 10s
 timeout, and 64KB output caps. There is no arbitrary-code-execution tool.
