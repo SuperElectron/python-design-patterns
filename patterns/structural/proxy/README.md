@@ -14,31 +14,17 @@ stdlib_sightings: [weakref.proxy, functools.cached_property, unittest.mock.Mock]
 
 # Proxy
 
-## Problem
+Stand between callers and an object to mediate access — lazily building it,
+guarding it, observing it. **Verdict: use with care** — the mediation is real
+power, the disguise is skin-deep.
 
-You want the *interface* of an object but not (yet, or not directly) the
-object: constructing it is expensive, touching it needs a permission check,
-or you want to observe every access.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `LazyProxy`, `ProtectionProxy`, `MeteringProxy` — stackable |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/db_gateway/`](examples/db_gateway/) | Mini-project: an expensive warehouse connection behind all three proxies |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF virtual proxy: same interface as the real subject,
-constructing it only on first use.
-
-## Pythonic solution
-
-`__getattr__` builds a generic lazy proxy in a dozen lines — no shared
-interface needed, any attribute access triggers construction and then
-forwards. And when the real goal is one lazily-computed attribute,
-`functools.cached_property` replaces the whole apparatus.
-
-## In the wild
-
-`weakref.proxy` returns an object that forwards everything to its referent
-without keeping it alive — and raises once the referent is gone.
-`unittest.mock.Mock` is a proxy you interrogate afterwards.
-
-## Verdict
-
-**Use with care.** Powerful where laziness or mediation is real; remember the
-disguise is skin-deep (identity, isinstance, dunders).
+```bash
+uv run python -m patterns.structural.proxy.examples.db_gateway
+```

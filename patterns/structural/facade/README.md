@@ -14,31 +14,17 @@ stdlib_sightings: [subprocess.run, shutil.make_archive, urllib.request.urlopen]
 
 # Facade
 
-## Problem
+One entry point for the subsystem dance every caller used to copy-paste —
+ordering, rollback and all. **Verdict: pythonic** — the natural Python facade
+is a module-level function, and the subsystem stays public beside it.
 
-Doing the common thing takes five coordinated calls into a subsystem, and
-every caller performs the same dance. One misordered step, one leaked
-resource, and the copy-paste bill comes due.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `place_order` fronting `Warehouse`/`PaymentGateway`/`Shipping`/`Notifier` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/order_checkout/`](examples/order_checkout/) | Mini-project: a storefront batch-processing orders through the one door |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the class-shaped version: subsystem classes plus a
-`HomeTheaterFacade` whose one method runs the sequence.
-
-## Pythonic solution
-
-Modules are namespaces and functions are entry points, so the natural Python
-facade is a *function*: `pythonic.py` puts `place_order()` in front of an
-order-fulfillment subsystem (inventory, payment, shipping, notification) —
-including the payment-failure rollback every call site used to forget. The
-subsystem stays public for callers needing the full controls.
-
-## In the wild
-
-`subprocess.run` is a facade over `Popen`'s wiring; `shutil.make_archive`
-fronts `zipfile`/`tarfile`; `urllib.request.urlopen` hides openers and
-handlers. Each leaves the machinery public underneath.
-
-## Verdict
-
-**Pythonic.** Ship the one-call common case; keep the subsystem's door open.
+```bash
+uv run python -m patterns.structural.facade.examples.order_checkout
+```

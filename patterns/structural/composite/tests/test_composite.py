@@ -1,40 +1,63 @@
-"""Behavioral tests for all three composite variants."""
+"""Behavioral tests for the Composite building block."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
 
 import pytest
 
-from patterns.structural.composite import naive, pythonic, real_world
+from patterns.structural.composite import Composite
 
 
-class TestNaive:
-    def test_nested_render_recurses(self) -> None:
-        scene = naive.Group("scene")
-        scene.add(naive.Circle("sun"))
-        inner = naive.Group("g")
-        inner.add(naive.Circle("a"))
-        scene.add(inner)
-        assert scene.render() == "group(scene)\n  circle(sun)\n  group(g)\n    circle(a)"
+@dataclass(frozen=True)
+class Task:
+    hours: int
 
-    def test_leaf_refuses_children(self) -> None:
-        with pytest.raises(TypeError):
-            naive.Circle("sun").add(naive.Circle("moon"))
+    def total(self) -> int:
+        return self.hours
 
 
-class TestPythonic:
-    def test_totals_recurse_through_nesting(self) -> None:
-        root = pythonic.Directory("root")
-        root.add(pythonic.File("a", 100))
-        sub = pythonic.Directory("sub")
-        sub.add(pythonic.File("b", 400))
-        root.add(sub)
-        assert root.total_bytes() == 500
+class TestRollup:
+    def test_a_container_totals_its_leaves(self) -> None:
+        team = Composite[int](sum, [Task(3), Task(5)])
+        assert team.total() == 8
 
-    def test_leaf_has_no_child_management(self) -> None:
-        assert not hasattr(pythonic.File("a", 1), "add")
+    def test_nesting_rolls_up_through_every_level(self) -> None:
+        team = Composite[int](sum, [Task(3), Task(5)])
+        project = Composite[int](sum, [team, Task(8)])
+        portfolio = Composite[int](sum, [project])
+        assert portfolio.total() == 16
 
-    def test_empty_directory_totals_zero(self) -> None:
-        assert pythonic.Directory("empty").total_bytes() == 0
+    def test_an_empty_container_totals_the_combine_identity(self) -> None:
+        assert Composite[int](sum).total() == 0
+
+    def test_leaf_and_subtree_are_interchangeable_to_callers(self) -> None:
+        def describe(node: Task | Composite[int]) -> str:
+            return f"{node.total()}h"  # never asks which kind it holds
+
+        assert describe(Task(4)) == "4h"
+        assert describe(Composite[int](sum, [Task(4)])) == "4h"
 
 
-class TestRealWorld:
-    def test_uniform_traversal_counts_all_depths(self) -> None:
-        assert real_world.count_circles(real_world.build_scene()) == 3
+class TestHonestInterfaces:
+    def test_child_management_lives_only_on_the_container(self) -> None:
+        assert not hasattr(Task(1), "add")
+        assert not hasattr(Task(1), "remove")
+
+    def test_add_and_remove_change_the_rollup(self) -> None:
+        team = Composite[int](sum, [Task(3)])
+        extra = Task(5)
+        team.add(extra)
+        assert team.total() == 8
+        team.remove(extra)
+        assert team.total() == 3
+
+    def test_removing_a_stranger_raises(self) -> None:
+        with pytest.raises(ValueError):
+            Composite[int](sum).remove(Task(1))
+
+    def test_iteration_walks_direct_children_in_order(self) -> None:
+        first, second = Task(1), Task(2)
+        team = Composite[int](sum, [first, second])
+        assert list(team) == [first, second]
+        assert len(team) == 2
