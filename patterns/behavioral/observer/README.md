@@ -14,30 +14,17 @@ stdlib_sightings: [concurrent.futures.Future.add_done_callback, asyncio.Future]
 
 # Observer
 
-## Problem
+Broadcast a change to whoever subscribed, in order, without the subject
+knowing its audience. **Verdict: pythonic** — observers are callables in a
+list; the only real design decisions are order and failure policy.
 
-A model changes and three views must repaint; a download finishes and
-logging, metrics, and the UI all care. The subject must broadcast without
-compiling a list of friends into itself.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Signal`, `Subscriber`, `ErrorPolicy` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/order_events/`](examples/order_events/) | Mini-project: order pipeline with independent subscribers built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF form: Subject with attach/detach/notify, an Observer
-ABC, concrete observers implementing `update()`.
-
-## Pythonic solution
-
-Observers are callables in a list; subscribing is appending. `pythonic.py`
-also shows the property-setter variant — assignment to `.temperature`
-triggers the callbacks — which is how observation usually hides inside
-Python APIs.
-
-## In the wild
-
-`concurrent.futures.Future.add_done_callback` is the stdlib observer:
-register any callable, it fires when the future resolves — even if it
-already has.
-
-## Verdict
-
-**Pythonic.** Lists of callables, everywhere, deliberately.
+```bash
+uv run python -m patterns.behavioral.observer.examples.order_events
+```

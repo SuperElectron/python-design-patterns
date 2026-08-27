@@ -14,32 +14,17 @@ stdlib_sightings: [functools.partial, sched.scheduler, unittest.mock.call]
 
 # Command
 
-## Problem
+Package a request as an object so it can be queued, logged, undone, or run by
+code that doesn't know its details. **Verdict: use with care** — a callable is
+the whole pattern until commands need undo, logs, or metadata.
 
-A menu button, a job queue, or an undo stack must trigger operations without
-knowing what they do. Reify the request: an object carrying everything needed
-to perform (and possibly reverse) it.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Undoable`, `UndoStack`, `Action` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/editor_undo/`](examples/editor_undo/) | Mini-project: text-editor undo/redo built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the classic remote-control shape: a `Command` interface with
-`execute`/`undo`, concrete commands closing over a receiver, and an invoker
-that runs them and keeps a history for undo.
-
-## Pythonic solution
-
-Functions are first-class, so *a command is just a callable*. `pythonic.py`
-queues `functools.partial` objects for the execute-only case, and uses a pair
-of callables (do, undo) where reversibility matters — no interface, no
-hierarchy.
-
-## In the wild
-
-Every callback API is the Command pattern: `sched.scheduler.enter` takes the
-action as a callable, Tkinter buttons take `command=`, `atexit.register`
-queues commands to run at shutdown.
-
-## Verdict
-
-**Use with care.** Callables for deferral, the class form only once commands
-need undo, serialization, or introspection beyond "run me".
+```bash
+uv run python -m patterns.behavioral.command.examples.editor_undo
+```

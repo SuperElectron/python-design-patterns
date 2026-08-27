@@ -14,29 +14,17 @@ stdlib_sightings: [json.JSONEncoder.default, unittest.TestCase.setUp, socketserv
 
 # Template Method
 
-## Problem
+Fix the algorithm's spine, vary its steps. **Verdict: prefer an alternative**
+— pass the steps as callables; subclass hooks belong at framework boundaries
+that hand them to you.
 
-Report generation always goes fetch → format → deliver, but each report
-formats differently. The skeleton must stay fixed while steps vary.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `Skeleton`, `keep_all`, `discard` |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/report_pipeline/`](examples/report_pipeline/) | Mini-project: sales reports built on `pattern/` |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` is the GoF form: the base class owns the skeleton as a concrete
-method; subclasses override the abstract hook steps.
-
-## Pythonic solution
-
-The skeleton is a function; the varying steps are callable parameters with
-defaults. No subclass per variation, and steps combine freely at call time.
-
-## In the wild
-
-`json.JSONEncoder` runs the encoding skeleton and calls your `default()`
-hook for objects it can't serialize — a template method you've probably
-already overridden. `unittest.TestCase.setUp`/`tearDown` and
-`socketserver.BaseRequestHandler.handle` are the same shape.
-
-## Verdict
-
-**Prefer an alternative** in your own code — pass the steps. Recognize and
-use the subclass form at framework boundaries.
+```bash
+uv run python -m patterns.behavioral.template_method.examples.report_pipeline
+```
