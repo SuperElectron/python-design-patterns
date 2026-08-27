@@ -1,3 +1,2 @@
-# Load-bearing: markdown registers itself at import time — a plugin nobody
-# imports doesn't exist (the pattern's sharpest caveat).
-from patterns.modern.registry.examples.export_plugins import markdown as markdown
+# Load-bearing: markdown registers itself at import time (the unit's caveat demo).
+from . import markdown as markdown

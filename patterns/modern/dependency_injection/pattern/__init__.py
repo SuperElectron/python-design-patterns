@@ -1,5 +1,5 @@
-from patterns.modern.dependency_injection.pattern.service import Clock as Clock
-from patterns.modern.dependency_injection.pattern.service import Invoice as Invoice
-from patterns.modern.dependency_injection.pattern.service import InvoiceSource as InvoiceSource
-from patterns.modern.dependency_injection.pattern.service import MailTransport as MailTransport
-from patterns.modern.dependency_injection.pattern.service import ReminderService as ReminderService
+from .service import Clock as Clock
+from .service import Invoice as Invoice
+from .service import InvoiceSource as InvoiceSource
+from .service import MailTransport as MailTransport
+from .service import ReminderService as ReminderService

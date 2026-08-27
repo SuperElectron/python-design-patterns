@@ -1,1 +1,1 @@
-from patterns.creational.singleton.pattern import Shared as Shared
+from .pattern import Shared as Shared

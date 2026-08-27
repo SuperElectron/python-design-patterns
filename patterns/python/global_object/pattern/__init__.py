@@ -1,1 +1,1 @@
-from patterns.python.global_object.pattern.lazy import Lazy as Lazy
+from .lazy import Lazy as Lazy

@@ -1,2 +1,2 @@
-from patterns.creational.prototype.pattern import Template as Template
-from patterns.creational.prototype.pattern import TemplateRegistry as TemplateRegistry
+from .pattern import Template as Template
+from .pattern import TemplateRegistry as TemplateRegistry
