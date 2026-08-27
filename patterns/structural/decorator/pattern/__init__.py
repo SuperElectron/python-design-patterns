@@ -1,9 +1,6 @@
-"""Decorator — public API.
+"""The Decorator pattern, importable as library code."""
 
->>> from patterns.structural.decorator import retry
-"""
-
-from patterns.structural.decorator.pattern import (
+from patterns.structural.decorator.pattern.decorators import (
     RateLimitExceededError,
     logged,
     rate_limited,

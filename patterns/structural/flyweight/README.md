@@ -15,30 +15,17 @@ stdlib_sightings: [sys.intern, functools.lru_cache, int]
 
 # Flyweight
 
-## Problem
+Share one immutable instance per distinct value instead of building millions
+of duplicates. **Verdict: use with care** — measure first, keep flyweights
+frozen, prefer an explicit factory over `__new__` tricks.
 
-A text editor holds a million character objects; a card game deals thousands
-of hands from 52 distinct cards. Building a fresh object per occurrence wastes
-memory on identical state. Share one immutable instance per distinct value.
+| Where | What |
+|---|---|
+| [`pattern/`](pattern/) | The importable code: `InternPool` (keyed sharing with an immutability guard) |
+| [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
+| [`examples/glyph_styles/`](examples/glyph_styles/) | Mini-project: a text buffer holding thousands of glyphs on a handful of shared styles |
+| [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |
 
-## Naive solution
-
-`naive.py` uses the book's shape — a factory that checks a pool before
-constructing — for playing cards: ask for `9♥` twice, get the same object.
-
-## Pythonic solution
-
-Two idiomatic forms in `pythonic.py`: a `functools.lru_cache`-decorated
-factory (the pool is the cache), and the guide's `__new__` variant where the
-class itself makes `Card(9, "♥") is Card(9, "♥")` true.
-
-## In the wild
-
-CPython interns small integers (`-5..256`) and identifier-like strings on its
-own, and `sys.intern` lets you intern strings explicitly to speed up
-comparisons — the interpreter running Flyweight underneath you.
-
-## Verdict
-
-**Use with care.** Great when profiling shows real duplication of immutable
-values; pointless ceremony otherwise. Keep flyweights frozen.
+```bash
+uv run python -m patterns.structural.flyweight.examples.glyph_styles
+```

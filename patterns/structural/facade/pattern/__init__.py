@@ -1,9 +1,6 @@
-"""Facade — public API.
+"""The Facade pattern, importable as library code."""
 
->>> from patterns.structural.facade import place_order
-"""
-
-from patterns.structural.facade.pattern import (
+from patterns.structural.facade.pattern.checkout import (
     Notifier,
     OrderResult,
     PaymentGateway,

@@ -1,10 +1,10 @@
-"""The pythonic facade: a module-level function with good defaults.
+"""A facade in its natural Python form: one function with good defaults.
 
 The subsystem is a small order-fulfillment flow -- inventory, payment,
 shipping, notification -- four calls every checkout caller used to
 copy-paste, in the right order, with the right rollback. ``place_order``
-is the one-call common case; the subsystem stays public for callers who
-need the full controls (partial shipments, invoice-only, etc.).
+is the one-call common case; the subsystem classes stay public for callers
+who need the full controls (partial shipments, invoice-only, etc.).
 """
 
 from __future__ import annotations
@@ -87,24 +87,3 @@ def place_order(
     label = shipping.create_label(sku, address)
     notifier.confirm(address, txn, label)
     return OrderResult(transaction_id=txn, shipping_label=label)
-
-
-def main() -> None:
-    warehouse = Warehouse(stock={"mug": 10})
-    result = place_order(
-        warehouse,
-        PaymentGateway(),
-        Shipping(),
-        Notifier(),
-        sku="mug",
-        quantity=2,
-        price_cents=1200,
-        card="4242",
-        address="12 Grace Ave",
-    )
-    print(result)
-    print(f"stock after: {warehouse.stock}")
-
-
-if __name__ == "__main__":
-    main()
