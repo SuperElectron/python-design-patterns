@@ -130,8 +130,9 @@ def _write_module_unit(root: Path, group: str, slug: str, frontmatter: str) -> P
     unit = root / group / slug
     (unit / "pattern").mkdir(parents=True)
     (unit / "README.md").write_text(f"---\n{frontmatter}\n---\n\n# x\n")
-    (unit / "__init__.py").write_text("")
-    (unit / "pattern" / "__init__.py").write_text("")
+    # Only load-bearing __init__.py exist (house rule): the two API files.
+    (unit / "__init__.py").write_text("from .pattern.thing import build as build\n")
+    (unit / "pattern" / "__init__.py").write_text("from .thing import build as build\n")
     (unit / "pattern" / "thing.py").write_text("def build() -> str:\n    return 'thing'\n")
     docs = unit / "docs"
     docs.mkdir()
@@ -139,8 +140,6 @@ def _write_module_unit(root: Path, group: str, slug: str, frontmatter: str) -> P
         (docs / f"{name}.md").write_text(f"# {name}\n")
     project = unit / "examples" / "demo"
     project.mkdir(parents=True)
-    (unit / "examples" / "__init__.py").write_text("")
-    (project / "__init__.py").write_text("")
     (project / "__main__.py").write_text("print('demo ran')\n")
     tests = unit / "tests"
     tests.mkdir()
@@ -168,10 +167,10 @@ class TestModuleShapeValidation:
         with pytest.raises(CatalogError, match="no runnable examples"):
             load_catalog(tmp_path)
 
-    def test_example_not_a_package_fails(self, tmp_path: Path) -> None:
+    def test_empty_init_in_example_fails(self, tmp_path: Path) -> None:
         unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
-        (unit / "examples" / "demo" / "__init__.py").unlink()
-        with pytest.raises(CatalogError, match="not a package"):
+        (unit / "examples" / "demo" / "__init__.py").write_text("")
+        with pytest.raises(CatalogError, match=r"delete empty __init__\.py"):
             load_catalog(tmp_path)
 
     def test_empty_tests_fails(self, tmp_path: Path) -> None:
@@ -200,11 +199,19 @@ class TestModuleShapeValidation:
         with pytest.raises(CatalogError, match="module unit missing docs"):
             load_catalog(tmp_path)
 
-    def test_examples_dir_needs_init(self, tmp_path: Path) -> None:
+    def test_empty_init_in_examples_dir_fails(self, tmp_path: Path) -> None:
         unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
-        (unit / "examples" / "__init__.py").unlink()
-        with pytest.raises(CatalogError, match=r"examples/ is not a package"):
+        (unit / "examples" / "__init__.py").write_text("")
+        with pytest.raises(CatalogError, match=r"delete empty __init__\.py"):
             load_catalog(tmp_path)
+
+    def test_loadbearing_example_init_is_allowed(self, tmp_path: Path) -> None:
+        # A NON-empty example __init__.py (e.g. plugin self-registration) is fine.
+        unit = _write_module_unit(tmp_path, "creational", "thing", GOOD)
+        (unit / "examples" / "demo" / "__init__.py").write_text(
+            "# load-bearing: demo of import-time registration\n"
+        )
+        assert load_catalog(tmp_path).get("creational/thing").examples()
 
     def test_index_json_carries_docs_and_examples(self, tmp_path: Path) -> None:
         _write_module_unit(tmp_path, "creational", "thing", GOOD)
