@@ -21,7 +21,8 @@ def write_module_unit(root: Path) -> Path:
     (unit / "README.md").write_text(
         "---\n"
         "id: creational/thing\nname: Thing\nguide_url: null\n"
-        'problem: "Build a thing."\nsymptoms: ["thing needed"]\nverdict: pythonic\ncaveats: []\n'
+        'problem: "Build a thing."\nsymptoms: ["thing needed"]\n'
+        "verdict: prefer-alternative\ncaveats: []\n"
         "---\n\n# Thing\n"
     )
     (unit / "pattern" / "thing.py").write_text("def build() -> str:\n    return 'built a thing'\n")

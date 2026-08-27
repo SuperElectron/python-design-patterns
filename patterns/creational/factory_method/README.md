@@ -21,7 +21,7 @@ Java with the serial numbers filed off.
 
 | Where | What |
 |---|---|
-| [`pattern/`](pattern/) | The importable code: the three dodges, best first (`InjectedStore`, `Store`, `Factory`) |
+| [`pattern/`](pattern/) | The importable code: `factory_slot` (trap-safe class-attribute factories) and the `Factory` alias; the three dodges — injection, class-attribute slot, instance override — documented best first |
 | [`docs/`](docs/) | [Fundamentals](docs/fundamentals.md) · [Implementation guide](docs/implementation.md) · [External examples](docs/examples.md) |
 | [`examples/feed_client/`](examples/feed_client/) | Mini-project: a feed-client framework with a `response_class` slot |
 | [`tests/`](tests/) | Behavioral tests for the pattern and the mini-project |

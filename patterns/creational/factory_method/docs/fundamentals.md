@@ -12,7 +12,7 @@ class.
 | Role | Classic (GoF) form | Python form |
 |---|---|---|
 | Creator | Abstract class with an abstract `factory_method()` | The class that needs the helper — creation is a **class attribute** holding any callable |
-| Concrete creators | One subclass per helper choice | Assignment (`Store.shipment_factory = express`), a one-line subclass, or a constructor argument |
+| Concrete creators | One subclass per helper choice | A one-line subclass, or a constructor argument per instance. Class-level slots hold a class bare, or any other callable via `factory_slot` — a bare *function* in a class body binds `self` and raises `TypeError` when called |
 | Product | Abstract product interface | Whatever the factory callable returns |
 | Concrete products | Subclasses of the product | Any objects; no shared base required |
 
@@ -50,13 +50,16 @@ class StandardStore(Store):  # ...per choice
 ```
 
 The design exists because 1994 languages could not pass a class or function as
-a value. Python can, so the guide's dodges rank ahead of it, best first —
-each one is importable from [`pattern/`](../pattern/):
+a value. Python can, so the guide's dodges rank ahead of it, best first — the
+[`examples/feed_client/`](../examples/feed_client/) mini-project shows all
+three on one framework class:
 
-1. **Dependency injection** (`InjectedStore`) — if the helper can exist up
-   front, pass the object and skip the factory entirely.
-2. **Class-attribute factory** (`Store.shipment_factory`) — creation stays
-   inside the class; overriding is assignment or a one-line subclass.
+1. **Dependency injection** (`FeedClient(transport)`) — if the helper can
+   exist up front, pass the object and skip the factory entirely.
+2. **Class-attribute factory** (`FeedClient.response_class`) — creation stays
+   inside the class; a subclass overrides the slot in one line. A class is
+   safe to assign bare; wrap any other callable in `factory_slot` (from
+   [`pattern/`](../pattern/)) so it does not bind as a method.
 3. **Instance-attribute factory** — a constructor argument shadows the class
    attribute for one object; tests love this.
 

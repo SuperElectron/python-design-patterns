@@ -23,10 +23,11 @@ class TestReports:
 
     def test_region_report_narrows_conditionally(self) -> None:
         conn = seed_orders()
-        west_all = orders_in_region(conn, "west")
-        west_widgets = orders_in_region(conn, "west", "widgets")
-        assert [row[0] for row in west_all] == ["A-1", "A-3"]
-        assert west_widgets == west_all  # west only has widgets...
+        east_all = orders_in_region(conn, "east")
+        east_widgets = orders_in_region(conn, "east", "widgets")
+        assert [row[0] for row in east_all] == ["A-2", "A-5"]
+        # east carries two products, so the product filter must actually narrow.
+        assert [row[0] for row in east_widgets] == ["A-5"]
         assert orders_in_region(conn, "east", "gears") == [("A-2", "gears", 450)]
 
     def test_no_rows_is_an_empty_list_not_an_error(self) -> None:

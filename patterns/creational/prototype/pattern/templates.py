@@ -25,8 +25,14 @@ class TemplateRegistry(Generic[T]):
     def __init__(self) -> None:
         self._templates: dict[str, Template[T]] = {}
 
-    def register(self, name: str, template: Template[T]) -> Template[T]:
-        """Add a template under ``name``; returns it, so it can wrap a def."""
+    def register(self, name: str, template: Template[T], *, replace: bool = False) -> Template[T]:
+        """Add a template under ``name``; returns it, so it can wrap a def.
+
+        A duplicate ``name`` is an error unless ``replace=True`` — silently
+        losing a template is how menus drift.
+        """
+        if name in self._templates and not replace:
+            raise ValueError(f"template {name!r} already registered (pass replace=True)")
         self._templates[name] = template
         return template
 

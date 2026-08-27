@@ -6,6 +6,7 @@ from patterns.creational.factory_method.examples.feed_client.client import (
     DigestClient,
     FeedClient,
     FeedResponse,
+    StrictClient,
 )
 
 FEED = "Storm warning|Heavy rain expected tonight\nNew library opens|Doors open at nine"
@@ -29,6 +30,10 @@ def main() -> None:
 
     per_instance = FeedClient(canned_transport, response_class=UpperResponse)
     print(f"instance override: {per_instance.fetch('news://local').titles()}")
+
+    strict = StrictClient(canned_transport)
+    count = len(strict.fetch("news://local").articles)
+    print(f"function slot:     {count} articles parsed strictly")
 
 
 if __name__ == "__main__":

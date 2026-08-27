@@ -6,7 +6,8 @@ Construction calls repeating the same configuration, or a "template" object
 that everyone mutates before use:
 
 ```python
-job = ReportJob(
+# The pre-pattern shape: a plain mutable class, before anyone froze it.
+job = MutableReportJob(
     name="nightly-sales",
     query="SELECT * FROM sales WHERE day = today()",  # copied everywhere
     recipients=("sales-leads@example.com",),

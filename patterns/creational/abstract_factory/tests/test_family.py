@@ -63,9 +63,9 @@ class TestFamilyDiscipline:
         assert plain.callout("note") == "<p>note</p>"
         assert plain.heading("Sales") == HTML.heading("Sales")  # rest shared
 
-    def test_a_stub_family_slots_in_without_patching(self) -> None:
-        calls: list[str] = []
-        family = make_recording_family(calls)
-        family.heading("x")
-        family.table([], [])
-        assert calls == ["heading", "table"]
+    def test_markdown_table_carries_the_separator_row(self) -> None:
+        table = MARKDOWN.table(["region", "total"], [["west", "1280"]])
+        lines = table.splitlines()
+        assert lines[0] == "| region | total |"
+        assert lines[1] == "|---|---|"  # without it, the table is not Markdown
+        assert lines[2] == "| west | 1280 |"

@@ -72,7 +72,7 @@ class TestTools:
             assert run["exit_code"] == 0 and not run["timed_out"]
             assert "helpdesk" in run["stdout"]
 
-    async def test_recommend_attaches_caveats_and_alternative_note(self) -> None:
+    async def test_recommend_attaches_caveats(self) -> None:
         async with Client(mcp) as client:
             result = await client.call_tool(
                 "recommend_pattern",
@@ -82,14 +82,47 @@ class TestTools:
             recs = result.structured_content["result"]
             singleton = next(r for r in recs if r["id"] == "creational/singleton")
             assert singleton["verdict"] == "prefer-alternative"
-            # The note steers by unit shape; accept either side of the migration.
-            from design_patterns.mcp.server import get_catalog
-
-            if get_catalog().get("creational/singleton").shape == "module":
-                assert "get_pattern_docs" in singleton["note"]
-            else:
-                assert "pythonic.py" in singleton["note"]
             assert singleton["caveats"]
+
+
+class TestRecommendNoteByShape:
+    """The prefer-alternative note is pinned per shape, via synthetic units."""
+
+    @staticmethod
+    def _point_at(
+        catalog: Catalog,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        from design_patterns.mcp.search import SearchIndex
+
+        monkeypatch.setattr(server_module, "get_catalog", lambda: catalog)
+        monkeypatch.setattr(server_module, "get_index", lambda: SearchIndex(catalog))
+
+    async def test_module_unit_note_names_the_module_tools(
+        self, module_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        self._point_at(module_catalog, monkeypatch)
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "recommend_pattern", {"problem_statement": "thing needed"}
+            )
+            assert result.structured_content is not None
+            rec = result.structured_content["result"][0]
+            assert rec["id"] == "creational/thing"
+            assert "get_pattern_docs" in rec["note"] and "read_source" in rec["note"]
+
+    async def test_legacy_unit_note_points_at_pythonic_file(
+        self, legacy_catalog: Catalog, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        self._point_at(legacy_catalog, monkeypatch)
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "recommend_pattern", {"problem_statement": "old thing needed"}
+            )
+            assert result.structured_content is not None
+            rec = result.structured_content["result"][0]
+            assert rec["id"] == "creational/oldthing"
+            assert "pythonic.py" in rec["note"]
 
 
 class TestModuleShapeTools:
@@ -185,6 +218,17 @@ class TestLegacyShapeErrors:
         async with Client(mcp) as client:
             result = await client.call_tool("read_source", {"pattern_id": "creational/oldthing"})
             assert result.is_error
+
+    async def test_run_example_legacy_variant_dispatch(self) -> None:
+        # The variant= arm is what every un-migrated unit still relies on.
+        async with Client(mcp) as client:
+            result = await client.call_tool(
+                "run_example", {"pattern_id": "creational/oldthing", "variant": "pythonic"}
+            )
+            assert result.structured_content is not None
+            run = result.structured_content
+            assert run["exit_code"] == 0 and not run["timed_out"]
+            assert "pythonic oldthing runs" in run["stdout"]
 
     async def test_docs_resource_error_text_reaches_client(self) -> None:
         # ResourceError (not ValueError) is required for the hint to survive

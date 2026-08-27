@@ -63,6 +63,9 @@ several factories must stay consistent, group them in a frozen dataclass.
 - Whole-family swap is a real requirement: output targets, storage backends,
   test doubles for everything at once.
 
+Note: the bundled `HTML` family interpolates content unescaped — it is
+teaching code, not a sanitizer. Escape untrusted text before rendering.
+
 ## When not to use it
 
 - One factory would do → pass a single callable; no bundle, no pattern.

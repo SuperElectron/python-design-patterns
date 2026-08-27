@@ -1,10 +1,13 @@
 """Behavioral tests for the feed-client mini-project."""
 
+import pytest
+
 from patterns.creational.factory_method.examples.feed_client import (
     DigestClient,
     DigestResponse,
     FeedClient,
     FeedResponse,
+    StrictClient,
 )
 
 FEED = "Storm warning|Heavy rain expected tonight\nNew library opens|Doors open at nine"
@@ -43,3 +46,16 @@ class TestFrameworkSlot:
 
         FeedClient(spying).fetch("news://spied")
         assert calls == ["news://spied"]
+
+    def test_lenient_parse_keeps_title_only_lines(self) -> None:
+        # Documented policy: no '|' means an article with an empty body.
+        response = FeedClient(lambda url: "Bare headline").fetch("news://x")
+        assert [(a.title, a.body) for a in response.articles] == [("Bare headline", "")]
+
+    def test_strict_client_slots_a_plain_function_via_factory_slot(self) -> None:
+        assert StrictClient(canned).fetch("news://x").titles() == [
+            "Storm warning",
+            "New library opens",
+        ]
+        with pytest.raises(ValueError, match="malformed feed line"):
+            StrictClient(lambda url: "Bare headline").fetch("news://x")

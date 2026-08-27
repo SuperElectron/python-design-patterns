@@ -27,7 +27,12 @@ class Settings:
 
 
 def load_settings(source: Mapping[str, str] | None = None) -> Settings:
-    """Parse settings from an env-style mapping (``os.environ`` by default)."""
+    """Parse settings from an env-style mapping (``os.environ`` by default).
+
+    Raises ``ValueError`` if ``APP_MAX_WORKERS`` is not an integer — through
+    ``get_settings()`` that surfaces on first use, which is the honest place
+    for a misconfigured environment to fail.
+    """
     env = os.environ if source is None else source
     return Settings(
         env=env.get("APP_ENV", "dev"),

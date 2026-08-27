@@ -1,21 +1,8 @@
 """The Factory Method pattern's Python forms, importable as library code."""
 
-from patterns.creational.factory_method.pattern.dodges import (
-    ExpressStore,
-    Factory,
-    InjectedStore,
-    Shipment,
-    Store,
-    express,
-    standard,
-)
+from patterns.creational.factory_method.pattern.dodges import Factory, factory_slot
 
 __all__ = [
-    "ExpressStore",
     "Factory",
-    "InjectedStore",
-    "Shipment",
-    "Store",
-    "express",
-    "standard",
+    "factory_slot",
 ]

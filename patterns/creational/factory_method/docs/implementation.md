@@ -33,21 +33,27 @@ constructor call a *slot*.
    subclassing.
 
 ```python
-from patterns.creational.factory_method import Store, express
+from patterns.creational.factory_method import factory_slot
+from patterns.creational.factory_method.examples.feed_client import (
+    FeedClient,
+    parse_strictly,
+)
 
-Store(shipment_factory=express)  # per-instance
+FeedClient(transport, response_class=parse_strictly)  # per-instance
 
 
-class RushStore(Store):  # or per-subclass
-    shipment_factory = staticmethod(express)
+class StrictClient(FeedClient):  # or per-subclass; factory_slot because
+    response_class = factory_slot(parse_strictly)  # a bare function would bind
 ```
 
 ## Python idioms that keep it small
 
-- **`staticmethod` around plain-function defaults** on the class attribute —
-  without it, Python would bind the function as a method and pass `self`.
-- **`functools.partial` is a configured factory**: `partial(Shipment, "rush")`
-  slots in wherever a zero-argument callable is expected.
+- **`factory_slot` (a `staticmethod` wrapper) around non-class defaults** on
+  the class attribute — without it, Python would bind a plain function as a
+  method and pass `self`.
+- **`functools.partial` is a configured factory**: `partial(FeedResponse, ...)`
+  slots in wherever the factory shape is expected — wrapped in `factory_slot`
+  when assigned in a class body.
 - Class attributes are inherited: a subclass overrides *only* the factory and
   inherits the whole workflow — that is the entire GoF promise, one line long.
 

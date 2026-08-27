@@ -1,24 +1,11 @@
 """Factory Method — public API.
 
->>> from patterns.creational.factory_method import Store
+>>> from patterns.creational.factory_method import factory_slot
 """
 
-from patterns.creational.factory_method.pattern import (
-    ExpressStore,
-    Factory,
-    InjectedStore,
-    Shipment,
-    Store,
-    express,
-    standard,
-)
+from patterns.creational.factory_method.pattern import Factory, factory_slot
 
 __all__ = [
-    "ExpressStore",
     "Factory",
-    "InjectedStore",
-    "Shipment",
-    "Store",
-    "express",
-    "standard",
+    "factory_slot",
 ]

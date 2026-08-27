@@ -1,5 +1,6 @@
 """Behavioral tests for the app-config mini-project."""
 
+import dataclasses
 from collections.abc import Iterator
 
 import pytest
@@ -41,5 +42,11 @@ class TestAppConfig:
         assert settings.max_workers == 4  # defaults still apply
 
     def test_settings_are_immutable(self) -> None:
-        with pytest.raises(AttributeError):
+        with pytest.raises(dataclasses.FrozenInstanceError):
             get_settings().env = "prod"  # type: ignore[misc]
+
+    def test_malformed_worker_count_fails_loudly(self) -> None:
+        # Documented: a non-integer APP_MAX_WORKERS raises at load time —
+        # through the accessor, that means on first use.
+        with pytest.raises(ValueError):
+            load_settings({"APP_MAX_WORKERS": "many"})

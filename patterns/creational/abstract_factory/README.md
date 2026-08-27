@@ -9,6 +9,7 @@ verdict: prefer-alternative
 caveats:
   - "The pattern exists because 1990s languages could not pass classes or functions as values — Python can, so a factory is usually just a callable argument."
   - "Reach for a factory *object* only when the family of factories is large enough that bundling them beats passing them individually."
+  - "The bundled HTML family is teaching code, not a sanitizer: content is interpolated unescaped, so escape untrusted text before rendering."
 stdlib_sightings: [json.load parse_float, decimal.Decimal, unittest.mock]
 ---
 

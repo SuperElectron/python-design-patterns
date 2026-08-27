@@ -44,6 +44,28 @@ class TestTemplateRegistry:
         assert menu.register("blank", blank) is blank
         assert menu.names() == ["blank"]
 
+    def test_names_come_back_sorted_regardless_of_registration_order(self) -> None:
+        menu: TemplateRegistry[Widget] = TemplateRegistry()
+        menu.register("zeta", partial(Widget, label="z"))
+        menu.register("alpha", partial(Widget, label="a"))
+        assert menu.names() == ["alpha", "zeta"]
+
+    def test_duplicate_registration_is_refused_unless_replace(self) -> None:
+        menu: TemplateRegistry[Widget] = TemplateRegistry()
+        menu.register("small", partial(Widget, label="small"))
+        with pytest.raises(ValueError, match="already registered"):
+            menu.register("small", partial(Widget, label="other"))
+        menu.register("small", partial(Widget, label="other"), replace=True)
+        assert menu.create("small").label == "other"
+
+    def test_overrides_refuse_a_class_valued_product(self) -> None:
+        # is_dataclass(SomeDataclass) is True for the class object itself —
+        # the isinstance(product, type) half of the guard rejects it.
+        menu: TemplateRegistry[type] = TemplateRegistry()
+        menu.register("the-class", lambda: Widget)
+        with pytest.raises(TypeError, match="dataclass"):
+            menu.create("the-class", label="nope")
+
     def test_overrides_refuse_non_dataclass_products(self) -> None:
         menu: TemplateRegistry[str] = TemplateRegistry()
         menu.register("greeting", lambda: "hello")
